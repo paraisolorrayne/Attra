@@ -103,25 +103,34 @@ export default function JornadaPage() {
       <JornadaSchema />
       
       {/* Hero Section */}
-      <section className="relative h-[70vh] min-h-[600px] flex items-center pt-20">
-        <div className="absolute inset-0">
-          <Image src="/experience/hero.jpg" alt="Jornada Attra - Curadoria de Supercarros" fill className="object-cover" priority />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+      <section className="relative min-h-[600px] lg:min-h-[70vh] flex flex-col lg:justify-center pt-24 sm:pt-28 lg:pt-20 pb-12 lg:pb-0">
+        {/* Background with fallback gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+          <Image
+            src="/experience/showroom.jpg"
+            alt="Jornada Attra - Curadoria de Supercarros"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Theme-aware overlays using custom CSS classes */}
+          <div className="absolute inset-0 jornada-hero-overlay md:!bg-transparent" />
+          <div className="absolute inset-0 hidden md:block jornada-hero-overlay-gradient" />
         </div>
 
         <Container className="relative z-10">
           <Breadcrumb items={breadcrumbItems} afterHero />
-          <div className="max-w-2xl mt-8">
+          <div className="max-w-2xl mt-6 lg:mt-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6">
               <Star className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-primary uppercase tracking-wider">Além do Automóvel</span>
             </div>
-            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold jornada-hero-heading mb-6 leading-tight">
               Da seleção ao desembarque <span className="text-metallic text-metallic-animate">na sua garagem</span>
             </h1>
-            <p className="text-lg lg:text-xl text-foreground-secondary mb-8 leading-relaxed">
-              Uma jornada exclusiva de compra de veículos premium, com curadoria completa de supercarros, 
-              para quem não aceita menos que o extraordinário. <strong className="text-foreground">Atendimento nacional</strong> a partir de Uberlândia.
+            <p className="text-lg lg:text-xl jornada-hero-text mb-8 leading-relaxed">
+              Uma jornada exclusiva de compra de veículos premium, com curadoria completa de supercarros,
+              para quem não aceita menos que o extraordinário. <strong className="jornada-hero-text-strong">Atendimento nacional</strong> a partir de Uberlândia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button asChild size="lg" className="text-lg px-8 py-6">
@@ -129,7 +138,7 @@ export default function JornadaPage() {
                   <MessageCircle className="w-5 h-5 mr-2" />Agendar Visita VIP
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
+              <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 jornada-hero-btn-outline">
                 <Link href={getWhatsAppUrl('Olá! Gostaria de iniciar uma curadoria à distância.')} target="_blank">
                   <Phone className="w-5 h-5 mr-2" />Curadoria à Distância
                 </Link>
@@ -185,14 +194,14 @@ export default function JornadaPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {journeySteps.map((step) => (
               <div key={step.step} className="group bg-background-card border border-border rounded-2xl p-8 hover:border-primary/50 transition-all">
-                <div className="flex items-start gap-6">
-                  <div className="shrink-0">
+                <div className="flex items-start gap-4 sm:gap-6">
+                  <div className="shrink-0 w-16 text-center">
                     <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-2">
                       <step.icon className="w-8 h-8 text-primary" />
                     </div>
-                    <span className="text-xs font-bold text-primary uppercase tracking-wider">{step.subtitle}</span>
+                    <span className="text-xs font-bold text-primary uppercase tracking-wider block">{step.subtitle}</span>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-3xl font-bold text-primary/30">{step.step}</span>
                       <h3 className="text-xl font-bold text-foreground">{step.title}</h3>
