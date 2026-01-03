@@ -1,0 +1,111 @@
+'use client'
+
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
+import { Loader2 } from 'lucide-react'
+
+const schema = z.object({
+  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+  email: z.string().email('E-mail inválido'),
+  phone: z.string().min(10, 'Telefone inválido'),
+  vehicleValue: z.string().min(1, 'Informe o valor do veículo'),
+  downPayment: z.string().optional(),
+  installments: z.string().min(1, 'Selecione o número de parcelas'),
+})
+
+type FormData = z.infer<typeof schema>
+
+const installmentOptions = [
+  { value: '12', label: '12x' },
+  { value: '24', label: '24x' },
+  { value: '36', label: '36x' },
+  { value: '48', label: '48x' },
+  { value: '60', label: '60x' },
+]
+
+export function FinancingForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  })
+
+  const onSubmit = async (data: FormData) => {
+    setIsSubmitting(true)
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, subject: 'Simulação de Financiamento', sourcePage: '/financiamento' }),
+      })
+      setIsSuccess(true)
+      reset()
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (isSuccess) {
+    return (
+      <div className="bg-green-500/10 border border-green-500 rounded-xl p-6 text-center">
+        <p className="text-green-600 dark:text-green-400 font-medium">Solicitação enviada com sucesso!</p>
+        <p className="text-foreground-secondary text-sm mt-2">Entraremos em contato em breve.</p>
+        <button onClick={() => setIsSuccess(false)} className="text-primary text-sm mt-4 hover:underline">Enviar nova solicitação</button>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">Nome completo</label>
+        <Input {...register('name')} placeholder="Seu nome" error={errors.name?.message} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">E-mail</label>
+          <Input {...register('email')} type="email" placeholder="seu@email.com" error={errors.email?.message} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Telefone</label>
+          <Input {...register('phone')} placeholder="(00) 00000-0000" error={errors.phone?.message} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Valor do veículo</label>
+          <Input {...register('vehicleValue')} type="number" placeholder="R$ 500.000" error={errors.vehicleValue?.message} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Entrada (opcional)</label>
+          <Input {...register('downPayment')} type="number" placeholder="R$ 100.000" />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">Número de parcelas</label>
+        <Select {...register('installments')} options={installmentOptions} placeholder="Selecione" />
+        {errors.installments && <p className="mt-1 text-sm text-primary">{errors.installments.message}</p>}
+      </div>
+
+      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enviando...</> : 'Solicitar Simulação'}
+      </Button>
+
+      <p className="text-xs text-foreground-secondary text-center">
+        Ao enviar, você concorda com nossa política de privacidade.
+      </p>
+    </form>
+  )
+}
+
