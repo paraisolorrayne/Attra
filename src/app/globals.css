@@ -550,3 +550,26 @@ html {
 .header-nav-link.active::after {
   transform: scaleX(1);
 }
+
+/* ===== MOBILE-SPECIFIC STYLES ===== */
+/* Vehicle images: contain on mobile (show full car), cover on desktop */
+.vehicle-image-responsive {
+  object-fit: contain !important;
+}
+
+@media (min-width: 640px) {
+  .vehicle-image-responsive {
+    object-fit: cover !important;
+  }
+}
+
+/* Mobile menu overlay with solid background */
+.mobile-menu-overlay {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.dark .mobile-menu-overlay {
+  background-color: rgba(10, 10, 10, 0.97) !important;
+}

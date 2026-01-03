@@ -33,7 +33,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
               src={vehicle.photos[0]}
               alt={`${vehicle.brand} ${vehicle.model}`}
               fill
-              className="object-contain sm:object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           ) : (

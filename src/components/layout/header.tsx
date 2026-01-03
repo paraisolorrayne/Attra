@@ -185,15 +185,9 @@ export function Header() {
         {/* Mobile navigation - full screen overlay with solid background */}
         <div
           className={cn(
-            'lg:hidden fixed inset-0 top-20 z-40 transition-all duration-300',
+            'lg:hidden fixed inset-0 top-20 z-40 transition-all duration-300 mobile-menu-overlay',
             mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
           )}
-          style={{
-            // Use inline style to guarantee solid background color
-            backgroundColor: isLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(10, 10, 10, 0.95)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)'
-          }}
         >
           <Container className="relative py-8">
             <div className="flex flex-col gap-6">
