@@ -47,7 +47,7 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
               src={vehicle.photos?.[0] || '/placeholder.jpg'}
               alt={`${vehicle.brand} ${vehicle.model}`}
               fill
-              className="object-contain sm:object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
             {/* Badges - positioned to not cover car */}
@@ -90,7 +90,7 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
             src={vehicle.photos?.[0] || '/placeholder.jpg'}
             alt={`${vehicle.brand} ${vehicle.model}`}
             fill
-            className="object-contain sm:object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
 

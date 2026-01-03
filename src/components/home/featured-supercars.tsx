@@ -70,7 +70,7 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
                   src={vehicle.photos?.[0] || '/placeholder.jpg'}
                   alt={`${vehicle.brand} ${vehicle.model}`}
                   fill
-                  className="object-contain lg:object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-105"
                 />
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex gap-2">

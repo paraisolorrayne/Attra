@@ -44,7 +44,7 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
               src={allMedia[currentIndex]}
               alt={`${vehicleName} - Foto ${currentIndex + 1}`}
               fill
-              className="object-contain sm:object-cover"
+              className="vehicle-image-responsive"
               priority
             />
           )
