@@ -8,6 +8,7 @@ import { Container } from '@/components/ui/container'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
 import { EDITORIAL_SECTION } from '@/lib/constants'
+import { X } from 'lucide-react'
 
 // Minimal navigation for premium boutique feel
 const navigation = [
@@ -363,7 +364,7 @@ export function Header() {
         <div
           ref={menuPanelRef}
           className={cn(
-            'absolute top-20 left-0 right-0 bottom-0 transform overflow-y-auto overscroll-contain',
+            'absolute top-0 left-0 right-0 bottom-0 transform overflow-y-auto overscroll-contain',
             mobileMenuOpen ? 'translate-y-0' : '-translate-y-8'
           )}
           style={{
@@ -372,6 +373,36 @@ export function Header() {
             transition: 'transform 300ms ease-out'
           }}
         >
+          {/* Close button header - visible at top of menu panel */}
+          <div className={cn(
+            'sticky top-0 z-10 flex items-center justify-between h-20 px-6 border-b',
+            isLightMode
+              ? 'bg-[#fafafa] border-gray-200'
+              : 'bg-[#2a2a2a] border-white/10'
+          )}>
+            <span className={cn(
+              'text-lg font-semibold',
+              isLightMode ? 'text-gray-900' : 'text-white'
+            )}>
+              Menu
+            </span>
+            <button
+              type="button"
+              onClick={closeMenu}
+              className={cn(
+                'w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                isLightMode
+                  ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
+                  : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+              )}
+              aria-label="Fechar menu"
+              tabIndex={mobileMenuOpen ? 0 : -1}
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
           <Container className="py-8 px-6">
             <nav className="flex flex-col gap-0" aria-label="Menu principal">
               {navigation.map((item, index) => (
@@ -380,11 +411,13 @@ export function Header() {
                   ref={index === 0 ? firstLinkRef : index === navigation.length - 1 ? lastLinkRef : undefined}
                   href={item.href}
                   className={cn(
-                    'text-xl sm:text-2xl font-semibold py-4 sm:py-5 border-b transition-all duration-200',
+                    'text-xl sm:text-2xl font-semibold py-4 sm:py-5 transition-all duration-200',
                     'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                    // Add border-b only if not the last item
+                    index < navigation.length - 1 && (isLightMode ? 'border-b border-gray-200' : 'border-b border-white/10'),
                     isLightMode
-                      ? 'text-gray-900 hover:text-primary active:text-primary border-gray-200'
-                      : 'text-white hover:text-primary active:text-primary border-white/10',
+                      ? 'text-gray-900 hover:text-primary active:text-primary'
+                      : 'text-white hover:text-primary active:text-primary',
                     mobileMenuOpen
                       ? 'translate-x-0 opacity-100'
                       : '-translate-x-4 opacity-0'

@@ -114,6 +114,67 @@ body {
   z-index: 10;
 }
 
+/* Jornada Hero Section - Theme-aware overlays and text */
+/* Light mode: white overlay with dark text */
+:root .jornada-hero-overlay {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+:root .jornada-hero-overlay-gradient {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.4));
+}
+
+:root .jornada-hero-heading {
+  color: var(--foreground);
+}
+
+:root .jornada-hero-text {
+  color: var(--foreground-secondary);
+}
+
+:root .jornada-hero-text-strong {
+  color: var(--foreground);
+}
+
+:root .jornada-hero-btn-outline {
+  border-color: rgba(17, 17, 17, 0.3);
+  color: var(--foreground);
+}
+
+:root .jornada-hero-btn-outline:hover {
+  background: rgba(17, 17, 17, 0.1);
+}
+
+/* Dark mode: dark overlay with white text */
+.dark .jornada-hero-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark .jornada-hero-overlay-gradient {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+}
+
+.dark .jornada-hero-heading {
+  color: #FFFFFF;
+}
+
+.dark .jornada-hero-text {
+  color: #D1D5DB;
+}
+
+.dark .jornada-hero-text-strong {
+  color: #FFFFFF;
+}
+
+.dark .jornada-hero-btn-outline {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+}
+
+.dark .jornada-hero-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* Extra small screen breakpoint for hero */
 @media (max-width: 374px) {
   .hero-cta-container {
@@ -646,31 +707,14 @@ html {
   height: 100% !important;
 }
 
-/* 768px - Tablet */
+/* Mobile: use object-contain to show the full vehicle without cropping */
+/* 768px and below - Tablet and mobile */
 @media (max-width: 768px) {
   .hero-vehicle-image {
-    object-position: center 45% !important;
-  }
-}
-
-/* 414px - iPhone Plus */
-@media (max-width: 414px) {
-  .hero-vehicle-image {
-    object-position: center 40% !important;
-  }
-}
-
-/* 375px - Standard iPhone */
-@media (max-width: 375px) {
-  .hero-vehicle-image {
-    object-position: center 35% !important;
-  }
-}
-
-/* 320px - iPhone SE */
-@media (max-width: 320px) {
-  .hero-vehicle-image {
-    object-position: center 30% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    /* Dark background to complement the vehicle images */
+    background-color: #0a0a0a;
   }
 }
 
