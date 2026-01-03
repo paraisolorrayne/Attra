@@ -553,19 +553,26 @@ html {
 
 /* ===== IMAGE ASPECT RATIOS & OBJECT-FIT ===== */
 /* Standardized aspect ratios for vehicle images across the site */
+/* Tested breakpoints: 320px, 375px, 414px, 768px */
 
-/* Hero/Slider: 16:9 on desktop, 4:3 on mobile for better car visibility */
+/* Hero/Slider: 16:9 on desktop, slightly taller on mobile for better car visibility */
 .aspect-hero {
   aspect-ratio: 16 / 9;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .aspect-hero {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 2; /* Taller than 16:9, shows more of the car vertically */
   }
 }
 
-/* Vehicle cards: consistent 4:3 aspect ratio */
+@media (max-width: 414px) {
+  .aspect-hero {
+    aspect-ratio: 4 / 3; /* Even taller on small phones */
+  }
+}
+
+/* Vehicle cards: consistent 4:3 aspect ratio - never changes */
 .aspect-vehicle-card {
   aspect-ratio: 4 / 3;
 }
@@ -575,7 +582,7 @@ html {
   aspect-ratio: 16 / 10;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .aspect-vehicle-wide {
     aspect-ratio: 4 / 3;
   }
@@ -589,12 +596,12 @@ html {
 /* Vehicle image base styles - core settings */
 .vehicle-image {
   object-fit: cover;
-  object-position: center;
+  object-position: center center;
   width: 100%;
   height: 100%;
 }
 
-/* Vehicle images: consistent cover across all devices */
+/* Vehicle images: consistent cover across all devices - NO STRETCHING */
 .vehicle-image-responsive {
   object-fit: cover !important;
   object-position: center center !important;
@@ -602,22 +609,36 @@ html {
   height: 100% !important;
 }
 
-/* Mobile: adjust object-position to show more of the car (front/center focus) */
-@media (max-width: 639px) {
+/* Mobile breakpoints for vehicle-image-responsive */
+/* 768px - Tablet portrait */
+@media (max-width: 768px) {
   .vehicle-image-responsive {
-    /* 35% from top shows more of the car body/front */
-    object-position: center 35% !important;
+    object-position: center 45% !important;
   }
 }
 
-/* Tablet: slight adjustment */
-@media (min-width: 640px) and (max-width: 1023px) {
+/* 414px - iPhone Plus and similar */
+@media (max-width: 414px) {
   .vehicle-image-responsive {
     object-position: center 40% !important;
   }
 }
 
-/* Hero-specific image positioning - show full car width on mobile */
+/* 375px - Standard iPhone */
+@media (max-width: 375px) {
+  .vehicle-image-responsive {
+    object-position: center 35% !important;
+  }
+}
+
+/* 320px - iPhone SE and small devices */
+@media (max-width: 320px) {
+  .vehicle-image-responsive {
+    object-position: center 30% !important;
+  }
+}
+
+/* Hero-specific image positioning - optimized for each breakpoint */
 .hero-vehicle-image {
   object-fit: cover !important;
   object-position: center center !important;
@@ -625,14 +646,35 @@ html {
   height: 100% !important;
 }
 
-@media (max-width: 639px) {
+/* 768px - Tablet */
+@media (max-width: 768px) {
   .hero-vehicle-image {
-    /* Center focus for hero - show the car prominently */
+    object-position: center 45% !important;
+  }
+}
+
+/* 414px - iPhone Plus */
+@media (max-width: 414px) {
+  .hero-vehicle-image {
+    object-position: center 40% !important;
+  }
+}
+
+/* 375px - Standard iPhone */
+@media (max-width: 375px) {
+  .hero-vehicle-image {
+    object-position: center 35% !important;
+  }
+}
+
+/* 320px - iPhone SE */
+@media (max-width: 320px) {
+  .hero-vehicle-image {
     object-position: center 30% !important;
   }
 }
 
-/* Card-specific image positioning */
+/* Card-specific image positioning - consistent across sizes */
 .card-vehicle-image {
   object-fit: cover !important;
   object-position: center center !important;
@@ -640,31 +682,33 @@ html {
   height: 100% !important;
 }
 
-@media (max-width: 639px) {
+/* Cards: slightly adjusted position on mobile to show more car front */
+@media (max-width: 768px) {
   .card-vehicle-image {
-    /* Show more of the front of the car in cards */
-    object-position: center 40% !important;
+    object-position: center 45% !important;
   }
 }
 
-/* Container for vehicle images - prevents layout shift */
+@media (max-width: 414px) {
+  .card-vehicle-image {
+    object-position: center 42% !important;
+  }
+}
+
+/* Container for vehicle images - prevents layout shift and stretching */
 .vehicle-image-container {
   position: relative;
   overflow: hidden;
   background-color: hsl(var(--background-soft));
-  /* Ensure container respects aspect ratio */
   width: 100%;
 }
 
+/* Ensure images inside container never stretch */
 .vehicle-image-container img {
-  object-fit: cover;
-  object-position: center;
-  width: 100%;
-  height: 100%;
-}
-
-/* Prevent any stretching or squashing */
-.vehicle-image-container::before {
-  content: '';
-  display: block;
+  object-fit: cover !important;
+  object-position: center center;
+  width: 100% !important;
+  height: 100% !important;
+  /* Prevent any stretching */
+  max-width: 100%;
 }

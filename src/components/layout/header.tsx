@@ -275,14 +275,19 @@ export function Header() {
                 className={cn(
                   'relative w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                  isScrolled
+                  // When menu is open, show high contrast button
+                  mobileMenuOpen
                     ? isLightMode
-                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200 shadow-sm'
-                      : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
-                    : 'bg-white/15 hover:bg-white/25 text-white border border-white/25 shadow-lg'
+                      ? 'bg-gray-200 hover:bg-gray-300 text-gray-900 border border-gray-300 shadow-md'
+                      : 'bg-white/30 hover:bg-white/40 text-white border border-white/40 shadow-md'
+                    : isScrolled
+                      ? isLightMode
+                        ? 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200 shadow-sm'
+                        : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
+                      : 'bg-white/15 hover:bg-white/25 text-white border border-white/25 shadow-lg'
                 )}
                 style={{
-                  filter: !isScrolled ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'none'
+                  filter: !isScrolled && !mobileMenuOpen ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'none'
                 }}
                 onClick={toggleMenu}
                 aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -295,8 +300,10 @@ export function Header() {
                 <div className="relative w-6 h-5 flex flex-col justify-center items-center" aria-hidden="true">
                   <span
                     className={cn(
-                      'absolute h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out rounded-full',
-                      mobileMenuOpen ? 'rotate-45' : '-translate-y-2'
+                      'absolute h-0.5 w-6 transform transition-all duration-300 ease-in-out rounded-full',
+                      mobileMenuOpen
+                        ? 'rotate-45 bg-white'
+                        : '-translate-y-2 bg-current'
                     )}
                   />
                   <span
@@ -307,8 +314,10 @@ export function Header() {
                   />
                   <span
                     className={cn(
-                      'absolute h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out rounded-full',
-                      mobileMenuOpen ? '-rotate-45' : 'translate-y-2'
+                      'absolute h-0.5 w-6 transform transition-all duration-300 ease-in-out rounded-full',
+                      mobileMenuOpen
+                        ? '-rotate-45 bg-white'
+                        : 'translate-y-2 bg-current'
                     )}
                   />
                 </div>
@@ -333,9 +342,9 @@ export function Header() {
         )}
         style={{ transition: 'opacity 300ms ease, visibility 300ms ease' }}
       >
-        {/* Dark overlay backdrop - click to close */}
+        {/* Semi-transparent overlay backdrop - 15% lighter for better visibility */}
         <div
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/65 backdrop-blur-sm"
           onClick={closeMenu}
           onKeyDown={(e) => e.key === 'Enter' && closeMenu()}
           role="button"
@@ -343,7 +352,7 @@ export function Header() {
           aria-label="Fechar menu"
         />
 
-        {/* Menu panel */}
+        {/* Menu panel - 15% lighter background */}
         <div
           ref={menuPanelRef}
           className={cn(
@@ -351,7 +360,8 @@ export function Header() {
             mobileMenuOpen ? 'translate-y-0' : '-translate-y-8'
           )}
           style={{
-            backgroundColor: isLightMode ? '#ffffff' : '#0a0a0a',
+            // 15% lighter: #0a0a0a -> #1a1a1a (dark), #ffffff stays same (light)
+            backgroundColor: isLightMode ? '#ffffff' : '#1a1a1a',
             transition: 'transform 300ms ease-out'
           }}
         >
