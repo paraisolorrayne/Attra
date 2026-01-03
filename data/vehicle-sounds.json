@@ -1,0 +1,17 @@
+[
+  {
+    "vehicle_id": "821350",
+    "vehicle_name": "Porsche 911 911 Carrera GTS Coupe 3.0 (992)",
+    "vehicle_brand": "Porsche",
+    "vehicle_slug": "porsche-911-2023-821350",
+    "sound_file_url": "/uploads/sounds/engine-sound-1767325702747-hcmybc.mp3",
+    "description": null,
+    "icon": "🔥",
+    "is_electric": false,
+    "is_active": true,
+    "display_order": 0,
+    "id": "a5a63fd6-8dfb-4b8f-abb0-7c24c09423d2",
+    "created_at": "2026-01-02T03:48:42.511Z",
+    "updated_at": "2026-01-02T03:48:42.511Z"
+  }
+]
