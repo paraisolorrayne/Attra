@@ -39,15 +39,13 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
     return (
       <Link href={`/veiculo/${vehicle.slug}`} className="group block">
         <div className="bg-background-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1">
-          {/* Image - Clean, no overlays */}
-          {/* Mobile: object-contain to show full car without cropping */}
-          {/* Desktop: object-cover for better visual consistency in grid */}
-          <div className="relative aspect-[16/10] overflow-hidden bg-background-soft">
+          {/* Image container with consistent 4:3 aspect ratio */}
+          <div className="relative aspect-[4/3] overflow-hidden bg-background-soft vehicle-image-container">
             <Image
               src={vehicle.photos?.[0] || '/placeholder.jpg'}
               alt={`${vehicle.brand} ${vehicle.model}`}
               fill
-              className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-[1.03]"
+              className="card-vehicle-image transition-transform duration-500 group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
             {/* Badges - positioned to not cover car */}
@@ -82,15 +80,13 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
   return (
     <Link href={`/veiculo/${vehicle.slug}`} className="group block">
       <div className="bg-background-card border border-border rounded-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-300 hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1">
-        {/* Image - Clean, minimal overlay only at edge for transition */}
-        {/* Mobile: object-contain to show full car without cropping */}
-        {/* Desktop: object-cover for better visual consistency */}
-        <div className="relative aspect-[16/10] md:aspect-[4/3] md:w-2/5 lg:w-1/2 overflow-hidden bg-background-soft">
+        {/* Image container with consistent 4:3 aspect ratio */}
+        <div className="relative aspect-[4/3] md:w-2/5 lg:w-1/2 overflow-hidden bg-background-soft vehicle-image-container">
           <Image
             src={vehicle.photos?.[0] || '/placeholder.jpg'}
             alt={`${vehicle.brand} ${vehicle.model}`}
             fill
-            className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-[1.03]"
+            className="card-vehicle-image transition-transform duration-500 group-hover:scale-[1.03]"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
 

@@ -32,19 +32,20 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
 
   return (
     <div className="space-y-4">
-      {/* Main image/video */}
-      <div className="relative aspect-[16/10] bg-background-card border border-border rounded-xl overflow-hidden group">
+      {/* Main image/video - responsive aspect ratio: 4:3 on mobile, 16:9 on desktop */}
+      <div className="relative aspect-[4/3] md:aspect-[16/9] bg-background-card border border-border rounded-xl overflow-hidden group vehicle-image-container">
         {hasMedia ? (
           isVideo(allMedia[currentIndex]) ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Play className="w-16 h-16 text-white" />
+            <div className="absolute inset-0 flex items-center justify-center bg-background-soft">
+              <Play className="w-16 h-16 text-foreground-secondary" />
             </div>
           ) : (
             <Image
               src={allMedia[currentIndex]}
               alt={`${vehicleName} - Foto ${currentIndex + 1}`}
               fill
-              className="vehicle-image-responsive"
+              className="hero-vehicle-image"
+              sizes="(max-width: 768px) 100vw, 60vw"
               priority
             />
           )
@@ -93,7 +94,7 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
         )}
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails - consistent 4:3 aspect ratio */}
       {allMedia.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-2">
           {allMedia.map((media, index) => (
@@ -101,7 +102,7 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={cn(
-                'relative flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-colors',
+                'relative flex-shrink-0 w-20 aspect-[4/3] rounded-lg overflow-hidden border-2 transition-colors vehicle-image-container',
                 index === currentIndex ? 'border-primary' : 'border-transparent hover:border-border'
               )}
             >
@@ -114,7 +115,8 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
                   src={media}
                   alt={`${vehicleName} - Miniatura ${index + 1}`}
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
+                  sizes="80px"
                 />
               )}
             </button>
