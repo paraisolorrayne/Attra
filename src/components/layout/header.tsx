@@ -295,14 +295,16 @@ export function Header() {
                 aria-controls="mobile-menu"
                 aria-haspopup="true"
               >
-                {/* Animated hamburger/X icon */}
+                {/* Animated hamburger/X icon - min 24px touch target */}
                 <span className="sr-only">{mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}</span>
                 <div className="relative w-6 h-5 flex flex-col justify-center items-center" aria-hidden="true">
                   <span
                     className={cn(
                       'absolute h-0.5 w-6 transform transition-all duration-300 ease-in-out rounded-full',
                       mobileMenuOpen
-                        ? 'rotate-45 bg-white'
+                        ? isLightMode
+                          ? 'rotate-45 bg-gray-900'
+                          : 'rotate-45 bg-white'
                         : '-translate-y-2 bg-current'
                     )}
                   />
@@ -316,7 +318,9 @@ export function Header() {
                     className={cn(
                       'absolute h-0.5 w-6 transform transition-all duration-300 ease-in-out rounded-full',
                       mobileMenuOpen
-                        ? '-rotate-45 bg-white'
+                        ? isLightMode
+                          ? '-rotate-45 bg-gray-900'
+                          : '-rotate-45 bg-white'
                         : 'translate-y-2 bg-current'
                     )}
                   />
@@ -342,9 +346,12 @@ export function Header() {
         )}
         style={{ transition: 'opacity 300ms ease, visibility 300ms ease' }}
       >
-        {/* Semi-transparent overlay backdrop - 15% lighter for better visibility */}
+        {/* Semi-transparent overlay backdrop - reduced opacity for lighter feel */}
         <div
-          className="absolute inset-0 bg-black/65 backdrop-blur-sm"
+          className={cn(
+            "absolute inset-0 backdrop-blur-sm",
+            isLightMode ? "bg-black/30" : "bg-black/50"
+          )}
           onClick={closeMenu}
           onKeyDown={(e) => e.key === 'Enter' && closeMenu()}
           role="button"
@@ -352,7 +359,7 @@ export function Header() {
           aria-label="Fechar menu"
         />
 
-        {/* Menu panel - 15% lighter background */}
+        {/* Menu panel - lighter background for better readability */}
         <div
           ref={menuPanelRef}
           className={cn(
@@ -360,8 +367,8 @@ export function Header() {
             mobileMenuOpen ? 'translate-y-0' : '-translate-y-8'
           )}
           style={{
-            // 15% lighter: #0a0a0a -> #1a1a1a (dark), #ffffff stays same (light)
-            backgroundColor: isLightMode ? '#ffffff' : '#1a1a1a',
+            // Lighter backgrounds: #2a2a2a (dark mode), #fafafa (light mode)
+            backgroundColor: isLightMode ? '#fafafa' : '#2a2a2a',
             transition: 'transform 300ms ease-out'
           }}
         >
