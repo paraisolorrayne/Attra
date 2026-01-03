@@ -64,13 +64,14 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
                 isVisible ? `animate-fade-in-up stagger-${index + 1}` : ''
               }`}
             >
-              {/* Image - contain on mobile to show full car, cover on desktop */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-background-soft">
+              {/* Image container with consistent 4:3 aspect ratio */}
+              <div className="relative aspect-[4/3] overflow-hidden bg-background-soft vehicle-image-container">
                 <Image
                   src={vehicle.photos?.[0] || '/placeholder.jpg'}
                   alt={`${vehicle.brand} ${vehicle.model}`}
                   fill
-                  className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-105"
+                  className="card-vehicle-image transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex gap-2">

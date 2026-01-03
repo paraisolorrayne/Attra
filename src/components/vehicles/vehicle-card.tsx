@@ -24,16 +24,14 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
   return (
     <Link href={`/veiculo/${vehicle.slug}`}>
       <Card className="group h-full border border-border bg-background-card transition-all duration-300 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1">
-        {/* Image - Clean design without heavy overlays */}
-        {/* Mobile: object-contain to show full car without cropping */}
-        {/* Desktop: object-cover for better visual consistency in grid */}
-        <div className="relative aspect-[4/3] bg-background-soft overflow-hidden">
+        {/* Image container with consistent 4:3 aspect ratio */}
+        <div className="relative aspect-[4/3] bg-background-soft overflow-hidden vehicle-image-container">
           {vehicle.photos?.[0] ? (
             <Image
               src={vehicle.photos[0]}
               alt={`${vehicle.brand} ${vehicle.model}`}
               fill
-              className="vehicle-image-responsive transition-transform duration-500 group-hover:scale-[1.03]"
+              className="card-vehicle-image transition-transform duration-500 group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           ) : (

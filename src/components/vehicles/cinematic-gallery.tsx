@@ -110,7 +110,7 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
                     alt={`${vehicleName} - Imagem ${index + 1}`}
                     fill
                     className={cn(
-                      "vehicle-image-responsive transition-opacity duration-300",
+                      "hero-vehicle-image transition-opacity duration-300",
                       loadedImages.has(index) ? "opacity-100" : "opacity-0"
                     )}
                     priority={index === 0 || index === currentIndex}

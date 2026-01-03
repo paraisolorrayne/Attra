@@ -173,10 +173,10 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
                   : `Veículo em destaque ${index + 1}`
                 }
                 fill
-                className="object-cover object-center"
+                className="hero-vehicle-image"
                 priority={index <= 1}
                 sizes="100vw"
-                quality={100}
+                quality={90}
                 unoptimized={slide.image.includes('autoconf') || slide.image.includes('cdn')}
               />
             )

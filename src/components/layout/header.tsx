@@ -2,9 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTheme } from 'next-themes'
-import { Menu, X } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
@@ -26,17 +25,131 @@ export function Header() {
   const [mounted, setMounted] = useState(false)
   const { resolvedTheme } = useTheme()
 
+  // Refs for focus management
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const menuPanelRef = useRef<HTMLDivElement>(null)
+  const firstLinkRef = useRef<HTMLAnchorElement>(null)
+  const lastLinkRef = useRef<HTMLAnchorElement>(null)
+  const scrollPositionRef = useRef(0)
+
+  // Close menu function with focus restoration
+  const closeMenu = useCallback(() => {
+    setMobileMenuOpen(false)
+    // Return focus to the menu button after closing
+    setTimeout(() => {
+      menuButtonRef.current?.focus()
+    }, 100)
+  }, [])
+
+  // Toggle menu function
+  const toggleMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev)
+  }, [])
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Lock body scroll when mobile menu is open - improved version
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      // Store current scroll position
+      scrollPositionRef.current = window.scrollY
+      // Apply styles to prevent scroll
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollPositionRef.current}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
+      document.body.style.width = '100%'
+
+      // Move focus to first menu item
+      setTimeout(() => {
+        firstLinkRef.current?.focus()
+      }, 300)
+    } else {
+      // Restore body styles
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
+      document.body.style.width = ''
+      // Restore scroll position
+      if (scrollPositionRef.current > 0) {
+        window.scrollTo(0, scrollPositionRef.current)
+      }
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
+      document.body.style.width = ''
+    }
+  }, [mobileMenuOpen])
+
+  // Handle ESC key to close menu
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        e.preventDefault()
+        closeMenu()
+      }
+    }
+
+    if (mobileMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [mobileMenuOpen, closeMenu])
+
+  // Focus trap within the menu
+  useEffect(() => {
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (!mobileMenuOpen || e.key !== 'Tab') return
+
+      const focusableElements = menuPanelRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      )
+
+      if (!focusableElements || focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0] as HTMLElement
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault()
+        lastElement.focus()
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    if (mobileMenuOpen) {
+      document.addEventListener('keydown', handleTabKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleTabKey)
+    }
+  }, [mobileMenuOpen])
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+      if (!mobileMenuOpen) {
+        setIsScrolled(window.scrollY > 50)
+      }
     }
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [mobileMenuOpen])
 
   // Determine which logo to show based on theme
   // Always show white logo since header now has dark background
@@ -156,9 +269,12 @@ export function Header() {
                 )}
               />
               <button
+                ref={menuButtonRef}
                 type="button"
+                id="mobile-menu-button"
                 className={cn(
-                  'w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300',
+                  'relative w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                   isScrolled
                     ? isLightMode
                       ? 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200 shadow-sm'
@@ -166,52 +282,126 @@ export function Header() {
                     : 'bg-white/15 hover:bg-white/25 text-white border border-white/25 shadow-lg'
                 )}
                 style={{
-                  // Add drop shadow for extra visibility over images
                   filter: !isScrolled ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'none'
                 }}
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                onClick={toggleMenu}
                 aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
+                aria-haspopup="true"
               >
-                {mobileMenuOpen ? (
-                  <X className="w-7 h-7" strokeWidth={2.5} />
-                ) : (
-                  <Menu className="w-7 h-7" strokeWidth={2.5} />
-                )}
+                {/* Animated hamburger/X icon */}
+                <span className="sr-only">{mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}</span>
+                <div className="relative w-6 h-5 flex flex-col justify-center items-center" aria-hidden="true">
+                  <span
+                    className={cn(
+                      'absolute h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out rounded-full',
+                      mobileMenuOpen ? 'rotate-45' : '-translate-y-2'
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      'absolute h-0.5 w-6 bg-current transition-all duration-300 ease-in-out rounded-full',
+                      mobileMenuOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      'absolute h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out rounded-full',
+                      mobileMenuOpen ? '-rotate-45' : 'translate-y-2'
+                    )}
+                  />
+                </div>
               </button>
             </div>
           </nav>
         </Container>
+      </header>
 
-        {/* Mobile navigation - full screen overlay with solid background */}
+      {/* Mobile Menu Overlay - Full screen, outside header */}
+      <div
+        id="mobile-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu de navegação"
+        aria-hidden={!mobileMenuOpen}
+        className={cn(
+          'lg:hidden fixed inset-0 z-[100]',
+          mobileMenuOpen
+            ? 'opacity-100 visible'
+            : 'opacity-0 invisible pointer-events-none'
+        )}
+        style={{ transition: 'opacity 300ms ease, visibility 300ms ease' }}
+      >
+        {/* Dark overlay backdrop - click to close */}
         <div
+          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          onClick={closeMenu}
+          onKeyDown={(e) => e.key === 'Enter' && closeMenu()}
+          role="button"
+          tabIndex={mobileMenuOpen ? 0 : -1}
+          aria-label="Fechar menu"
+        />
+
+        {/* Menu panel */}
+        <div
+          ref={menuPanelRef}
           className={cn(
-            'lg:hidden fixed inset-0 top-20 z-40 transition-all duration-300 mobile-menu-overlay',
-            mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+            'absolute top-20 left-0 right-0 bottom-0 transform overflow-y-auto overscroll-contain',
+            mobileMenuOpen ? 'translate-y-0' : '-translate-y-8'
           )}
+          style={{
+            backgroundColor: isLightMode ? '#ffffff' : '#0a0a0a',
+            transition: 'transform 300ms ease-out'
+          }}
         >
-          <Container className="relative py-8">
-            <div className="flex flex-col gap-6">
+          <Container className="py-8 px-6">
+            <nav className="flex flex-col gap-0" aria-label="Menu principal">
               {navigation.map((item, index) => (
                 <Link
                   key={item.name}
+                  ref={index === 0 ? firstLinkRef : index === navigation.length - 1 ? lastLinkRef : undefined}
                   href={item.href}
                   className={cn(
-                    'text-2xl font-semibold transition-all duration-300 py-3 border-b',
+                    'text-xl sm:text-2xl font-semibold py-4 sm:py-5 border-b transition-all duration-200',
+                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                     isLightMode
-                      ? 'text-gray-900 hover:text-primary border-gray-200'
-                      : 'text-white hover:text-primary border-white/10',
-                    mobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+                      ? 'text-gray-900 hover:text-primary active:text-primary border-gray-200'
+                      : 'text-white hover:text-primary active:text-primary border-white/10',
+                    mobileMenuOpen
+                      ? 'translate-x-0 opacity-100'
+                      : '-translate-x-4 opacity-0'
                   )}
-                  style={{ transitionDelay: `${index * 50}ms` }}
-                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    transitionDelay: mobileMenuOpen ? `${index * 40 + 50}ms` : '0ms'
+                  }}
+                  onClick={closeMenu}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
                 >
                   {item.name}
                 </Link>
               ))}
+            </nav>
+
+            {/* Additional info in menu */}
+            <div
+              className={cn(
+                'mt-10 pt-6 border-t transition-all duration-300',
+                isLightMode ? 'border-gray-200' : 'border-white/10',
+                mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+              )}
+              style={{ transitionDelay: mobileMenuOpen ? '300ms' : '0ms' }}
+            >
+              <p className={cn(
+                'text-sm',
+                isLightMode ? 'text-gray-500' : 'text-white/50'
+              )}>
+                Attra Veículos © {new Date().getFullYear()}
+              </p>
             </div>
           </Container>
         </div>
-      </header>
+      </div>
     </>
   )
 }
