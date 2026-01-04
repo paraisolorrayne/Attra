@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
 
     const cookieStore = await cookies()
 
-    // Create response to capture cookies
-    const response = NextResponse.json({ success: true })
+    // Collect cookies to be set on the response
+    const cookiesToSetOnResponse: Array<{ name: string; value: string; options?: Record<string, unknown> }> = []
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,8 +28,9 @@ export async function POST(request: NextRequest) {
             return cookieStore.getAll()
           },
           setAll(cookiesToSet) {
+            // Collect cookies instead of setting them on a response immediately
             cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
+              cookiesToSetOnResponse.push({ name, value, options })
             })
           },
         },
@@ -89,8 +90,8 @@ export async function POST(request: NextRequest) {
       console.warn('Failed to update last_login:', e)
     }
 
-    // Return response with cookies set
-    const successResponse = NextResponse.json({
+    // Create the final response with user data
+    const response = NextResponse.json({
       success: true,
       user: {
         id: adminUser.id,
@@ -99,17 +100,18 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Copy cookies from the supabase response
-    response.cookies.getAll().forEach(cookie => {
-      successResponse.cookies.set(cookie.name, cookie.value, {
+    // Set all collected auth cookies on the response
+    cookiesToSetOnResponse.forEach(({ name, value, options }) => {
+      response.cookies.set(name, value, {
         path: '/',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
+        ...options,
       })
     })
 
-    return successResponse
+    return response
   } catch (error) {
     console.error('Admin login error:', error)
     return NextResponse.json(
