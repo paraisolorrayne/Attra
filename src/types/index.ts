@@ -143,6 +143,13 @@ export interface CarReviewSpecs {
 	acceleration: string
 	top_speed: string
 	transmission: string
+	// Campos expandidos
+	weight?: string
+	drivetrain?: string // Ex: "Tração traseira (RWD)"
+	tires?: string // Ex: "Pirelli P Zero Corsa"
+	brakes?: string // Ex: "Carbono-cerâmicos"
+	fuel_consumption?: string
+	trunk_capacity?: string
 }
 
 export interface CarReviewAvailability {
@@ -151,14 +158,49 @@ export interface CarReviewAvailability {
 	stock_url?: string
 }
 
+// FAQ para SEO e LLMO
+export interface CarReviewFAQ {
+	question: string
+	answer: string
+}
+
+// Opcionais e destaques
+export interface CarReviewHighlight {
+	text: string
+	category?: 'performance' | 'design' | 'technology' | 'exclusivity' | 'comfort'
+}
+
+// Avaliação Attra
+export interface CarReviewEvaluation {
+	summary: string // 2-3 frases resumo
+	highlights: string[] // 3-5 bullets
+	target_profile?: string // Perfil do cliente ideal
+	investment_potential?: 'alto' | 'medio' | 'estavel' // Potencial de valorização
+}
+
+// Imagem da galeria com legenda
+export interface CarReviewGalleryImage {
+	url: string
+	alt: string
+	caption?: string
+}
+
 export interface CarReviewFields {
 	vehicle_id?: string
 	brand: string
 	model: string
 	year: number
+	version?: string // Ex: "LP640-2"
+	status?: string // Ex: "0km", "Seminovo", "Exclusivo Attra"
+	color?: string
 	specs: CarReviewSpecs
-	gallery_images: string[]
+	gallery_images: string[] | CarReviewGalleryImage[]
 	availability: CarReviewAvailability
+	// Novos campos para SEO/LLMO
+	faq?: CarReviewFAQ[]
+	highlights?: CarReviewHighlight[]
+	optionals?: string[]
+	evaluation?: CarReviewEvaluation
 }
 
 export interface BlogPostSEO {
