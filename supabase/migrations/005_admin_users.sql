@@ -25,11 +25,20 @@ CREATE INDEX IF NOT EXISTS idx_admin_users_email ON admin_users(email);
 CREATE INDEX IF NOT EXISTS idx_admin_users_role ON admin_users(role);
 CREATE INDEX IF NOT EXISTS idx_admin_users_active ON admin_users(is_active) WHERE is_active = true;
 
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_admin_users_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Updated at trigger
 CREATE TRIGGER trigger_admin_users_updated_at
   BEFORE UPDATE ON admin_users
   FOR EACH ROW
-  EXECUTE FUNCTION update_google_reviews_updated_at(); -- Reusing existing trigger function
+  EXECUTE FUNCTION update_admin_users_updated_at();
 
 -- Enable RLS
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
