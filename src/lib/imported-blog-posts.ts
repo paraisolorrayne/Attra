@@ -1,5 +1,6 @@
-// Auto-generated from WordPress import on 2026-01-02T19:17:19.908Z
+// Auto-generated from WordPress import - Enhanced with AI on 2026-01-04T22:55:03.227Z
 // DO NOT EDIT MANUALLY - Regenerate using: npx ts-node scripts/import-wordpress-blog.ts
+// Enhancement: npx ts-node scripts/enhance-blog-posts.ts
 
 import type { DualBlogPost } from '@/types'
 
@@ -35,12 +36,13 @@ export const importedBlogPosts: DualBlogPost[] = [
       "model": "718 Boxster GTS 2024",
       "year": 2024,
       "specs": {
-        "engine": "Consultar",
-        "power": "Consultar",
+        "engine": "Motor Central Boxer",
+        "power": "400 cv",
         "torque": "Consultar",
         "acceleration": "Consultar",
         "top_speed": "Consultar",
-        "transmission": "Consultar"
+        "transmission": "Manual",
+        "drivetrain": "Tração Traseira"
       },
       "gallery_images": [
         "https://attraveiculos.com.br/wp-content/uploads/2024/10/IMG-20240930-WA0393-1024x768.jpg",
@@ -51,6 +53,78 @@ export const importedBlogPosts: DualBlogPost[] = [
         "in_stock": false,
         "price": "Sob consulta",
         "stock_url": "/estoque?marca=porsche"
+      },
+      "version": "GTS",
+      "status": "0km • Exclusivo Attra",
+      "color": "Vermelho Carmim",
+      "faq": [
+        {
+          "question": "Onde posso encontrar um Porsche 718 Boxster GTS 2024 0km com câmbio manual?",
+          "answer": "A Attra Veículos tem o orgulho de apresentar o Porsche 718 Boxster GTS 2024, zero quilômetro e com câmbio manual, uma configuração rara e muito valorizada. Este exemplar exclusivo está disponível para pronta entrega em nosso showroom em Uberlândia."
+        },
+        {
+          "question": "Quais são os diferenciais de performance do Porsche 718 Boxster GTS 2024?",
+          "answer": "O 718 Boxster GTS 2024 conta com um motor Central Boxer de 400cv e tração traseira, garantindo uma experiência de condução autêntica e pura. Suas proporções ideais e distância entre-eixos contribuem para uma dinâmica excepcional."
+        },
+        {
+          "question": "Qual a configuração de interior e exterior do Porsche 718 Boxster GTS 2024 disponível na Attra Veículos?",
+          "answer": "Este exemplar exclusivo apresenta um design exterior em Vermelho Carmim, complementado por faróis bixênon com luzes diurnas em LED. O interior é revestido em Couro & Alcântara com costuras em Vermelho, e possui bancos esportivos e um volante de três raios."
+        },
+        {
+          "question": "Por que o Porsche 718 Boxster GTS 2024 com câmbio manual é considerado uma oportunidade única?",
+          "answer": "A Attra Veículos destaca que a configuração com câmbio manual é cada vez mais rara e valorizada pelos puristas da marca. A disponibilidade de um exemplar 0km com essa característica, aliada à exclusividade da Attra, torna-o uma oportunidade ímpar para verdadeiros entusiastas."
+        },
+        {
+          "question": "O Porsche 718 Boxster GTS 2024 oferece praticidade no dia a dia?",
+          "answer": "Sim, apesar de ser um esportivo de alta performance, o 718 Boxster GTS surpreende com sua praticidade, oferecendo duas bagageiras que somam 150 litros de capacidade, ideal para escapadas de fim de semana ou uso cotidiano."
+        }
+      ],
+      "highlights": [
+        {
+          "text": "Configuração rara e valorizada com câmbio manual, um achado para puristas.",
+          "category": "exclusivity"
+        },
+        {
+          "text": "Design autoconfiante, baixo, largo e perfeitamente equilibrado em Vermelho Carmim.",
+          "category": "design"
+        },
+        {
+          "text": "Motor Central Boxer de 400cv e Tração Traseira para uma experiência de condução pura.",
+          "category": "performance"
+        },
+        {
+          "text": "Interior luxuoso em Couro & Alcântara com costuras em Vermelho e cockpit centrado no motorista.",
+          "category": "comfort"
+        },
+        {
+          "text": "Proporções ideais (4.397 mm C, 1.801 mm L, 1.281 mm A) e distância entre-eixos de 2.475 mm para dinâmica excepcional.",
+          "category": "design"
+        },
+        {
+          "text": "Faróis bixênon com luzes diurnas em LED, combinando identidade visual e segurança.",
+          "category": "technology"
+        }
+      ],
+      "optionals": [
+        "Câmbio Manual",
+        "Cor Vermelho Carmim",
+        "Interior em Couro & Alcântara com Costuras em Vermelho",
+        "Faróis bixênon com luzes diurnas em LED",
+        "Bancos esportivos",
+        "Volante esportivo de três raios",
+        "Duas bagageiras com 150 litros de capacidade"
+      ],
+      "evaluation": {
+        "summary": "Este Porsche 718 Boxster GTS 0km, exclusivo da Attra Veículos, oferece uma experiência de condução autêntica e pura, combinando performance lendária com a exclusividade de uma configuração manual rara. É a harmonia perfeita entre tradição, tecnologia e emoção, pronto para ser vivenciado.",
+        "highlights": [
+          "Exclusividade 0km com câmbio manual, um achado para puristas.",
+          "Performance visceral com motor Boxer de 400cv e tração traseira.",
+          "Design icônico e interior luxuoso focado no motorista.",
+          "Disponibilidade imediata na Attra Veículos, sem espera.",
+          "Combinação rara de atributos para entusiastas da condução esportiva."
+        ],
+        "target_profile": "O comprador ideal é um entusiasta da condução esportiva que busca a pureza e a exclusividade de um Porsche 718 Boxster GTS 0km com câmbio manual.",
+        "investment_potential": "alto"
       }
     }
   },
@@ -136,12 +210,13 @@ export const importedBlogPosts: DualBlogPost[] = [
       "model": "",
       "year": 2026,
       "specs": {
-        "engine": "Consultar",
-        "power": "Consultar",
-        "torque": "Consultar",
-        "acceleration": "Consultar",
-        "top_speed": "Consultar",
-        "transmission": "Consultar"
+        "engine": "5.2 V10",
+        "power": "640cv",
+        "torque": "57,1kgfm de Torque",
+        "acceleration": "3,2s",
+        "top_speed": "325km/h",
+        "transmission": "Consultar",
+        "drivetrain": "Tração Traseira"
       },
       "gallery_images": [
         "https://attraveiculos.com.br/wp-content/uploads/2025/04/WhatsApp-Image-2025-04-14-at-15.54.20-scaled.jpeg",
@@ -153,6 +228,73 @@ export const importedBlogPosts: DualBlogPost[] = [
         "in_stock": false,
         "price": "Sob consulta",
         "stock_url": "/estoque?marca=lamborghini"
+      },
+      "version": "LP640-2",
+      "status": "0km • Exclusivo Attra",
+      "color": "Viola Pasifae",
+      "faq": [
+        {
+          "question": "Qual o principal diferencial da Lamborghini Huracán Tecnica LP640-2 2024?",
+          "answer": "A Lamborghini Huracán Tecnica LP640-2 2024 é uma obra-prima da engenharia italiana, combinando design radical, performance extrema e exclusividade. Este modelo representa o equilíbrio perfeito entre a ferocidade do STO e a usabilidade do EVO, tornando-o um superesportivo altamente cobiçado."
+        },
+        {
+          "question": "Como a Attra Veículos consegue modelos tão exclusivos como a Huracán Tecnica no Brasil?",
+          "answer": "A Attra Veículos destaca-se pela sua capacidade única de adquirir modelos raríssimos e configurações exclusivas. Isso é fruto de décadas de relacionamento com fornecedores internacionais e uma expertise aprofundada no mercado global de veículos premium, garantindo acesso a automóveis dos sonhos para clientes exigentes."
+        },
+        {
+          "question": "Qual a especificação de motor e performance da Lamborghini Huracán Tecnica LP640-2?",
+          "answer": "A Huracán Tecnica LP640-2 é equipada com um motor 5.2 V10 que entrega 640cv de potência e 57,1kgfm de torque. Ela acelera de 0 a 100 km/h em impressionantes 3,2 segundos e atinge uma velocidade máxima de 325 km/h, oferecendo uma experiência de condução visceral."
+        },
+        {
+          "question": "Qual a cor e os detalhes internos da Lamborghini Huracán Tecnica 2024 trazida pela Attra Veículos?",
+          "answer": "O exemplar trazido pela Attra Veículos apresenta uma exclusiva pintura externa Viola Pasifae, um tom de roxo hipnotizante que muda com a luz. O interior é um requintado Nero Cosmus em couro e Alcântara, elevando o conceito de luxo e personalização a novos patamares."
+        },
+        {
+          "question": "Por que a Lamborghini Huracán Tecnica é considerada uma obra de arte mecânica?",
+          "answer": "A Lamborghini Huracán Tecnica é considerada uma obra de arte mecânica devido à sua combinação de design italiano agressivo e aerodinâmico, engenharia de ponta que otimiza performance e usabilidade, e a atenção meticulosa aos detalhes em sua construção e personalização, resultando em um veículo de beleza e potência inigualáveis."
+        }
+      ],
+      "highlights": [
+        {
+          "text": "Ápice da engenharia italiana, combinando luxo, exclusividade e desempenho bruto",
+          "category": "exclusivity"
+        },
+        {
+          "text": "Motor 5.2 V10 de 640cv e 57,1kgfm de torque, garantindo aceleração de 0-100km/h em 3,2s",
+          "category": "performance"
+        },
+        {
+          "text": "Design exterior radical com linhas agressivas e aerodinâmica otimizada, inspiradas no STO e EVO",
+          "category": "design"
+        },
+        {
+          "text": "Configuração única com pintura especial Viola Pasifae e interior Nero Cosmus em couro e Alcântara",
+          "category": "exclusivity"
+        },
+        {
+          "text": "Capacidade exclusiva da Attra Veículos em adquirir modelos raríssimos e personalizados globalmente",
+          "category": "exclusivity"
+        },
+        {
+          "text": "Equilíbrio perfeito entre performance extrema e praticidade diária, ideal para entusiastas exigentes",
+          "category": "performance"
+        }
+      ],
+      "optionals": [
+        "Cor Especial – Viola Pasifae",
+        "Interior Nero Cosmus em Couro & Alcântara"
+      ],
+      "evaluation": {
+        "summary": "A Lamborghini Huracán Tecnica LP640-2 2024, na configuração exclusiva trazida pela Attra Veículos, é um exemplar singular que transcende o conceito de superesportivo. Representa o auge da personalização e da performance, oferecendo uma experiência de posse inigualável no mercado brasileiro de luxo.",
+        "highlights": [
+          "Exclusividade inquestionável no mercado brasileiro",
+          "Performance e engenharia de ponta Lamborghini",
+          "Design icônico e aerodinâmico altamente desejável",
+          "Personalização meticulosa para clientes exigentes",
+          "Uma verdadeira obra de arte mecânica em movimento"
+        ],
+        "target_profile": "Colecionadores e entusiastas de superesportivos que buscam a máxima exclusividade, performance sem compromissos e um veículo com potencial de valorização, valorizando a capacidade de personalização única.",
+        "investment_potential": "alto"
       }
     }
   },
@@ -289,12 +431,14 @@ export const importedBlogPosts: DualBlogPost[] = [
       "model": "M2",
       "year": 2026,
       "specs": {
-        "engine": "Consultar",
-        "power": "Consultar",
-        "torque": "Consultar",
-        "acceleration": "Consultar",
-        "top_speed": "Consultar",
-        "transmission": "Consultar"
+        "engine": "3.0 TwinPower Turbo",
+        "power": "460 cv",
+        "torque": "550 Nm",
+        "acceleration": "4,1 segundos",
+        "top_speed": "250 km/h (limitada)",
+        "transmission": "Automático de 8 velocidades",
+        "drivetrain": "Tração Traseira",
+        "tires": "Rodas de 19 polegadas na dianteira e 20 polegadas na traseira"
       },
       "gallery_images": [
         "https://attraveiculos.com.br/wp-content/uploads/2025/04/WhatsApp-Image-2025-04-03-at-15.00.05-2048x1536.jpeg",
@@ -307,6 +451,81 @@ export const importedBlogPosts: DualBlogPost[] = [
         "in_stock": false,
         "price": "Sob consulta",
         "stock_url": "/estoque?marca=bmw"
+      },
+      "version": "G87",
+      "status": "Seminovo Premium",
+      "color": "Azul São Paulo",
+      "faq": [
+        {
+          "question": "Qual o valor do BMW M2 G87 2024 na Attra Veículos?",
+          "answer": "O BMW M2 G87 2024 seminovo premium está disponível na Attra Veículos por R$ 629.000,00. Este exemplar de baixa quilometragem, com apenas 9.500 km, oferece uma excelente oportunidade de adquirir um esportivo de alta performance."
+        },
+        {
+          "question": "Quais as principais diferenças entre o BMW M2 G87 e o F87?",
+          "answer": "O G87 apresenta um design mais angular e ousado, motor mais potente com 460 cv e maior tecnologia embarcada, enquanto o F87 é valorizado por suas proporções clássicas e experiência de condução mais visceral. A nova geração representa uma evolução em performance e modernidade."
+        },
+        {
+          "question": "Qual a potência e aceleração do BMW M2 G87?",
+          "answer": "O BMW M2 G87 é equipado com um motor 3.0 TwinPower Turbo de 460 cv e 550 Nm de torque. Ele acelera de 0 a 100 km/h em impressionantes 4,1 segundos, entregando uma performance pura e emocionante, característica do DNA M da BMW."
+        },
+        {
+          "question": "Onde encontrar um BMW M2 G87 Azul São Paulo seminovo premium?",
+          "answer": "Um exemplar do BMW M2 G87 2024 na exclusiva cor Azul São Paulo, com apenas 9.500 km rodados, está disponível na Attra Veículos. Convidamos você a conhecer este cobiçado esportivo e todas as suas características em nossa loja, que atende clientes de Uberlândia e todo o Brasil."
+        },
+        {
+          "question": "Quais tecnologias e características de design destacam o BMW M2 G87?",
+          "answer": "O G87 se destaca pelo seu design ousado com grade ampliada, rodas de 19/20 polegadas e quatro ponteiras de escape esportivas. Internamente, oferece bancos esportivos M com ajustes elétricos e o sistema M Drive Professional, garantindo uma experiência de condução tecnológica e imersiva."
+        }
+      ],
+      "highlights": [
+        {
+          "text": "Motor 3.0 TwinPower Turbo de 460 cv e 550 Nm de torque",
+          "category": "performance"
+        },
+        {
+          "text": "Aceleração de 0-100 km/h em apenas 4,1 segundos",
+          "category": "performance"
+        },
+        {
+          "text": "Design angular e ousado com grade ampliada e postura agressiva",
+          "category": "design"
+        },
+        {
+          "text": "Exclusiva cor Azul São Paulo com detalhes em preto brilhante",
+          "category": "design"
+        },
+        {
+          "text": "Cockpit esportivo com bancos M e tecnologia de ponta",
+          "category": "technology"
+        },
+        {
+          "text": "Sistema M Drive Professional e Diferenciais M Sport",
+          "category": "performance"
+        }
+      ],
+      "optionals": [
+        "Bancos esportivos M com ajustes elétricos",
+        "Suporte lateral reforçado (dos bancos)",
+        "Volante M de aro grosso",
+        "Botões de acesso rápido (no volante M)",
+        "Sistema M Drive Professional",
+        "Diferenciais M Sport",
+        "Rodas de 19 polegadas na dianteira",
+        "Rodas de 20 polegadas na traseira",
+        "Quatro ponteiras de escape integradas ao difusor traseiro",
+        "Espelhos com design exclusivo da linha M"
+      ],
+      "evaluation": {
+        "summary": "O BMW M2 2024 G87 disponível na Attra Veículos representa a vanguarda dos esportivos compactos, combinando desempenho brutal com um design que desafia o convencional. Este exemplar seminovo premium oferece uma oportunidade única de vivenciar a emoção M com a conveniência e o cuidado que só a Attra proporciona.",
+        "highlights": [
+          "Performance superior com 460 cv e 0-100 km/h em 4,1s.",
+          "Design ousado e distintivo na exclusiva cor Azul São Paulo.",
+          "Tecnologia M avançada para uma experiência de condução imersiva.",
+          "Exemplar seminovo com baixa quilometragem e estado impecável.",
+          "Representa a nova filosofia da BMW M, abraçando a modernidade."
+        ],
+        "target_profile": "Ideal para entusiastas que buscam um esportivo compacto de alta performance com design vanguardista e tecnologia de ponta, valorizando a exclusividade de um veículo premium seminovo.",
+        "investment_potential": "estavel"
       }
     }
   },
