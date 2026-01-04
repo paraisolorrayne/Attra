@@ -45,8 +45,9 @@ export default function AdminLoginPage() {
 
       // Redirect to intended page or default
       const redirect = searchParams.get('redirect') || '/admin/engine-sounds'
-      router.push(redirect)
-      router.refresh()
+
+      // Use window.location for a full page reload to ensure cookies are set
+      window.location.href = redirect
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {

@@ -1,12 +1,13 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, createBrowserClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Only protect admin routes (except login and reset-password)
-  if (!pathname.startsWith('/admin') || 
-      pathname === '/admin/login' || 
+  if (!pathname.startsWith('/admin') ||
+      pathname === '/admin/login' ||
       pathname.startsWith('/admin/reset-password')) {
     return NextResponse.next()
   }
@@ -17,6 +18,7 @@ export async function middleware(request: NextRequest) {
     },
   })
 
+  // Client for auth session management (uses anon key)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -52,8 +54,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  // Admin client to bypass RLS for checking admin_users table
+  const adminClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+
   // Check if user has admin access
-  const { data: adminUser } = await supabase
+  const { data: adminUser } = await adminClient
     .from('admin_users')
     .select('role, is_active')
     .eq('id', user.id)
