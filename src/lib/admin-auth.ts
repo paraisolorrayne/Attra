@@ -1,137 +1,73 @@
 /**
  * Admin Authentication Service
- * Simple token-based authentication for the admin panel
- * Uses environment variables for admin credentials
+ * DEPRECATED: This file is kept for backwards compatibility.
+ * New code should use admin-auth-supabase.ts instead.
+ *
+ * All functions now delegate to the Supabase-based authentication system.
  */
 
-import { cookies } from 'next/headers'
-import { promises as fs } from 'fs'
-import path from 'path'
+import {
+  isAuthenticated as supabaseIsAuthenticated,
+  getCurrentAdmin,
+  signOut,
+  type AdminUser
+} from './admin-auth-supabase'
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'attra2024!'
-const SESSION_COOKIE_NAME = 'admin_session'
-const SESSION_DURATION_HOURS = 24
+// Re-export types for backwards compatibility
+export type { AdminUser }
 
-interface AdminSession {
-  token: string
-  expires_at: string
-  created_at: string
-}
-
-const DATA_DIR = path.join(process.cwd(), 'data')
-const SESSIONS_FILE = path.join(DATA_DIR, 'admin-sessions.json')
-
-// Ensure data directory exists
-async function ensureDataDir(): Promise<void> {
-  try {
-    await fs.access(DATA_DIR)
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true })
-  }
-}
-
-// Read all sessions
-async function getAllSessions(): Promise<AdminSession[]> {
-  try {
-    await ensureDataDir()
-    const data = await fs.readFile(SESSIONS_FILE, 'utf-8')
-    return JSON.parse(data)
-  } catch {
-    return []
-  }
-}
-
-// Save all sessions
-async function saveSessions(sessions: AdminSession[]): Promise<void> {
-  await ensureDataDir()
-  await fs.writeFile(SESSIONS_FILE, JSON.stringify(sessions, null, 2))
-}
-
-// Generate a secure random token
-function generateToken(): string {
-  const array = new Uint8Array(32)
-  crypto.getRandomValues(array)
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
-}
-
-// Validate admin credentials and create session
-export async function adminLogin(username: string, password: string): Promise<string | null> {
-  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
-    return null
-  }
-
-  const token = generateToken()
-  const expiresAt = new Date(Date.now() + SESSION_DURATION_HOURS * 60 * 60 * 1000)
-
-  const session: AdminSession = {
-    token,
-    expires_at: expiresAt.toISOString(),
-    created_at: new Date().toISOString(),
-  }
-
-  const sessions = await getAllSessions()
-  // Clean up expired sessions
-  const validSessions = sessions.filter(s => new Date(s.expires_at) > new Date())
-  validSessions.push(session)
-  await saveSessions(validSessions)
-
-  return token
-}
-
-// Validate session token
-export async function validateSession(token: string): Promise<boolean> {
-  if (!token) return false
-
-  const sessions = await getAllSessions()
-  const session = sessions.find(s => s.token === token)
-
-  if (!session) return false
-  if (new Date(session.expires_at) <= new Date()) {
-    // Session expired, clean it up
-    const validSessions = sessions.filter(s => s.token !== token)
-    await saveSessions(validSessions)
-    return false
-  }
-
-  return true
-}
-
-// Logout - invalidate session
-export async function adminLogout(token: string): Promise<void> {
-  const sessions = await getAllSessions()
-  const validSessions = sessions.filter(s => s.token !== token)
-  await saveSessions(validSessions)
-}
-
-// Get session token from cookies (server-side)
-export async function getSessionToken(): Promise<string | null> {
-  const cookieStore = await cookies()
-  return cookieStore.get(SESSION_COOKIE_NAME)?.value || null
-}
-
-// Check if current request is authenticated
+/**
+ * Check if current request is authenticated
+ * @deprecated Use isAuthenticated from admin-auth-supabase.ts
+ */
 export async function isAuthenticated(): Promise<boolean> {
-  const token = await getSessionToken()
-  if (!token) return false
-  return validateSession(token)
+  return supabaseIsAuthenticated()
 }
 
-// Set session cookie (used after login)
-export async function setSessionCookie(token: string): Promise<void> {
-  const cookieStore = await cookies()
-  cookieStore.set(SESSION_COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: SESSION_DURATION_HOURS * 60 * 60,
-    path: '/',
-  })
+/**
+ * Get current admin user
+ * @deprecated Use getCurrentAdmin from admin-auth-supabase.ts
+ */
+export async function getAdminUser(): Promise<AdminUser | null> {
+  return getCurrentAdmin()
 }
 
-// Clear session cookie (used after logout)
+/**
+ * Logout current user
+ * @deprecated Use signOut from admin-auth-supabase.ts
+ */
+export async function adminLogout(): Promise<void> {
+  return signOut()
+}
+
+// Legacy functions - no longer needed but kept for compatibility
+// These are no-ops since Supabase handles everything
+
+/** @deprecated No longer used with Supabase auth */
+export async function getSessionToken(): Promise<string | null> {
+  console.warn('getSessionToken is deprecated. Use Supabase auth instead.')
+  return null
+}
+
+/** @deprecated No longer used with Supabase auth */
+export async function setSessionCookie(_token: string): Promise<void> {
+  console.warn('setSessionCookie is deprecated. Use Supabase auth instead.')
+}
+
+/** @deprecated No longer used with Supabase auth */
 export async function clearSessionCookie(): Promise<void> {
-  const cookieStore = await cookies()
-  cookieStore.delete(SESSION_COOKIE_NAME)
+  console.warn('clearSessionCookie is deprecated. Use Supabase auth instead.')
+}
+
+/** @deprecated No longer used with Supabase auth */
+export async function validateSession(_token: string): Promise<boolean> {
+  console.warn('validateSession is deprecated. Use Supabase auth instead.')
+  return supabaseIsAuthenticated()
+}
+
+/** @deprecated No longer used with Supabase auth */
+export async function adminLogin(_username: string, _password: string): Promise<string | null> {
+  console.warn('adminLogin is deprecated. Use signInWithEmail from admin-auth-supabase.ts instead.')
+  return null
 }
 
