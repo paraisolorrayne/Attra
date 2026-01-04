@@ -157,6 +157,112 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['admin_sessions']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['admin_sessions']['Insert']>
       }
+      // CRM Tables
+      clientes: {
+        Row: {
+          id: string
+          nome: string
+          telefone: string | null
+          email: string | null
+          cpf_cnpj: string | null
+          origem_principal: OrigemCliente
+          faixa_valor_preferida_min: number | null
+          faixa_valor_preferida_max: number | null
+          tipos_preferidos: string[]
+          marcas_preferidas: string[]
+          criado_em: string
+          atualizado_em: string
+        }
+        Insert: Omit<Database['public']['Tables']['clientes']['Row'], 'id' | 'criado_em' | 'atualizado_em'>
+        Update: Partial<Database['public']['Tables']['clientes']['Insert']>
+      }
+      leads: {
+        Row: {
+          id: string
+          origem: OrigemLead
+          payload_bruto: Json
+          cliente_id: string | null
+          nome: string
+          telefone: string | null
+          email: string | null
+          interesse_tipo: InteresseTipo | null
+          faixa_preco_interesse_min: number | null
+          faixa_preco_interesse_max: number | null
+          categoria_interesse: string | null
+          marca_interesse: string | null
+          modelo_interesse: string | null
+          prioridade: PrioridadeLead
+          status: StatusLead
+          criado_em: string
+          atualizado_em: string
+        }
+        Insert: Omit<Database['public']['Tables']['leads']['Row'], 'id' | 'criado_em' | 'atualizado_em'>
+        Update: Partial<Database['public']['Tables']['leads']['Insert']>
+      }
+      eventos_lead: {
+        Row: {
+          id: string
+          lead_id: string
+          tipo: EventoLeadTipo
+          descricao: string | null
+          proximo_contato_em: string | null
+          responsavel: string
+          webhook_disparado: boolean
+          criado_em: string
+        }
+        Insert: Omit<Database['public']['Tables']['eventos_lead']['Row'], 'id' | 'criado_em'>
+        Update: Partial<Database['public']['Tables']['eventos_lead']['Insert']>
+      }
+      historico_compras: {
+        Row: {
+          id: string
+          cliente_id: string
+          veiculo_id_externo: string | null
+          data_compra: string
+          valor_compra: number
+          categoria: string | null
+          marca: string | null
+          modelo: string | null
+          status: StatusCompra
+          criado_em: string
+        }
+        Insert: Omit<Database['public']['Tables']['historico_compras']['Row'], 'id' | 'criado_em'>
+        Update: Partial<Database['public']['Tables']['historico_compras']['Insert']>
+      }
+      boletos: {
+        Row: {
+          id: string
+          cliente_id: string
+          lead_id: string | null
+          identificador_externo: string | null
+          nosso_numero: string | null
+          linha_digitavel: string | null
+          descricao: string
+          valor_total: number
+          data_emissao: string
+          data_vencimento: string
+          data_pagamento: string | null
+          status: StatusBoleto
+          forma_cobranca: FormaCobranca
+          origem: OrigemBoleto
+          criado_em: string
+          atualizado_em: string
+        }
+        Insert: Omit<Database['public']['Tables']['boletos']['Row'], 'id' | 'criado_em' | 'atualizado_em'>
+        Update: Partial<Database['public']['Tables']['boletos']['Insert']>
+      }
+      eventos_boleto: {
+        Row: {
+          id: string
+          boleto_id: string
+          tipo: EventoBoletoTipo
+          descricao: string | null
+          data_evento: string
+          criado_em: string
+        }
+        Insert: Omit<Database['public']['Tables']['eventos_boleto']['Row'], 'id' | 'criado_em'>
+        Update: Partial<Database['public']['Tables']['eventos_boleto']['Insert']>
+      }
     }
     Views: {
       [_ in never]: never
@@ -166,10 +272,35 @@ export interface Database {
     }
     Enums: {
       vehicle_status: 'available' | 'reserved' | 'sold' | 'highlight'
+      origem_cliente: OrigemCliente
+      origem_lead: OrigemLead
+      interesse_tipo: InteresseTipo
+      prioridade_lead: PrioridadeLead
+      status_lead: StatusLead
+      evento_lead_tipo: EventoLeadTipo
+      status_compra: StatusCompra
+      status_boleto: StatusBoleto
+      forma_cobranca: FormaCobranca
+      origem_boleto: OrigemBoleto
+      evento_boleto_tipo: EventoBoletoTipo
     }
   }
 }
 
+// CRM Enum Types
+export type OrigemCliente = 'site' | 'whatsapp' | 'indicacao' | 'crm_externo'
+export type OrigemLead = 'site_chat' | 'whatsapp_ia' | 'instagram_form' | 'crm_externo'
+export type InteresseTipo = 'comprar' | 'vender' | 'ambos'
+export type PrioridadeLead = 'baixa' | 'media' | 'alta'
+export type StatusLead = 'novo' | 'em_atendimento' | 'concluido' | 'perdido' | 'ganho'
+export type EventoLeadTipo = 'criado' | 'contato_realizado' | 'retorno_pendente' | 'sem_resposta' | 'ganho' | 'perdido'
+export type StatusCompra = 'ativo' | 'vendido' | 'trocado'
+export type StatusBoleto = 'pendente' | 'vencido' | 'pago' | 'cancelado' | 'em_negociacao'
+export type FormaCobranca = 'boleto' | 'pix_copia_cola' | 'link_pagamento'
+export type OrigemBoleto = 'manual' | 'gateway_x' | 'sistema_y'
+export type EventoBoletoTipo = 'criado' | 'enviado' | 'lembranca' | 'pago' | 'cancelado' | 'renegociado'
+
+// Existing Table Types
 export type Vehicle = Database['public']['Tables']['vehicles']['Row']
 export type Location = Database['public']['Tables']['locations']['Row']
 export type BlogPost = Database['public']['Tables']['blog_posts']['Row']
@@ -178,3 +309,45 @@ export type ContactSubmission = Database['public']['Tables']['contact_submission
 export type WebhookEvent = Database['public']['Tables']['webhook_events']['Row']
 export type VehicleSound = Database['public']['Tables']['vehicle_sounds']['Row']
 export type AdminSession = Database['public']['Tables']['admin_sessions']['Row']
+
+// CRM Table Types
+export type Cliente = Database['public']['Tables']['clientes']['Row']
+export type ClienteInsert = Database['public']['Tables']['clientes']['Insert']
+export type ClienteUpdate = Database['public']['Tables']['clientes']['Update']
+
+export type Lead = Database['public']['Tables']['leads']['Row']
+export type LeadInsert = Database['public']['Tables']['leads']['Insert']
+export type LeadUpdate = Database['public']['Tables']['leads']['Update']
+
+export type EventoLead = Database['public']['Tables']['eventos_lead']['Row']
+export type EventoLeadInsert = Database['public']['Tables']['eventos_lead']['Insert']
+
+export type HistoricoCompra = Database['public']['Tables']['historico_compras']['Row']
+export type HistoricoCompraInsert = Database['public']['Tables']['historico_compras']['Insert']
+
+export type Boleto = Database['public']['Tables']['boletos']['Row']
+export type BoletoInsert = Database['public']['Tables']['boletos']['Insert']
+export type BoletoUpdate = Database['public']['Tables']['boletos']['Update']
+
+export type EventoBoleto = Database['public']['Tables']['eventos_boleto']['Row']
+export type EventoBoletoInsert = Database['public']['Tables']['eventos_boleto']['Insert']
+
+// Extended types with relations
+export interface ClienteWithStats extends Cliente {
+  lead_count: number
+  purchase_count: number
+  total_spent: number
+  last_purchase_date: string | null
+}
+
+export interface LeadWithCliente extends Lead {
+  cliente?: Cliente | null
+  eventos?: EventoLead[]
+  proximo_contato?: string | null
+}
+
+export interface BoletoWithCliente extends Boleto {
+  cliente: Cliente
+  lead?: Lead | null
+  dias_em_atraso?: number
+}

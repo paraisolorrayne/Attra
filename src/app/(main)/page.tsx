@@ -3,6 +3,7 @@ import {
   FeaturedSupercars,
   EngineSoundSection,
   ExperienceSection,
+  TestimonialsSection,
   LocationSection,
   CTASection,
 } from '@/components/home'
@@ -45,6 +46,9 @@ export default async function Home() {
 
       {/* Attra experience showcase */}
       <ExperienceSection />
+
+      {/* Customer testimonials from Google */}
+      <TestimonialsSection />
 
       {/* Final CTA */}
       <CTASection />

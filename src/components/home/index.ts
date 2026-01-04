@@ -11,4 +11,5 @@ export * from './hero-search-widget'
 export * from './featured-supercars'
 export * from './engine-sound-section'
 export * from './experience-section'
+export * from './testimonials-section'
 
