@@ -15,7 +15,7 @@ let cachedGeoLocation: GeoLocation | null = null
 
 /**
  * Fetches user's geolocation based on IP address
- * Uses ip-api.com free service (no API key required, 45 requests/minute limit)
+ * Uses ipapi.co free service (HTTPS, no API key required, 1000 requests/day limit)
  */
 export async function getGeoLocation(): Promise<GeoLocation | null> {
   // Return cached result if available
@@ -24,8 +24,12 @@ export async function getGeoLocation(): Promise<GeoLocation | null> {
   }
 
   try {
-    const response = await fetch('http://ip-api.com/json/?fields=status,message,country,regionName,city,query', {
+    // Using ipapi.co which supports HTTPS (required for production)
+    const response = await fetch('https://ipapi.co/json/', {
       method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
     })
 
     if (!response.ok) {
@@ -35,16 +39,16 @@ export async function getGeoLocation(): Promise<GeoLocation | null> {
 
     const data = await response.json()
 
-    if (data.status === 'fail') {
-      console.error('[GeoLocation] API error:', data.message)
+    if (data.error) {
+      console.error('[GeoLocation] API error:', data.reason)
       return null
     }
 
     cachedGeoLocation = {
       city: data.city || 'Não identificada',
-      region: data.regionName || 'Não identificada',
-      country: data.country || 'Brasil',
-      ip: data.query || '',
+      region: data.region || 'Não identificada',
+      country: data.country_name || 'Brasil',
+      ip: data.ip || '',
     }
 
     console.log('[GeoLocation] Successfully fetched:', cachedGeoLocation.city, cachedGeoLocation.region)
