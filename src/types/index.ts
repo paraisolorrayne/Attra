@@ -45,6 +45,14 @@ export interface ContactFormData {
 	sourcePage: string
 }
 
+// Geolocation data from IP
+export interface GeoLocation {
+	city: string
+	region: string
+	country: string
+	ip?: string
+}
+
 // WhatsApp/N8N webhook payload
 export interface WhatsAppWebhookPayload {
 	eventType: 'chat_request' | 'vehicle_inquiry' | 'service_inquiry' | 'whatsapp_click'
@@ -68,6 +76,8 @@ export interface WhatsAppWebhookPayload {
 	localTimestamp?: string
 	sessionId?: string
 	timestamp: string
+	// Geolocation data
+	geoLocation?: GeoLocation
 }
 
 // Webhook response type
