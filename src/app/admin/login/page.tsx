@@ -43,14 +43,19 @@ export default function AdminLoginPage() {
         throw new Error(data.error || 'Login failed')
       }
 
-      // Redirect to intended page or default
-      const redirect = searchParams.get('redirect') || '/admin/engine-sounds'
+      // Redirect to intended page or default based on user role
+      let redirect = searchParams.get('redirect')
 
-      // Use window.location for a full page reload to ensure cookies are set
-      window.location.href = redirect
+      // If no redirect specified, use role-based default
+      if (!redirect) {
+        redirect = data.user?.role === 'admin' ? '/admin/crm/leads' : '/admin/engine-sounds'
+      }
+
+      // Use window.location.replace for a full page reload
+      // Don't set isLoading to false since we're navigating away
+      window.location.replace(redirect)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
-    } finally {
       setIsLoading(false)
     }
   }
