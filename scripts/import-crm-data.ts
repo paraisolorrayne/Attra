@@ -113,6 +113,7 @@ interface CompraRecord {
   marca: string | null
   categoria: string | null
   loja: string | null
+  vendedor: string | null
   status: 'ativo' | 'vendido' | 'trocado'
 }
 
@@ -183,27 +184,33 @@ function parseCurrency(value: string): number {
 
 /**
  * Parse date from various formats
+ * IMPORTANT: All sales should be in 2025, not 2026
  */
 function parseDate(dateStr: string): string {
   if (!dateStr || dateStr.trim() === '') {
-    return new Date().toISOString().split('T')[0]
+    return '2025-01-15' // Default to mid-January 2025
   }
-  
+
   const cleaned = dateStr.trim().toLowerCase()
-  
+
   // Check if it's a month name (e.g., "Janeiro", "dezembro")
   if (monthMap[cleaned]) {
     const month = monthMap[cleaned]
-    // Assume 2025 for month-only dates
+    // All sales are from 2025
     return `2025-${month.toString().padStart(2, '0')}-15`
   }
-  
+
   // Check if it's in DD/MM/YYYY format (Brazilian standard)
   const parts = dateStr.split('/')
   if (parts.length === 3) {
     let [first, second, year] = parts.map(p => parseInt(p, 10))
     // Handle 2-digit years
-    const fullYear = year < 100 ? 2000 + year : year
+    let fullYear = year < 100 ? 2000 + year : year
+
+    // VALIDATION: No sales from 2026, cap at 2025
+    if (fullYear > 2025) {
+      fullYear = 2025
+    }
 
     // Brazilian format: DD/MM/YYYY
     // If first number > 12, it must be the day
@@ -229,9 +236,34 @@ function parseDate(dateStr: string): string {
 
     return `${fullYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
   }
-  
-  // Default to current date
-  return new Date().toISOString().split('T')[0]
+
+  // Default to January 2025
+  return '2025-01-15'
+}
+
+/**
+ * Normalize vendedor (salesperson) field
+ * "<SEM VENDEDOR>" or empty should be treated as null (will display as "Não informado")
+ */
+function normalizeVendedor(vendedor: string): string | null {
+  if (!vendedor || vendedor.trim() === '') return null
+
+  const cleaned = vendedor.trim().toUpperCase()
+
+  // Handle "<SEM VENDEDOR>" or similar
+  if (cleaned === '<SEM VENDEDOR>' ||
+      cleaned === 'SEM VENDEDOR' ||
+      cleaned === 'N/A' ||
+      cleaned === 'NA' ||
+      cleaned === '-') {
+    return null
+  }
+
+  // Capitalize first letter of each word
+  return vendedor.trim()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
 }
 
 /**
@@ -405,6 +437,7 @@ async function createCompra(
   const marca = extractBrand(vehicle)
   const categoria = extractCategory(vehicle)
   const loja = row['LOJA']?.trim() || null
+  const vendedor = normalizeVendedor(row['VENDEDOR'])
 
   const compraData: CompraRecord = {
     cliente_id: clienteId,
@@ -414,6 +447,7 @@ async function createCompra(
     marca,
     categoria,
     loja,
+    vendedor,
     status: 'vendido'
   }
 
