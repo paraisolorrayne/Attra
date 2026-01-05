@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { MessageCircle, X, Car, Wrench, HelpCircle, Loader2, Bot } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { sendWhatsAppWebhook, sendToLeadsterWithoutAI, sendToLeadsterWithAI, getGeoLocation, generateVehicleMessage } from '@/lib/webhook'
@@ -12,7 +13,7 @@ interface WhatsAppButtonProps {
   vehicleId?: string
   vehicleBrand?: string
   vehicleModel?: string
-  sourcePage: string
+  sourcePage?: string // Optional - will auto-detect from pathname if not provided
 }
 
 // Page behavior types
@@ -93,6 +94,7 @@ const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleMod
 }
 
 export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePage }: WhatsAppButtonProps) {
+  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -102,9 +104,15 @@ export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePa
   const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(null)
   const { showToast, hideToast } = useToast()
 
-  const context = getContextMessage(sourcePage, vehicleBrand, vehicleModel)
+  // Use pathname for auto-detection, or fallback to sourcePage prop
+  const currentPage = sourcePage && sourcePage !== 'global' ? sourcePage : pathname
+
+  const context = getContextMessage(currentPage, vehicleBrand, vehicleModel)
   const IconComponent = context.icon
-  const pageBehavior = getPageBehavior(sourcePage, vehicleId)
+  const pageBehavior = getPageBehavior(currentPage, vehicleId)
+
+  // Debug: log current behavior
+  console.log('[WhatsAppButton] pathname:', pathname, 'currentPage:', currentPage, 'behavior:', pageBehavior)
 
   // Fetch geolocation on mount (only once)
   useEffect(() => {
@@ -156,7 +164,7 @@ export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePa
 
     const basePayload = {
       eventType: vehicleId ? 'vehicle_inquiry' : 'chat_request' as const,
-      sourcePage,
+      sourcePage: currentPage,
       context: {
         vehicleId,
         vehicleBrand,
