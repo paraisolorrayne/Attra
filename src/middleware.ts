@@ -45,7 +45,9 @@ export async function middleware(request: NextRequest) {
   )
 
   // Get current session
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  console.log('[Middleware] User from session:', user?.id, 'Error:', userError?.message)
 
   if (!user) {
     // Redirect to login if not authenticated
@@ -67,11 +69,13 @@ export async function middleware(request: NextRequest) {
   )
 
   // Check if user has admin access
-  const { data: adminUser } = await adminClient
+  const { data: adminUser, error: adminError } = await adminClient
     .from('admin_users')
     .select('role, is_active')
     .eq('id', user.id)
     .single()
+
+  console.log('[Middleware] Admin user lookup:', adminUser, 'Error:', adminError?.message)
 
   if (!adminUser || !adminUser.is_active) {
     // User is authenticated but not an admin - redirect to login

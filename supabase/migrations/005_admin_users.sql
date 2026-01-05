@@ -43,42 +43,42 @@ CREATE TRIGGER trigger_admin_users_updated_at
 -- Enable RLS
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
+-- IMPORTANT: Create helper function FIRST to avoid infinite recursion in policies
+-- This function uses SECURITY DEFINER to bypass RLS when checking admin status
+CREATE OR REPLACE FUNCTION check_is_admin(user_id UUID)
+RETURNS BOOLEAN AS $$
+DECLARE
+  user_role TEXT;
+BEGIN
+  -- Direct table access bypasses RLS due to SECURITY DEFINER
+  SELECT role::TEXT INTO user_role FROM admin_users WHERE id = user_id AND is_active = true;
+  RETURN user_role = 'admin';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Policies for admin_users table
--- Users can read their own record
+-- Users can read their own record (simple, no recursion)
 CREATE POLICY "Users can read own admin profile" ON admin_users
   FOR SELECT USING (auth.uid() = id);
 
--- Admins can read all admin users
+-- Admins can read all admin users (uses SECURITY DEFINER function to avoid recursion)
 CREATE POLICY "Admins can read all admin users" ON admin_users
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM admin_users au 
-      WHERE au.id = auth.uid() AND au.role = 'admin'
-    )
-  );
+  FOR SELECT USING (check_is_admin(auth.uid()));
 
 -- Only admins can insert new admin users
 CREATE POLICY "Only admins can create admin users" ON admin_users
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM admin_users au 
-      WHERE au.id = auth.uid() AND au.role = 'admin'
-    )
-  );
+  FOR INSERT WITH CHECK (check_is_admin(auth.uid()));
 
 -- Only admins can update admin users (except own last_login)
 CREATE POLICY "Only admins can update admin users" ON admin_users
   FOR UPDATE USING (
-    -- Allow users to update their own last_login
+    -- Allow users to update their own record
     (auth.uid() = id) OR
     -- Allow admins to update any user
-    EXISTS (
-      SELECT 1 FROM admin_users au 
-      WHERE au.id = auth.uid() AND au.role = 'admin'
-    )
+    check_is_admin(auth.uid())
   );
 
--- Service role has full access
+-- Service role has full access (for server-side operations)
 CREATE POLICY "Service role full access on admin_users" ON admin_users
   FOR ALL USING (auth.role() = 'service_role');
 

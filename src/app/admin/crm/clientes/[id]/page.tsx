@@ -18,7 +18,13 @@ import {
   Edit2,
   Loader2,
   AlertCircle,
-  Tag
+  Tag,
+  X,
+  Car,
+  Store,
+  UserCheck,
+  DollarSign,
+  ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Cliente, Lead, HistoricoCompra, Boleto, StatusLead, StatusBoleto } from '@/types/database'
@@ -63,14 +69,147 @@ interface ClienteDetailResponse {
   }
 }
 
+// Purchase Detail Modal Component
+function PurchaseDetailModal({
+  compra,
+  onClose,
+  formatPrice,
+  formatDate
+}: {
+  compra: HistoricoCompra
+  onClose: () => void
+  formatPrice: (value: number | null | undefined) => string
+  formatDate: (date: string | null) => string
+}) {
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-background-card rounded-xl border border-border w-full max-w-lg shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">Detalhes da Compra</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-background-soft transition-colors text-foreground-secondary"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Vehicle Info */}
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-primary/10 rounded-lg">
+              <Car className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-foreground-secondary">Veículo</p>
+              <p className="text-lg font-semibold text-foreground">
+                {compra.marca && compra.modelo
+                  ? `${compra.marca} ${compra.modelo}`
+                  : compra.descricao || 'Veículo não especificado'
+                }
+              </p>
+              {compra.categoria && (
+                <span className="inline-block mt-1 px-2 py-0.5 bg-background-soft rounded text-xs text-foreground-secondary">
+                  {compra.categoria}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Grid of details */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Valor */}
+            <div className="bg-background-soft rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-green-500" />
+                <span className="text-sm text-foreground-secondary">Valor</span>
+              </div>
+              <p className="text-xl font-bold text-green-500">{formatPrice(compra.valor_compra)}</p>
+            </div>
+
+            {/* Data */}
+            <div className="bg-background-soft rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-foreground-secondary" />
+                <span className="text-sm text-foreground-secondary">Data</span>
+              </div>
+              <p className="text-lg font-medium text-foreground">{formatDate(compra.data_compra)}</p>
+            </div>
+
+            {/* Loja */}
+            <div className="bg-background-soft rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Store className="w-4 h-4 text-foreground-secondary" />
+                <span className="text-sm text-foreground-secondary">Loja</span>
+              </div>
+              <p className="text-lg font-medium text-foreground">{compra.loja || 'Não informada'}</p>
+            </div>
+
+            {/* Vendedor */}
+            <div className="bg-background-soft rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <UserCheck className="w-4 h-4 text-foreground-secondary" />
+                <span className="text-sm text-foreground-secondary">Vendedor</span>
+              </div>
+              <p className="text-lg font-medium text-foreground">{compra.vendedor || 'Não informado'}</p>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="flex items-center justify-between p-3 bg-background-soft rounded-lg">
+            <span className="text-sm text-foreground-secondary">Status</span>
+            <span className={cn(
+              "px-3 py-1 rounded-full text-sm font-medium",
+              compra.status === 'concluida' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+              compra.status === 'cancelada' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+            )}>
+              {compra.status === 'concluida' ? 'Concluída' :
+               compra.status === 'cancelada' ? 'Cancelada' : 'Pendente'}
+            </span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-border">
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ClienteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
-  
+
   const [cliente, setCliente] = useState<ClienteDetailResponse['data'] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'compras' | 'leads' | 'boletos'>('compras')
+  const [selectedPurchase, setSelectedPurchase] = useState<HistoricoCompra | null>(null)
 
   useEffect(() => {
     fetchCliente()
@@ -288,13 +427,33 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
                 ) : (
                   <div className="space-y-3">
                     {cliente.historico_compras.map((compra) => (
-                      <div key={compra.id} className="flex items-center justify-between p-3 bg-background-soft rounded-lg">
-                        <div>
-                          <p className="font-medium text-foreground">{compra.descricao || 'Compra'}</p>
-                          <p className="text-sm text-foreground-secondary">{formatDate(compra.data_compra)}</p>
+                      <button
+                        key={compra.id}
+                        onClick={() => setSelectedPurchase(compra)}
+                        className="w-full flex items-center justify-between p-3 bg-background-soft rounded-lg hover:bg-background hover:border-primary/50 border border-transparent transition-all cursor-pointer group text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                            <ShoppingBag className="w-4 h-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">
+                              {compra.marca && compra.modelo
+                                ? `${compra.marca} ${compra.modelo}`
+                                : compra.descricao || 'Compra'
+                              }
+                            </p>
+                            <p className="text-sm text-foreground-secondary">
+                              {formatDate(compra.data_compra)}
+                              {compra.loja && <span className="ml-2">• {compra.loja}</span>}
+                            </p>
+                          </div>
                         </div>
-                        <p className="font-bold text-green-500">{formatPrice(compra.valor_compra)}</p>
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-green-500">{formatPrice(compra.valor_compra)}</p>
+                          <ChevronRight className="w-4 h-4 text-foreground-secondary group-hover:text-primary transition-colors" />
+                        </div>
+                      </button>
                     ))}
                   </div>
                 )
@@ -421,6 +580,16 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+
+      {/* Purchase Detail Modal */}
+      {selectedPurchase && (
+        <PurchaseDetailModal
+          compra={selectedPurchase}
+          onClose={() => setSelectedPurchase(null)}
+          formatPrice={formatPrice}
+          formatDate={formatDate}
+        />
+      )}
     </div>
   )
 }

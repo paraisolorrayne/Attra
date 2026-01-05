@@ -80,17 +80,21 @@ export async function signOut(): Promise<void> {
  */
 export async function getCurrentAdmin(): Promise<AdminUser | null> {
   const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  console.log('[getCurrentAdmin] User from session:', user?.id, 'Error:', userError?.message)
+
   if (!user) return null
 
-  const { data: adminUser } = await supabase
+  const { data: adminUser, error: adminError } = await supabase
     .from('admin_users')
     .select('*')
     .eq('id', user.id)
     .eq('is_active', true)
     .single()
+
+  console.log('[getCurrentAdmin] Admin user lookup result:', adminUser?.email, 'Error:', adminError?.message)
 
   return adminUser as AdminUser | null
 }
