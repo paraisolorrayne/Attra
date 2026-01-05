@@ -83,11 +83,39 @@ function parseCSV(content: string): CSVRow[] {
 // Normalize phone to E.164 format
 function normalizePhone(phone: string): string | null {
   if (!phone || phone.trim() === '') return null
-  let digits = phone.replace(/\D/g, '')
+
+  // Remove .0 suffix that sometimes appears in CSV (e.g., "34991196071.0")
+  let cleaned = phone.replace(/\.0+$/, '')
+
+  // Extract only digits
+  let digits = cleaned.replace(/\D/g, '')
+
   if (digits.length < 10) return null
-  if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1)
-  if (digits.startsWith('55') && digits.length >= 12) return `+${digits}`
-  if (digits.length === 10 || digits.length === 11) return `+55${digits}`
+
+  // Remove leading 0 from 11-digit numbers (old format)
+  if (digits.length === 11 && digits.startsWith('0')) {
+    digits = digits.slice(1)
+  }
+
+  // Handle numbers that already have country code 55
+  if (digits.startsWith('55') && digits.length >= 12) {
+    // If it's 55 + 11 digits = 13 total, might have extra digit, normalize to 12
+    if (digits.length > 13) {
+      digits = digits.substring(0, 13)
+    }
+    return `+${digits}`
+  }
+
+  // Standard 10 or 11 digit Brazilian numbers
+  if (digits.length === 10 || digits.length === 11) {
+    return `+55${digits}`
+  }
+
+  // For 12+ digits without 55 prefix, truncate to 11 and add prefix
+  if (digits.length > 11) {
+    digits = digits.substring(0, 11)
+  }
+
   return `+55${digits}`
 }
 

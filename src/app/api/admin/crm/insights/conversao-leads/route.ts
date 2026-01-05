@@ -17,25 +17,27 @@ export async function GET(request: NextRequest) {
     const supabase = createAdminClient()
     
     // Calculate date range based on period
-    const now = new Date()
+    // Use 2025 as reference year since data is from 2019-2025
+    const referenceYear = 2025
+    const referenceMonth = 11 // December (0-indexed)
     let startDate: Date
-    
+
     switch (periodo) {
       case 'mensal':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+        startDate = new Date(referenceYear, referenceMonth, 1)
         break
       case 'trimestral':
-        startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1)
+        startDate = new Date(referenceYear, referenceMonth - 2, 1)
         break
       case 'semestral':
-        startDate = new Date(now.getFullYear(), now.getMonth() - 6, 1)
+        startDate = new Date(referenceYear, referenceMonth - 5, 1)
         break
       case 'anual':
       default:
-        startDate = new Date(now.getFullYear(), 0, 1)
+        startDate = new Date(referenceYear, 0, 1)
         break
     }
-    
+
     const startDateStr = startDate.toISOString().split('T')[0]
 
     // Get leads within the period
@@ -43,6 +45,7 @@ export async function GET(request: NextRequest) {
       .from('leads')
       .select('status, origem, prioridade, criado_em')
       .gte('criado_em', startDateStr)
+      .lte('criado_em', `${referenceYear}-12-31T23:59:59`)
 
     if (leadsError) {
       console.error('Error fetching leads:', leadsError)
