@@ -8,11 +8,9 @@ import { sendWhatsAppWebhook, sendToLeadsterWithoutAI, sendToLeadsterWithAI, get
 import { useToast } from '@/components/ui/toast'
 import { WHATSAPP_NUMBER } from '@/lib/constants'
 import { GeoLocation } from '@/types'
+import { useVehicleContext } from '@/contexts/vehicle-context'
 
 interface WhatsAppButtonProps {
-  vehicleId?: string
-  vehicleBrand?: string
-  vehicleModel?: string
   sourcePage?: string // Optional - will auto-detect from pathname if not provided
 }
 
@@ -93,8 +91,9 @@ const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleMod
   }
 }
 
-export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePage }: WhatsAppButtonProps) {
+export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
   const pathname = usePathname()
+  const { vehicle } = useVehicleContext()
   const [isOpen, setIsOpen] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -104,6 +103,12 @@ export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePa
   const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(null)
   const { showToast, hideToast } = useToast()
 
+  // Get vehicle data from context (set by VehicleContextSetter on vehicle pages)
+  const vehicleId = vehicle?.vehicleId
+  const vehicleBrand = vehicle?.vehicleBrand
+  const vehicleModel = vehicle?.vehicleModel
+  const vehicleYear = vehicle?.vehicleYear
+
   // Use pathname for auto-detection, or fallback to sourcePage prop
   const currentPage = sourcePage && sourcePage !== 'global' ? sourcePage : pathname
 
@@ -112,7 +117,7 @@ export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePa
   const pageBehavior = getPageBehavior(currentPage, vehicleId)
 
   // Debug: log current behavior
-  console.log('[WhatsAppButton] pathname:', pathname, 'currentPage:', currentPage, 'behavior:', pageBehavior)
+  console.log('[WhatsAppButton] pathname:', pathname, 'behavior:', pageBehavior, 'vehicle:', vehicleBrand, vehicleModel)
 
   // Fetch geolocation on mount (only once)
   useEffect(() => {
@@ -149,9 +154,9 @@ export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePa
     }
   }, [hasInteracted, isChatOpen])
 
-  // Generate WhatsApp redirect URL with formatted message including location
+  // Generate WhatsApp redirect URL with formatted message including location and year
   const getWhatsAppRedirectUrl = () => {
-    const formattedMessage = generateVehicleMessage(vehicleBrand, vehicleModel, undefined, geoLocation)
+    const formattedMessage = generateVehicleMessage(vehicleBrand, vehicleModel, vehicleYear, geoLocation)
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(formattedMessage)}`
   }
 
@@ -169,6 +174,7 @@ export function WhatsAppButton({ vehicleId, vehicleBrand, vehicleModel, sourcePa
         vehicleId,
         vehicleBrand,
         vehicleModel,
+        vehicleYear,
         scrollProgress: Math.round(scrollProgress),
         timeOnPage: Math.round(performance.now() / 1000),
         userMessage: context.message,

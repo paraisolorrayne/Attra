@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/footer'
 import { WhatsAppButton } from '@/components/layout/whatsapp-button'
 import { RacingProgress } from '@/components/ui/racing-progress'
 import { OrganizationSchema, WebsiteSchema } from '@/components/seo'
+import { VehicleProvider } from '@/contexts/vehicle-context'
 
 export default function MainLayout({
   children,
@@ -10,7 +11,7 @@ export default function MainLayout({
   children: React.ReactNode
 }) {
   return (
-    <>
+    <VehicleProvider>
       <OrganizationSchema />
       <WebsiteSchema />
       <RacingProgress />
@@ -19,8 +20,8 @@ export default function MainLayout({
         <main className="flex-1 page-enter">{children}</main>
         <Footer />
       </div>
-      <WhatsAppButton sourcePage="global" />
-    </>
+      <WhatsAppButton />
+    </VehicleProvider>
   )
 }
 

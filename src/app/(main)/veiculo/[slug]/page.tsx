@@ -11,6 +11,7 @@ import { VehicleContact } from '@/components/vehicles/vehicle-contact'
 import { RelatedVehicles } from '@/components/vehicles/related-vehicles'
 import { EngineAudioPlayer } from '@/components/vehicles/engine-audio-player'
 import { AIVehicleDescription, AIVehicleDescriptionSkeleton } from '@/components/vehicles/ai-vehicle-description'
+import { VehicleContextSetter } from '@/components/vehicles/vehicle-context-setter'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
 import { getVehicleSoundByVehicleId } from '@/lib/vehicle-sounds-storage'
 import { formatPrice } from '@/lib/utils'
@@ -65,6 +66,16 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 
 	return (
 		<main className="min-h-screen bg-background">
+			{/* Set vehicle data in global context for WhatsApp button */}
+			<VehicleContextSetter
+				vehicleId={vehicle.id}
+				vehicleBrand={vehicle.brand}
+				vehicleModel={vehicle.model}
+				vehicleYear={vehicle.year_model}
+				vehiclePrice={vehicle.price}
+				vehicleSlug={slug}
+			/>
+
 			{/* Hero Gallery - 60-70% viewport */}
 			{vehicle.photos && vehicle.photos.length > 0 ? (
 				<CinematicGallery
