@@ -14,8 +14,8 @@ const LEADSTER_AI_WEBHOOK_URL = process.env.NEXT_PUBLIC_LEADSTER_AI_WEBHOOK_URL 
 let cachedGeoLocation: GeoLocation | null = null
 
 /**
- * Fetches user's geolocation based on IP address
- * Uses ipapi.co free service (HTTPS, no API key required, 1000 requests/day limit)
+ * Fetches user's geolocation using internal API route
+ * This avoids CORS issues by making the request server-side
  */
 export async function getGeoLocation(): Promise<GeoLocation | null> {
   // Return cached result if available
@@ -24,8 +24,8 @@ export async function getGeoLocation(): Promise<GeoLocation | null> {
   }
 
   try {
-    // Using ipapi.co which supports HTTPS (required for production)
-    const response = await fetch('https://ipapi.co/json/', {
+    // Use internal API route to fetch geolocation server-side
+    const response = await fetch('/api/geolocation', {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -39,15 +39,10 @@ export async function getGeoLocation(): Promise<GeoLocation | null> {
 
     const data = await response.json()
 
-    if (data.error) {
-      console.error('[GeoLocation] API error:', data.reason)
-      return null
-    }
-
     cachedGeoLocation = {
       city: data.city || 'Não identificada',
       region: data.region || 'Não identificada',
-      country: data.country_name || 'Brasil',
+      country: data.country || 'Brasil',
       ip: data.ip || '',
     }
 
