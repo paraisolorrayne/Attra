@@ -1,31 +1,118 @@
-import { WhatsAppWebhookPayload, WebhookResponse } from '@/types'
+import { WhatsAppWebhookPayload, WebhookResponse, GeoLocation } from '@/types'
 
 // N8N Webhook URL (environment variable with fallback)
 const WEBHOOK_URL = process.env.NEXT_PUBLIC_LEADSTER_SDR_WEBHOOK_URL ||
   'https://webhook.dexidigital.com.br/webhook/leadster_sdr_attra'
 
+// Leadster Webhook URLs
+const LEADSTER_WEBHOOK_URL = process.env.NEXT_PUBLIC_LEADSTER_WEBHOOK_URL ||
+  'https://webhook.dexidigital.com.br/webhook/leadster_attra'
+const LEADSTER_AI_WEBHOOK_URL = process.env.NEXT_PUBLIC_LEADSTER_AI_WEBHOOK_URL ||
+  'https://webhook.dexidigital.com.br/webhook/leadster_ia_attra'
+
+// Cache for geolocation to avoid multiple API calls
+let cachedGeoLocation: GeoLocation | null = null
+
+/**
+ * Fetches user's geolocation based on IP address
+ * Uses ip-api.com free service (no API key required, 45 requests/minute limit)
+ */
+export async function getGeoLocation(): Promise<GeoLocation | null> {
+  // Return cached result if available
+  if (cachedGeoLocation) {
+    return cachedGeoLocation
+  }
+
+  try {
+    const response = await fetch('http://ip-api.com/json/?fields=status,message,country,regionName,city,query', {
+      method: 'GET',
+    })
+
+    if (!response.ok) {
+      console.error('[GeoLocation] Failed to fetch:', response.status)
+      return null
+    }
+
+    const data = await response.json()
+
+    if (data.status === 'fail') {
+      console.error('[GeoLocation] API error:', data.message)
+      return null
+    }
+
+    cachedGeoLocation = {
+      city: data.city || 'Não identificada',
+      region: data.regionName || 'Não identificada',
+      country: data.country || 'Brasil',
+      ip: data.query || '',
+    }
+
+    console.log('[GeoLocation] Successfully fetched:', cachedGeoLocation.city, cachedGeoLocation.region)
+    return cachedGeoLocation
+  } catch (error) {
+    console.error('[GeoLocation] Error fetching location:', error)
+    return null
+  }
+}
+
+/**
+ * Generates formatted message with vehicle info and location
+ */
+export function generateVehicleMessage(
+  vehicleBrand?: string,
+  vehicleModel?: string,
+  vehicleYear?: string | number,
+  geoLocation?: GeoLocation | null
+): string {
+  const vehicle = vehicleBrand && vehicleModel
+    ? `${vehicleBrand} ${vehicleModel}${vehicleYear ? ` ${vehicleYear}` : ''}`
+    : 'um veículo'
+
+  const location = geoLocation
+    ? `${geoLocation.city}/${geoLocation.region}`
+    : 'localização não identificada'
+
+  return `Vim do site e tenho interesse no ${vehicle}, sou de ${location}.`
+}
+
 /**
  * Sends lead data to N8N webhook for automated SDR processing
- * Maintains compatibility with existing component calls
+ * Includes geolocation data and formatted message
  */
 export async function sendWhatsAppWebhook(
-  payload: Omit<WhatsAppWebhookPayload, 'timestamp' | 'sessionId' | 'pageUrl' | 'userAgent' | 'localTimestamp'>
+  payload: Omit<WhatsAppWebhookPayload, 'timestamp' | 'sessionId' | 'pageUrl' | 'userAgent' | 'localTimestamp' | 'geoLocation'>,
+  geoLocation?: GeoLocation | null
 ): Promise<WebhookResponse> {
   try {
     const sessionId = getSessionId()
     const now = new Date()
 
+    // Generate formatted message with vehicle and location info
+    const formattedMessage = generateVehicleMessage(
+      payload.context.vehicleBrand,
+      payload.context.vehicleModel,
+      payload.context.vehicleYear,
+      geoLocation
+    )
+
     // Enhanced payload with additional context for N8N agent
     const enhancedPayload: WhatsAppWebhookPayload = {
       ...payload,
+      context: {
+        ...payload.context,
+        userMessage: formattedMessage, // Override with formatted message
+      },
       sessionId,
       timestamp: now.toISOString(),
       localTimestamp: now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       pageUrl: typeof window !== 'undefined' ? window.location.href : '',
       userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
+      geoLocation: geoLocation || undefined,
     }
 
     console.log('[Webhook] Sending to N8N:', enhancedPayload.eventType, enhancedPayload.sourcePage)
+    console.log('[Webhook] Message:', formattedMessage)
+    console.log('[Webhook] GeoLocation:', geoLocation?.city, geoLocation?.region)
 
     const response = await fetch(WEBHOOK_URL, {
       method: 'POST',
@@ -69,5 +156,109 @@ function getSessionId(): string {
     sessionStorage.setItem('attra_session_id', sessionId)
   }
   return sessionId
+}
+
+/**
+ * Sends lead data to Leadster WITHOUT AI processing
+ * Used for estoque page - redirects to WhatsApp after
+ */
+export async function sendToLeadsterWithoutAI(
+  payload: Omit<WhatsAppWebhookPayload, 'timestamp' | 'sessionId' | 'pageUrl' | 'userAgent' | 'localTimestamp'>
+): Promise<WebhookResponse> {
+  try {
+    const sessionId = getSessionId()
+    const now = new Date()
+
+    const enhancedPayload: WhatsAppWebhookPayload = {
+      ...payload,
+      sessionId,
+      timestamp: now.toISOString(),
+      localTimestamp: now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+      pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+      userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
+    }
+
+    console.log('[Leadster] Sending to Leadster (no AI):', enhancedPayload.eventType, enhancedPayload.sourcePage)
+
+    const response = await fetch(LEADSTER_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(enhancedPayload),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      console.error('[Leadster] Response error:', response.status, errorText)
+      throw new Error(`Leadster webhook failed: ${response.status}`)
+    }
+
+    console.log('[Leadster] Successfully sent (no AI)')
+
+    return {
+      success: true,
+      message: 'Conectando você ao WhatsApp...',
+    }
+  } catch (error) {
+    console.error('[Leadster] Error sending (no AI):', error)
+
+    return {
+      success: false,
+      message: 'Erro ao conectar. Redirecionando para WhatsApp...',
+    }
+  }
+}
+
+/**
+ * Sends lead data to Leadster WITH AI processing
+ * Used for general pages - opens chat widget on site
+ */
+export async function sendToLeadsterWithAI(
+  payload: Omit<WhatsAppWebhookPayload, 'timestamp' | 'sessionId' | 'pageUrl' | 'userAgent' | 'localTimestamp'>
+): Promise<WebhookResponse> {
+  try {
+    const sessionId = getSessionId()
+    const now = new Date()
+
+    const enhancedPayload: WhatsAppWebhookPayload = {
+      ...payload,
+      sessionId,
+      timestamp: now.toISOString(),
+      localTimestamp: now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+      pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+      userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
+    }
+
+    console.log('[Leadster AI] Sending to Leadster with AI:', enhancedPayload.eventType, enhancedPayload.sourcePage)
+
+    const response = await fetch(LEADSTER_AI_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(enhancedPayload),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      console.error('[Leadster AI] Response error:', response.status, errorText)
+      throw new Error(`Leadster AI webhook failed: ${response.status}`)
+    }
+
+    console.log('[Leadster AI] Successfully sent with AI')
+
+    return {
+      success: true,
+      message: 'Chat iniciado! Como posso ajudar?',
+    }
+  } catch (error) {
+    console.error('[Leadster AI] Error sending:', error)
+
+    return {
+      success: false,
+      message: 'Erro ao iniciar chat. Por favor, tente novamente.',
+    }
+  }
 }
 
