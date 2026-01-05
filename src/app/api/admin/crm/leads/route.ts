@@ -7,6 +7,8 @@ import type { LeadWithCliente, StatusLead, PrioridadeLead, OrigemLead } from '@/
 export async function GET(request: NextRequest) {
   try {
     const authenticated = await isAuthenticated()
+    console.log('[Leads API] isAuthenticated:', authenticated)
+
     if (!authenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -53,6 +55,8 @@ export async function GET(request: NextRequest) {
     query = query.range(from, to)
 
     const { data: leads, error, count } = await query
+
+    console.log('[Leads API] Query result - count:', count, 'leads length:', leads?.length, 'error:', error)
 
     if (error) {
       console.error('Leads query error:', error)

@@ -224,6 +224,9 @@ export interface Database {
           marca: string | null
           modelo: string | null
           status: StatusCompra
+          loja: string | null
+          vendedor: string | null
+          descricao: string | null
           criado_em: string
         }
         Insert: Omit<Database['public']['Tables']['historico_compras']['Row'], 'id' | 'criado_em'>

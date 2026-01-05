@@ -11,7 +11,10 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Loader2
+  Loader2,
+  Filter,
+  X,
+  ChevronDown
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ClienteWithStats } from '@/types/database'
@@ -27,13 +30,56 @@ interface ClientesResponse {
   }
 }
 
+interface Filters {
+  origem: string
+  faixaValorMin: string
+  faixaValorMax: string
+  totalGastoMin: string
+  totalGastoMax: string
+  atividadeRecente: string
+}
+
+const ORIGENS = [
+  { value: '', label: 'Todas as origens' },
+  { value: 'site', label: 'Site' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'indicacao', label: 'Indicação' },
+  { value: 'crm_externo', label: 'CRM Externo' }
+]
+
+const TOTAL_GASTO_RANGES = [
+  { value: '', label: 'Qualquer valor gasto' },
+  { value: '0-50000', label: 'R$ 0 - R$ 50.000' },
+  { value: '50000-100000', label: 'R$ 50.000 - R$ 100.000' },
+  { value: '100000-500000', label: 'R$ 100.000 - R$ 500.000' },
+  { value: '500000-', label: 'Acima de R$ 500.000' }
+]
+
+const ATIVIDADE_OPTIONS = [
+  { value: '', label: 'Qualquer período' },
+  { value: '30', label: 'Últimos 30 dias' },
+  { value: '90', label: 'Últimos 90 dias' },
+  { value: '180', label: 'Últimos 6 meses' }
+]
+
 export default function ClientesPage() {
   const router = useRouter()
-  
+
   const [clientes, setClientes] = useState<ClienteWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 })
   const [search, setSearch] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState<Filters>({
+    origem: '',
+    faixaValorMin: '',
+    faixaValorMax: '',
+    totalGastoMin: '',
+    totalGastoMax: '',
+    atividadeRecente: ''
+  })
+
+  const activeFiltersCount = Object.values(filters).filter(v => v !== '').length
 
   const fetchClientes = useCallback(async () => {
     setLoading(true)
@@ -42,6 +88,12 @@ export default function ClientesPage() {
       params.set('page', pagination.page.toString())
       params.set('limit', pagination.limit.toString())
       if (search) params.set('search', search)
+      if (filters.origem) params.set('origem', filters.origem)
+      if (filters.faixaValorMin) params.set('faixa_valor_min', filters.faixaValorMin)
+      if (filters.faixaValorMax) params.set('faixa_valor_max', filters.faixaValorMax)
+      if (filters.totalGastoMin) params.set('total_gasto_min', filters.totalGastoMin)
+      if (filters.totalGastoMax) params.set('total_gasto_max', filters.totalGastoMax)
+      if (filters.atividadeRecente) params.set('atividade_recente', filters.atividadeRecente)
 
       const response = await fetch(`/api/admin/crm/clientes?${params}`)
       const data: ClientesResponse = await response.json()
@@ -55,7 +107,7 @@ export default function ClientesPage() {
     } finally {
       setLoading(false)
     }
-  }, [pagination.page, pagination.limit, search])
+  }, [pagination.page, pagination.limit, search, filters])
 
   useEffect(() => {
     fetchClientes()
@@ -64,7 +116,42 @@ export default function ClientesPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setPagination(prev => ({ ...prev, page: 1 }))
-    fetchClientes()
+  }
+
+  const handleFilterChange = (key: keyof Filters, value: string) => {
+    // Handle total gasto range parsing
+    if (key === 'totalGastoMin' || key === 'totalGastoMax') {
+      setFilters(prev => ({ ...prev, [key]: value }))
+    } else {
+      setFilters(prev => ({ ...prev, [key]: value }))
+    }
+    setPagination(prev => ({ ...prev, page: 1 }))
+  }
+
+  const handleTotalGastoChange = (rangeValue: string) => {
+    if (!rangeValue) {
+      setFilters(prev => ({ ...prev, totalGastoMin: '', totalGastoMax: '' }))
+    } else {
+      const [min, max] = rangeValue.split('-')
+      setFilters(prev => ({
+        ...prev,
+        totalGastoMin: min || '',
+        totalGastoMax: max || ''
+      }))
+    }
+    setPagination(prev => ({ ...prev, page: 1 }))
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      origem: '',
+      faixaValorMin: '',
+      faixaValorMax: '',
+      totalGastoMin: '',
+      totalGastoMax: '',
+      atividadeRecente: ''
+    })
+    setPagination(prev => ({ ...prev, page: 1 }))
   }
 
   const formatPrice = (value: number | null | undefined) => {
@@ -79,6 +166,13 @@ export default function ClientesPage() {
   const formatDate = (date: string | null | undefined) => {
     if (!date) return '-'
     return new Date(date).toLocaleDateString('pt-BR')
+  }
+
+  const getCurrentTotalGastoRange = () => {
+    if (filters.totalGastoMin || filters.totalGastoMax) {
+      return `${filters.totalGastoMin}-${filters.totalGastoMax}`
+    }
+    return ''
   }
 
   return (
@@ -96,8 +190,8 @@ export default function ClientesPage() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="bg-background-card rounded-xl border border-border p-4">
+      {/* Search and Filters */}
+      <div className="bg-background-card rounded-xl border border-border p-4 space-y-4">
         <form onSubmit={handleSearch} className="flex gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-secondary" />
@@ -110,12 +204,121 @@ export default function ClientesPage() {
             />
           </div>
           <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "px-4 py-2.5 border rounded-lg flex items-center gap-2 transition-colors",
+              showFilters || activeFiltersCount > 0
+                ? "bg-primary/10 border-primary text-primary"
+                : "border-border text-foreground-secondary hover:text-foreground hover:bg-background-soft"
+            )}
+          >
+            <Filter className="w-5 h-5" />
+            <span className="hidden sm:inline">Filtros</span>
+            {activeFiltersCount > 0 && (
+              <span className="bg-primary text-white text-xs px-1.5 py-0.5 rounded-full">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
+          <button
             type="submit"
             className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
           >
             Buscar
           </button>
         </form>
+
+        {/* Filters Panel */}
+        {showFilters && (
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-foreground">Filtros Avançados</h3>
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  <X className="w-4 h-4" />
+                  Limpar filtros
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Origem */}
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1.5">Origem</label>
+                <div className="relative">
+                  <select
+                    value={filters.origem}
+                    onChange={(e) => handleFilterChange('origem', e.target.value)}
+                    className="w-full px-3 py-2.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground appearance-none cursor-pointer"
+                  >
+                    {ORIGENS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-secondary pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Total Gasto */}
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1.5">Total Gasto</label>
+                <div className="relative">
+                  <select
+                    value={getCurrentTotalGastoRange()}
+                    onChange={(e) => handleTotalGastoChange(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground appearance-none cursor-pointer"
+                  >
+                    {TOTAL_GASTO_RANGES.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-secondary pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Atividade Recente */}
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1.5">Atividade Recente</label>
+                <div className="relative">
+                  <select
+                    value={filters.atividadeRecente}
+                    onChange={(e) => handleFilterChange('atividadeRecente', e.target.value)}
+                    className="w-full px-3 py-2.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground appearance-none cursor-pointer"
+                  >
+                    {ATIVIDADE_OPTIONS.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-secondary pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Faixa de Valor Preferida */}
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1.5">Faixa de Valor Preferida</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.faixaValorMin}
+                    onChange={(e) => handleFilterChange('faixaValorMin', e.target.value)}
+                    className="w-1/2 px-3 py-2.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.faixaValorMax}
+                    onChange={(e) => handleFilterChange('faixaValorMax', e.target.value)}
+                    className="w-1/2 px-3 py-2.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Clientes Grid */}
