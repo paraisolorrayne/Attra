@@ -700,20 +700,21 @@ html {
 }
 
 /* Hero-specific image positioning - optimized for each breakpoint */
+/* Use object-contain to preserve vehicle proportions without distortion */
 .hero-vehicle-image {
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
   width: 100% !important;
   height: 100% !important;
+  /* Dark background to complement the vehicle images */
+  background-color: #0a0a0a;
 }
 
-/* Mobile: use object-contain to show the full vehicle without cropping */
-/* 768px and below - Tablet and mobile */
-@media (max-width: 768px) {
+/* Desktop: slightly larger positioning to fill more space while maintaining proportions */
+@media (min-width: 1024px) {
   .hero-vehicle-image {
     object-fit: contain !important;
     object-position: center center !important;
-    /* Dark background to complement the vehicle images */
     background-color: #0a0a0a;
   }
 }
