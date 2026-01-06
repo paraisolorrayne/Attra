@@ -37,7 +37,7 @@ const journeySteps = [
     step: '01',
     title: 'Curadoria Personalizada',
     subtitle: 'Seleção',
-    description: 'Nossa jornada começa com um briefing detalhado sobre suas preferências. Realizamos busca ativa no mercado nacional e internacional, com consultoria especializada para encontrar exatamente o supercar que você procura.',
+    description: 'Nossa jornada começa com um briefing detalhado sobre suas preferências. Realizamos busca ativa no mercado nacional e internacional, com consultoria especializada para encontrar exatamente o supercarro que você procura.',
     benefits: ['Briefing personalizado', 'Busca nacional e internacional', 'Consultoria especializada'],
   },
   {
@@ -52,7 +52,7 @@ const journeySteps = [
     icon: Handshake,
     step: '03',
     title: 'Negociação e Documentação',
-    subtitle: 'Fechamento',
+    subtitle: 'Conclusão',
     description: 'Conduzimos toda a negociação com segurança e transparência. Cuidamos de toda a documentação, transferência e regularização do veículo para você.',
     benefits: ['Negociação segura', 'Documentação completa', 'Transferência facilitada'],
   },
@@ -160,7 +160,7 @@ export default function JornadaPage() {
               Você pode estar em qualquer cidade do Brasil
             </h2>
             <p className="text-lg text-foreground-secondary leading-relaxed mb-8">
-              Com base em Uberlândia, a Attra oferece atendimento nacional para colecionadores de todo o Brasil.
+              Com base em Uberlândia, a Attra oferece atendimento nacional para aficionados de todo o Brasil.
               Nossa jornada completa cuida de cada etapa: <strong className="text-foreground">seleção, negociação, documentação, logística</strong> e
               <strong className="text-foreground"> entrega na porta da sua casa</strong>.
             </p>
@@ -194,7 +194,7 @@ export default function JornadaPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {journeySteps.map((step) => (
               <div key={step.step} className="group bg-background-card border border-border rounded-2xl p-8 hover:border-primary/50 transition-all">
-                <div className="flex items-start gap-4 sm:gap-6">
+                <div className="flex items-start gap-6 sm:gap-10">
                   <div className="shrink-0 w-16 text-center">
                     <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-2">
                       <step.icon className="w-8 h-8 text-primary" />

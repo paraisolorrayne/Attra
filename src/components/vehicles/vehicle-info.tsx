@@ -6,21 +6,54 @@ interface VehicleInfoProps {
   vehicle: Vehicle
 }
 
-export function VehicleInfo({ vehicle }: VehicleInfoProps) {
-  const statusBadge = () => {
-    if (vehicle.status === 'sold') return <Badge variant="sold">Vendido</Badge>
-    if (vehicle.status === 'reserved') return <Badge variant="warning">Reservado</Badge>
-    if (vehicle.is_new) return <Badge variant="success">0km</Badge>
-    if (vehicle.is_featured) return <Badge variant="primary">Destaque</Badge>
-    return null
+// Get badges for vehicle info
+function getInfoBadges(vehicle: Vehicle) {
+  const badges: { label: string; variant: 'primary' | 'success' | 'warning' | 'sold' }[] = []
+  const brandLower = vehicle.brand.toLowerCase()
+
+  // Status badges (always shown first)
+  if (vehicle.status === 'sold') {
+    badges.push({ label: 'Vendido', variant: 'sold' })
+    return badges
   }
+  if (vehicle.status === 'reserved') {
+    badges.push({ label: 'Reservado', variant: 'warning' })
+  }
+
+  // 0 km badge
+  if (vehicle.is_new || vehicle.mileage === 0) {
+    badges.push({ label: '0 km', variant: 'success' })
+  }
+
+  // Category badges based on brand
+  const supercarBrands = ['ferrari', 'lamborghini', 'mclaren', 'bugatti', 'pagani', 'koenigsegg']
+  const luxuryBrands = ['bentley', 'rolls-royce', 'maybach']
+  const sportsBrands = ['porsche', 'aston martin', 'maserati', 'lotus']
+
+  if (supercarBrands.some(b => brandLower.includes(b))) {
+    badges.push({ label: 'Superesportivo', variant: 'primary' })
+  } else if (luxuryBrands.some(b => brandLower.includes(b))) {
+    badges.push({ label: 'Ultra Luxo', variant: 'warning' })
+  } else if (sportsBrands.some(b => brandLower.includes(b))) {
+    badges.push({ label: 'Esportivo', variant: 'primary' })
+  }
+
+  return badges.slice(0, 2)
+}
+
+export function VehicleInfo({ vehicle }: VehicleInfoProps) {
+  const badges = getInfoBadges(vehicle)
 
   return (
     <div className="bg-background-card border border-border rounded-xl p-6 sticky top-24">
-      {/* Status badge */}
-      <div className="mb-4">
-        {statusBadge()}
-      </div>
+      {/* Status badges */}
+      {badges.length > 0 && (
+        <div className="mb-4 flex gap-2 flex-wrap">
+          {badges.map((badge, i) => (
+            <Badge key={i} variant={badge.variant}>{badge.label}</Badge>
+          ))}
+        </div>
+      )}
 
       {/* Title */}
       <h1 className="text-2xl font-bold text-foreground mb-1">

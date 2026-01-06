@@ -10,16 +10,48 @@ interface VehicleCardProps {
   vehicle: Vehicle
 }
 
-export function VehicleCard({ vehicle }: VehicleCardProps) {
-  const statusBadge = () => {
-    if (vehicle.status === 'sold') return <Badge variant="sold">Vendido</Badge>
-    if (vehicle.status === 'reserved') return <Badge variant="warning">Reservado</Badge>
-    if (vehicle.is_new) return <Badge variant="success">0 km</Badge>
-    if (vehicle.is_featured) return <Badge variant="primary">Destaque</Badge>
-    return null
+// Get badges for vehicle card
+function getVehicleBadges(vehicle: Vehicle) {
+  const badges: { label: string; variant: 'primary' | 'success' | 'warning' | 'sold' }[] = []
+  const brandLower = vehicle.brand.toLowerCase()
+
+  // Status badges (always shown first)
+  if (vehicle.status === 'sold') {
+    badges.push({ label: 'Vendido', variant: 'sold' })
+    return badges.slice(0, 2)
+  }
+  if (vehicle.status === 'reserved') {
+    badges.push({ label: 'Reservado', variant: 'warning' })
   }
 
-  const badge = statusBadge()
+  // 0 km badge
+  if (vehicle.is_new || vehicle.mileage === 0) {
+    badges.push({ label: '0 km', variant: 'success' })
+  }
+
+  // Category badges based on brand
+  const supercarBrands = ['ferrari', 'lamborghini', 'mclaren', 'bugatti', 'pagani', 'koenigsegg']
+  const luxuryBrands = ['bentley', 'rolls-royce', 'maybach']
+  const sportsBrands = ['porsche', 'aston martin', 'maserati', 'lotus']
+
+  if (supercarBrands.some(b => brandLower.includes(b))) {
+    badges.push({ label: 'Superesportivo', variant: 'primary' })
+  } else if (luxuryBrands.some(b => brandLower.includes(b))) {
+    badges.push({ label: 'Ultra Luxo', variant: 'warning' })
+  } else if (sportsBrands.some(b => brandLower.includes(b))) {
+    badges.push({ label: 'Esportivo', variant: 'primary' })
+  }
+
+  // Semi-novo for low mileage used cars
+  if (vehicle.mileage > 0 && vehicle.mileage <= 5000 && !badges.some(b => b.label === '0 km')) {
+    badges.push({ label: 'Semi-novo', variant: 'success' })
+  }
+
+  return badges.slice(0, 2)
+}
+
+export function VehicleCard({ vehicle }: VehicleCardProps) {
+  const badges = getVehicleBadges(vehicle)
 
   return (
     <Link href={`/veiculo/${vehicle.slug}`}>
@@ -40,10 +72,12 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
             </div>
           )}
 
-          {/* Status badge - positioned to not cover car */}
-          {badge && (
-            <div className="absolute top-3 left-3">
-              {badge}
+          {/* Status badges - positioned to not cover car */}
+          {badges.length > 0 && (
+            <div className="absolute top-3 left-3 flex gap-1.5">
+              {badges.map((badge, i) => (
+                <Badge key={i} variant={badge.variant}>{badge.label}</Badge>
+              ))}
             </div>
           )}
         </div>
