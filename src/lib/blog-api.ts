@@ -15,7 +15,7 @@ const mockBlogPosts: DualBlogPost[] = [
       <p>Curadoria de veículos é muito mais do que simplesmente selecionar carros para venda. É um processo meticuloso que envolve análise técnica, verificação de procedência, inspeção de qualidade e avaliação de valor de mercado.</p>
       
       <h3>Os Pilares da Curadoria Premium</h3>
-      <p>Na Attra, seguimos um rigoroso protocolo de 200 pontos de inspeção que garante que cada veículo em nosso estoque atende aos mais altos padrões de qualidade.</p>
+      <p>Na Attra, seguimos um rigoroso protocolo de 200 itens de inspeção que garante que cada veículo em nosso estoque atende aos mais altos padrões de qualidade.</p>
       
       <h3>Por que a Curadoria é Importante?</h3>
       <p>Ao adquirir um veículo de uma concessionária com curadoria especializada, você tem a garantia de:</p>

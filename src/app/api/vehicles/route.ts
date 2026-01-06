@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
     const filters: AutoConfFilters = {
       tipo: tipo || 'carros',
       pagina: page,
-      registros_por_pagina: limit,
+      // When searching, fetch more results to filter locally
+      // AutoConf API doesn't support text search, so we need to fetch all and filter
+      registros_por_pagina: (search || brand) ? 100 : limit,
     }
 
     // Map sort parameter to AutoConf format
@@ -79,6 +81,9 @@ export async function GET(request: NextRequest) {
         // All search terms must be present somewhere in the search text
         return searchTerms.every(term => searchText.includes(term))
       })
+
+      // When searching, limit results to what was requested
+      vehicles = vehicles.slice(0, limit)
     }
 
     return NextResponse.json({

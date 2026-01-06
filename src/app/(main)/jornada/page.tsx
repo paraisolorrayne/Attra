@@ -45,8 +45,8 @@ const journeySteps = [
     step: '02',
     title: 'Vistoria e Verificação',
     subtitle: 'Análise',
-    description: 'Cada veículo passa por inspeção técnica de 200 pontos, verificação completa de documentação, histórico e procedência. Transparência total antes da sua decisão de compra.',
-    benefits: ['200 pontos de inspeção', 'Verificação de procedência', 'Histórico completo'],
+    description: 'Cada veículo passa por inspeção técnica de 200 itens, verificação completa de documentação, histórico e procedência. Transparência total antes da sua decisão de compra.',
+    benefits: ['200 itens de inspeção', 'Verificação de procedência', 'Histórico completo'],
   },
   {
     icon: Handshake,
