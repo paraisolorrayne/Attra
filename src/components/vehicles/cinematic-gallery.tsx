@@ -194,47 +194,44 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
 
       {/* Fullscreen overlay */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] bg-black flex items-center justify-center">
+          {/* Close button */}
           <button
             onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10"
+            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+            aria-label="Fechar"
           >
             <X className="w-6 h-6" />
           </button>
 
+          {/* Previous button */}
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+            aria-label="Imagem anterior"
           >
             <ChevronLeft className="w-8 h-8" />
           </button>
 
-          <div className="relative w-full h-full max-w-7xl max-h-[90vh] mx-16">
-            {/* Loading indicator for fullscreen */}
-            {!loadedImages.has(currentIndex) && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Loader2 className="w-16 h-16 text-white/50 animate-spin" />
-              </div>
-            )}
+          {/* Main image container - always visible */}
+          <div className="relative w-full h-full max-w-7xl max-h-[90vh] mx-4 md:mx-16">
             <Image
               src={photos[currentIndex]}
               alt={`${vehicleName} - Imagem ${currentIndex + 1}`}
               fill
-              className={cn(
-                "object-contain transition-opacity duration-300",
-                loadedImages.has(currentIndex) ? "opacity-100" : "opacity-0"
-              )}
+              className="object-contain"
               quality={100}
               sizes="100vw"
               priority
-              onLoad={() => handleImageLoad(currentIndex)}
-              onError={() => handleImageError(currentIndex)}
+              unoptimized={false}
             />
           </div>
 
+          {/* Next button */}
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+            aria-label="Próxima imagem"
           >
             <ChevronRight className="w-8 h-8" />
           </button>
@@ -262,6 +259,7 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
             ))}
           </div>
 
+          {/* Counter */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-lg bg-black/50 px-4 py-2 rounded-full">
             {currentIndex + 1} / {photos.length}
           </div>
