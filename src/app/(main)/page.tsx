@@ -11,10 +11,20 @@ import { getVehicles, getHomeSlides, HeroSlideData } from '@/lib/autoconf-api'
 import { Vehicle } from '@/types'
 
 export default async function Home() {
-  // Fetch hero slides from /ads-home endpoint (banners have priority over vehicles)
-  let heroSlides: HeroSlideData[] = []
+  // Fetch hero slides for both desktop and mobile
+  // Desktop: adsDesktop → destaques → fallback
+  // Mobile: adsMobile → adsDesktop → destaques → fallback
+  let desktopSlides: HeroSlideData[] = []
+  let mobileSlides: HeroSlideData[] = []
+
   try {
-    heroSlides = await getHomeSlides(4)
+    // Fetch both in parallel for performance
+    const [desktop, mobile] = await Promise.all([
+      getHomeSlides(4, 'desktop'),
+      getHomeSlides(4, 'mobile'),
+    ])
+    desktopSlides = desktop
+    mobileSlides = mobile
   } catch (error) {
     console.error('Failed to fetch home slides:', error)
   }
@@ -36,7 +46,7 @@ export default async function Home() {
   return (
     <>
       {/* Full-screen cinematic hero with search widget */}
-      <CinematicHero heroSlides={heroSlides} />
+      <CinematicHero desktopSlides={desktopSlides} mobileSlides={mobileSlides} />
 
       {/* Featured supercar inventory with cinematic cards */}
       <FeaturedSupercars vehicles={featuredVehicles} />
