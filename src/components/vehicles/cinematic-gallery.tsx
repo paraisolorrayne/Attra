@@ -195,16 +195,13 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
       {/* Fullscreen overlay with blur background */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md"
           onClick={() => setIsFullscreen(false)}
         >
-          {/* Blur backdrop */}
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
-
           {/* Close button */}
           <button
             onClick={(e) => { e.stopPropagation(); setIsFullscreen(false) }}
-            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white z-20 transition-all hover:scale-110"
+            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/30 rounded-full text-white z-30 transition-colors"
             aria-label="Fechar"
           >
             <X className="w-6 h-6" />
@@ -213,89 +210,73 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
           {/* Previous button */}
           <button
             onClick={(e) => { e.stopPropagation(); goToPrevious() }}
-            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 md:p-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white z-20 transition-all hover:scale-110"
+            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 p-2 md:p-3 bg-white/10 hover:bg-white/30 rounded-full text-white z-30 transition-colors"
             aria-label="Imagem anterior"
           >
             <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
           </button>
 
-          {/* Main image container with crossfade animation */}
-          <div
-            className="relative w-full h-[calc(100vh-180px)] max-w-6xl mx-4 md:mx-20 mt-16 mb-24"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {photos.map((photo, index) => {
-              // Only render current, previous, and next for performance
-              const shouldRender =
-                index === currentIndex ||
-                index === (currentIndex + 1) % photos.length ||
-                index === (currentIndex - 1 + photos.length) % photos.length
-
-              if (!shouldRender) return null
-
-              return (
-                <div
-                  key={photo}
-                  className={cn(
-                    'absolute inset-0 transition-all duration-500 ease-out',
-                    index === currentIndex
-                      ? 'opacity-100 scale-100 z-10'
-                      : 'opacity-0 scale-95 z-0'
-                  )}
-                >
-                  <Image
-                    src={photo}
-                    alt={`${vehicleName} - Imagem ${index + 1}`}
-                    fill
-                    className="object-contain"
-                    quality={100}
-                    sizes="100vw"
-                    priority={index === currentIndex}
-                  />
-                </div>
-              )
-            })}
-          </div>
-
           {/* Next button */}
           <button
             onClick={(e) => { e.stopPropagation(); goToNext() }}
-            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 md:p-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white z-20 transition-all hover:scale-110"
+            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 p-2 md:p-3 bg-white/10 hover:bg-white/30 rounded-full text-white z-30 transition-colors"
             aria-label="Próxima imagem"
           >
             <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
           </button>
 
-          {/* Thumbnail strip in fullscreen */}
+          {/* Main image - simple absolute positioning */}
           <div
-            className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90%] overflow-x-auto py-3 px-4 bg-black/30 backdrop-blur-md rounded-xl z-20"
+            className="absolute inset-0 flex items-center justify-center p-4 md:p-16 pb-32"
             onClick={(e) => e.stopPropagation()}
           >
-            {photos.map((photo, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={cn(
-                  'relative w-14 h-10 md:w-20 md:h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all duration-300',
-                  index === currentIndex
-                    ? 'border-primary scale-110 shadow-lg shadow-primary/30'
-                    : 'border-white/20 opacity-50 hover:opacity-100 hover:border-white/50'
-                )}
-              >
-                <Image
-                  src={photo}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                  quality={60}
-                />
-              </button>
-            ))}
+            {/* Current image with fade transition */}
+            <div className="relative w-full h-full">
+              <Image
+                key={photos[currentIndex]}
+                src={photos[currentIndex]}
+                alt={`${vehicleName} - Imagem ${currentIndex + 1}`}
+                fill
+                className="object-contain animate-fade-in"
+                quality={95}
+                sizes="100vw"
+                priority
+              />
+            </div>
           </div>
 
-          {/* Counter with improved styling */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-medium bg-black/40 backdrop-blur-sm px-4 py-1.5 rounded-full z-20">
+          {/* Thumbnail strip - fixed at bottom */}
+          <div
+            className="absolute bottom-16 left-0 right-0 z-30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-center gap-2 px-4 overflow-x-auto py-2 mx-auto max-w-4xl">
+              {photos.map((photo, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={cn(
+                    'relative w-16 h-12 md:w-20 md:h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all',
+                    index === currentIndex
+                      ? 'border-primary ring-2 ring-primary/50'
+                      : 'border-white/30 opacity-60 hover:opacity-100'
+                  )}
+                >
+                  <Image
+                    src={photo}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                    quality={50}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Counter */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-1.5 rounded-full z-30">
             {currentIndex + 1} / {photos.length}
           </div>
         </div>
