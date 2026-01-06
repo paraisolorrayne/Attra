@@ -149,7 +149,7 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
   return (
     <>
     <section
-      className="relative h-[85svh] min-h-[500px] max-h-[750px] md:h-[75svh] md:min-h-[550px] lg:max-h-[700px] w-full overflow-hidden bg-background"
+      className="relative h-[88svh] min-h-[520px] max-h-[780px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden bg-background"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
