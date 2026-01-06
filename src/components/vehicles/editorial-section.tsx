@@ -90,7 +90,7 @@ export function EditorialSection({ brand, model, year, description, isCollectibl
               <div>
                 <h4 className="font-bold text-foreground mb-1">Garantia Attra</h4>
                 <p className="text-sm text-foreground-secondary">
-                  Inspeção de 200 pontos e documentação verificada
+                  Inspeção de 200 itens e documentação verificada
                 </p>
               </div>
             </div>

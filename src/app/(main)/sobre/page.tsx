@@ -73,7 +73,7 @@ const commitments = [
   {
     icon: Target,
     title: 'Curadoria Rigorosa',
-    description: 'Apenas veículos que atendem aos nossos rígidos padrões de qualidade entram no showroom. Inspeção de 200 pontos, verificação de procedência e análise de histórico.',
+    description: 'Apenas veículos que atendem aos nossos rígidos padrões de qualidade entram no showroom. Inspeção de 200 itens, verificação de procedência e análise de histórico.',
   },
   {
     icon: Shield,
@@ -90,7 +90,7 @@ const commitments = [
 const differentials = [
   { icon: Award, title: 'Referência em MG', description: 'Reconhecidos como a maior loja de veículos premium de Minas Gerais, com atendimento que se estende para todo o Brasil.' },
   { icon: Globe, title: 'Atendimento Nacional', description: 'Enviamos para todo o Brasil com logística especializada, seguro premium e rastreamento em tempo real.' },
-  { icon: Shield, title: 'Procedência Verificada', description: 'Todos os veículos passam por rigorosa inspeção de 200 pontos e verificação completa de histórico.' },
+  { icon: Shield, title: 'Procedência Verificada', description: 'Todos os veículos passam por rigorosa inspeção de 200 itens e verificação completa de histórico.' },
   { icon: Users, title: 'Equipe Especializada', description: 'Consultores especialistas em cada marca para atendimento consultivo e personalizado.' },
   { icon: Car, title: '+500 Veículos/Ano', description: 'Mais de 500 veículos comercializados anualmente para colecionadores de todo o Brasil.' },
   { icon: Building2, title: '5.000m² de Estrutura', description: 'Showroom climatizado com iluminação profissional e ambiente exclusivo para apreciação.' },

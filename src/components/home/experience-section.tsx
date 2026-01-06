@@ -22,7 +22,7 @@ const experiences = [
   {
     icon: Shield,
     title: 'Procedência Verificada',
-    description: 'Cada veículo passa por análise rigorosa de histórico, documentação e inspeção técnica de 200 pontos antes de integrar nosso acervo.',
+    description: 'Cada veículo passa por análise rigorosa de histórico, documentação e inspeção técnica de 200 itens antes de integrar nosso acervo.',
     gradient: 'from-green-500/20 via-green-500/10 to-transparent',
   },
   {
