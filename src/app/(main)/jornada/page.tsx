@@ -88,11 +88,11 @@ const testimonials = [
 ]
 
 const achievements = [
-  { year: 2010, title: 'Fundação', description: 'Início das operações em Uberlândia com foco em veículos premium' },
+  { year: 2008, title: 'Fundação', description: 'A Attra Veículos nasceu com o propósito de oferecer uma experiência diferenciada na compra e venda de veículos, unindo transparência, credibilidade e atendimento personalizado. Fundada como uma empresa familiar, a Attra foi construída sobre valores sólidos, com foco em profissionalização, respeito aos processos e compromisso com o cliente.'},
   { year: 2015, title: 'Primeiro Ferrari', description: 'Comercialização do primeiro superesportivo italiano' },
   { year: 2018, title: 'Novo Showroom', description: 'Inauguração do showroom de 5.000m² climatizado' },
   { year: 2023, title: '500+ Supercarros', description: 'Marco de 500 supercarros vendidos para todo Brasil' },
-  { year: 2024, title: 'Referência Nacional', description: 'Maior dealer premium do Triângulo Mineiro' },
+  { year: 2024, title: 'Referência Nacional', description: 'Attra Veículos segue em constante evolução, com expansao do showroom com mais de 1000m2,  mantendo sua essência familiar, mas com uma visão moderna de negócio, sempre focada em excelência, confiança e relacionamento de longo prazo com seus clientes.' },
 ]
 
 export default function JornadaPage() {
