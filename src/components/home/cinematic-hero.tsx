@@ -14,33 +14,63 @@ const HERO_BACKGROUNDS = {
   dark: '/images/background-banner-dark.jpg',
 }
 
+// Breakpoint for mobile detection (matches Tailwind's md breakpoint)
+const MOBILE_BREAKPOINT = 768
+
 interface CinematicHeroProps {
-  heroSlides?: HeroSlideData[]
+  desktopSlides?: HeroSlideData[]
+  mobileSlides?: HeroSlideData[]
 }
 
-export function CinematicHero({ heroSlides = [] }: CinematicHeroProps) {
+export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: CinematicHeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [touchStart, setTouchStart] = useState<number | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const slideContainerRef = useRef<HTMLDivElement>(null)
   const { resolvedTheme } = useTheme()
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Get theme-aware background image for vehicle slides
   const backgroundImage = mounted
     ? (resolvedTheme === 'dark' ? HERO_BACKGROUNDS.dark : HERO_BACKGROUNDS.light)
     : HERO_BACKGROUNDS.light
 
+  // Select slides based on device type
+  // Mobile uses mobileSlides with fallback to desktopSlides
+  // Desktop uses desktopSlides
+  const activeSlides = isMobile
+    ? (mobileSlides.length > 0 ? mobileSlides : desktopSlides)
+    : desktopSlides
+
   // Use provided slides or create fallback
-  const slides: HeroSlideData[] = heroSlides.length > 0
-    ? heroSlides
+  const slides: HeroSlideData[] = activeSlides.length > 0
+    ? activeSlides
     : [{
         type: 'banner',
         image: HERO_BACKGROUNDS.light,
         targetUrl: '/estoque',
         ordem: 0,
       }]
+
+  // Reset slide index when switching device type to prevent out-of-bounds
+  useEffect(() => {
+    if (currentSlide >= slides.length) {
+      setCurrentSlide(0)
+    }
+  }, [isMobile, slides.length, currentSlide])
 
   // Check if current slide is a banner or vehicle
   const currentSlideData = slides[currentSlide]

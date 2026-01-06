@@ -201,8 +201,9 @@ export interface AdsDesktopBanner {
  * Complete response structure from /ads-home endpoint
  */
 export interface AdsHomeResponse {
-  adsDesktop: AdsDesktopBanner[]  // Promotional banners (priority 1)
-  destaques: AdsHomeVehicle[]     // Featured vehicles (priority 2)
+  adsDesktop: AdsDesktopBanner[]  // Promotional banners for desktop
+  adsMobile: AdsDesktopBanner[]   // Promotional banners for mobile
+  destaques: AdsHomeVehicle[]     // Featured vehicles
 }
 
 /**
@@ -223,7 +224,7 @@ export interface HeroSlideData {
  * - destaques: Featured vehicles (priority 2)
  */
 export async function fetchAdsHome(): Promise<AdsHomeResponse> {
-  const emptyResponse: AdsHomeResponse = { adsDesktop: [], destaques: [] }
+  const emptyResponse: AdsHomeResponse = { adsDesktop: [], adsMobile: [], destaques: [] }
   const formData = new URLSearchParams()
   formData.append('token', DEALER_TOKEN)
 
@@ -253,6 +254,13 @@ export async function fetchAdsHome(): Promise<AdsHomeResponse> {
       ordem: banner.ordem ?? index,
     })).filter((b: AdsDesktopBanner) => b.url) // Filter out empty banners
 
+    // Extract adsMobile banners
+    const adsMobile: AdsDesktopBanner[] = (data.adsMobile || []).map((banner: { url?: string; target?: string; ordem?: number }, index: number) => ({
+      url: banner.url || '',
+      target: banner.target || '',
+      ordem: banner.ordem ?? index,
+    })).filter((b: AdsDesktopBanner) => b.url) // Filter out empty banners
+
     // Extract destaques vehicles
     const destaques: AdsHomeVehicle[] = (data.destaques || [])
       .map((vehicle: AdsHomeVehicle) => ({
@@ -265,9 +273,9 @@ export async function fetchAdsHome(): Promise<AdsHomeResponse> {
         return ordemA - ordemB
       })
 
-    console.log(`[fetchAdsHome] Found ${adsDesktop.length} banners, ${destaques.length} vehicles`)
+    console.log(`[fetchAdsHome] Found ${adsDesktop.length} desktop banners, ${adsMobile.length} mobile banners, ${destaques.length} vehicles`)
 
-    return { adsDesktop, destaques }
+    return { adsDesktop, adsMobile, destaques }
   } catch (error) {
     console.error('Error fetching ads home:', error)
     return emptyResponse
@@ -612,23 +620,54 @@ function deduplicateMappedVehicles(vehicles: Vehicle[]): Vehicle[] {
 }
 
 /**
- * Get hero slides for home banner
- * Returns HeroSlideData[] with proper priority:
+ * Get slides for the home hero banner with device-aware priority
  *
- * Priority strategy:
- * 1. adsDesktop: Promotional banners from CRM (highest priority)
+ * Priority strategy for DESKTOP:
+ * 1. adsDesktop: Promotional banners from CRM
  * 2. destaques: Featured vehicles from CRM
- * 3. Fallback: Most expensive vehicles from /veiculos (deduplicated)
+ * 3. Fallback: Most expensive vehicles
  * 4. Final fallback: Local inventory data
+ *
+ * Priority strategy for MOBILE:
+ * 1. adsMobile: Mobile-specific banners from CRM
+ * 2. adsDesktop: Desktop banners as fallback
+ * 3. destaques: Featured vehicles from CRM
+ * 4. Fallback: Most expensive vehicles
+ * 5. Final fallback: Local inventory data
+ *
+ * @param limit - Maximum number of slides to return
+ * @param deviceType - 'desktop' or 'mobile' for device-specific banners
  */
-export async function getHomeSlides(limit = 4): Promise<HeroSlideData[]> {
+export async function getHomeSlides(
+  limit = 4,
+  deviceType: 'desktop' | 'mobile' = 'desktop'
+): Promise<HeroSlideData[]> {
   try {
-    const { adsDesktop, destaques } = await fetchAdsHome()
+    const { adsDesktop, adsMobile, destaques } = await fetchAdsHome()
 
-    // Priority 1: Use adsDesktop banners if available
-    if (adsDesktop.length > 0) {
-      console.log(`[getHomeSlides] Using ${adsDesktop.length} promotional banners`)
-      return adsDesktop.slice(0, limit).map((banner, index) => ({
+    // Determine which banners to use based on device type
+    let bannersToUse: AdsDesktopBanner[] = []
+
+    if (deviceType === 'mobile') {
+      // Mobile: Try adsMobile first, then adsDesktop as fallback
+      if (adsMobile.length > 0) {
+        bannersToUse = adsMobile
+        console.log(`[getHomeSlides] Mobile: Using ${adsMobile.length} mobile-specific banners`)
+      } else if (adsDesktop.length > 0) {
+        bannersToUse = adsDesktop
+        console.log(`[getHomeSlides] Mobile: Using ${adsDesktop.length} desktop banners as fallback`)
+      }
+    } else {
+      // Desktop: Use adsDesktop
+      if (adsDesktop.length > 0) {
+        bannersToUse = adsDesktop
+        console.log(`[getHomeSlides] Desktop: Using ${adsDesktop.length} desktop banners`)
+      }
+    }
+
+    // Priority 1: Use banners if available
+    if (bannersToUse.length > 0) {
+      return bannersToUse.slice(0, limit).map((banner, index) => ({
         type: 'banner' as const,
         image: banner.url,
         targetUrl: banner.target,
