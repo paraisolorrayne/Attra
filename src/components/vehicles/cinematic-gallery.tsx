@@ -192,83 +192,74 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
         </div>
       </div>
 
-      {/* Fullscreen overlay with blur background */}
+      {/* Fullscreen Modal */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md"
-          onClick={() => setIsFullscreen(false)}
+          className="fixed inset-0 z-[9999] bg-black"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         >
-          {/* Close button */}
+          {/* Close button - top right */}
           <button
-            onClick={(e) => { e.stopPropagation(); setIsFullscreen(false) }}
-            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/30 rounded-full text-white z-30 transition-colors"
+            onClick={() => setIsFullscreen(false)}
+            className="absolute top-4 right-4 z-50 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
             aria-label="Fechar"
           >
             <X className="w-6 h-6" />
           </button>
 
-          {/* Previous button */}
+          {/* Previous button - left center */}
           <button
-            onClick={(e) => { e.stopPropagation(); goToPrevious() }}
-            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 p-2 md:p-3 bg-white/10 hover:bg-white/30 rounded-full text-white z-30 transition-colors"
+            onClick={goToPrevious}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
             aria-label="Imagem anterior"
           >
-            <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+            <ChevronLeft className="w-8 h-8" />
           </button>
 
-          {/* Next button */}
+          {/* Next button - right center */}
           <button
-            onClick={(e) => { e.stopPropagation(); goToNext() }}
-            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 p-2 md:p-3 bg-white/10 hover:bg-white/30 rounded-full text-white z-30 transition-colors"
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
             aria-label="Próxima imagem"
           >
-            <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+            <ChevronRight className="w-8 h-8" />
           </button>
 
-          {/* Main image - simple absolute positioning */}
+          {/* Main image container - centered */}
           <div
-            className="absolute inset-0 flex items-center justify-center p-4 md:p-16 pb-32"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ padding: '60px 60px 140px 60px' }}
           >
-            {/* Current image with fade transition */}
-            <div className="relative w-full h-full">
-              <Image
-                key={photos[currentIndex]}
-                src={photos[currentIndex]}
-                alt={`${vehicleName} - Imagem ${currentIndex + 1}`}
-                fill
-                className="object-contain animate-fade-in"
-                quality={95}
-                sizes="100vw"
-                priority
-              />
-            </div>
+            <img
+              key={currentIndex}
+              src={photos[currentIndex]}
+              alt={`${vehicleName} - Imagem ${currentIndex + 1}`}
+              className="max-w-full max-h-full object-contain animate-fade-in"
+              style={{ maxWidth: '100%', maxHeight: '100%' }}
+            />
           </div>
 
-          {/* Thumbnail strip - fixed at bottom */}
+          {/* Thumbnails - bottom */}
           <div
-            className="absolute bottom-16 left-0 right-0 z-30"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-12 left-0 right-0 z-50"
+            style={{ display: 'flex', justifyContent: 'center', padding: '0 16px' }}
           >
-            <div className="flex justify-center gap-2 px-4 overflow-x-auto py-2 mx-auto max-w-4xl">
+            <div className="flex gap-2 overflow-x-auto max-w-full py-2 px-4 bg-black/50 rounded-xl">
               {photos.map((photo, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
                   className={cn(
-                    'relative w-16 h-12 md:w-20 md:h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all',
+                    'relative flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all',
                     index === currentIndex
-                      ? 'border-primary ring-2 ring-primary/50'
-                      : 'border-white/30 opacity-60 hover:opacity-100'
+                      ? 'border-primary opacity-100'
+                      : 'border-transparent opacity-50 hover:opacity-100'
                   )}
                 >
-                  <Image
+                  <img
                     src={photo}
                     alt=""
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                    quality={50}
+                    className="w-full h-full object-cover"
                   />
                 </button>
               ))}
@@ -276,7 +267,7 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
           </div>
 
           {/* Counter */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-4 py-1.5 rounded-full z-30">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 text-white text-sm bg-black/70 px-4 py-1 rounded-full">
             {currentIndex + 1} / {photos.length}
           </div>
         </div>
