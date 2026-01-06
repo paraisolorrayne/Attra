@@ -25,7 +25,7 @@ const importSteps = [
   { number: '03', icon: FileCheck, title: 'Negociação e Fechamento', description: 'Negociamos as melhores condições e cuidamos de toda a documentação.', time: '2-5 dias' },
   { number: '04', icon: Ship, title: 'Logística Internacional', description: 'Transporte marítimo ou aéreo com seguro completo e rastreamento.', time: '20-40 dias' },
   { number: '05', icon: Shield, title: 'Desembaraço e Homologação', description: 'Cuidamos de toda a burocracia aduaneira e homologação junto ao INMETRO.', time: '15-30 dias' },
-  { number: '06', icon: Truck, title: 'Entrega VIP', description: 'Entregamos seu veículo em qualquer cidade do Brasil com cerimônia especial.', time: '1-3 dias' },
+  { number: '06', icon: Truck, title: 'Entrega VIP', description: 'Entregamos seu veículo em qualquer cidade do Brasil com agilidade e qualidade.', time: '1-3 dias' },
 ]
 
 // Benefits
@@ -33,7 +33,7 @@ const benefits = [
   { icon: Globe, title: 'Rede Global de Dealers', description: 'Acesso a dealers certificados em mais de 15 países.' },
   { icon: Shield, title: 'Processo 100% Legal', description: 'Toda documentação e homologação em conformidade com a legislação.' },
   { icon: Clock, title: 'Prazo Transparente', description: 'Cronograma detalhado com atualizações em tempo real.' },
-  { icon: Award, title: '17 Anos de Experiência', description: 'Mais de 500 veículos importados com sucesso.' },
+  { icon: Award, title: '18 Anos de Experiência', description: 'Mais de 500 veículos importados com sucesso.' },
 ]
 
 // FAQ

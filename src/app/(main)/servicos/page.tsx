@@ -65,8 +65,8 @@ const mainServices = [
 const whyChooseAttra = [
   {
     icon: Star,
-    title: 'Desde 2010 no Mercado Premium',
-    description: 'A Attra Veículos atua há mais de 15 anos no segmento de veículos nacionais, importados, seminovos premium e supercarros em Uberlândia/MG.'
+    title: 'Desde 2008 no Mercado Premium',
+    description: 'A Attra Veículos atua há 18 anos no segmento de veículos nacionais, importados, seminovos premium e supercarros em Uberlândia/MG.'
   },
   {
     icon: Shield,
@@ -397,7 +397,7 @@ export default function ServicosPage() {
               Por Que Escolher a Attra Veículos?
             </h2>
             <p className="text-foreground-secondary max-w-2xl mx-auto">
-              Há mais de 15 anos no mercado premium, a Attra se consolidou como referência em veículos nacionais, importados, seminovos premium e supercarros.
+              Há 18 anos no mercado premium, a Attra se consolidou como referência em veículos nacionais, importados, seminovos premium e supercarros.
             </p>
           </div>
 

@@ -108,17 +108,6 @@ function GallerySection({
   const [activeIndex, setActiveIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goToPrev()
-      if (e.key === 'ArrowRight') goToNext()
-      if (e.key === 'Escape' && isFullscreen) setIsFullscreen(false)
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  })
-
   if (!images || images.length === 0) return null
 
   // Normalizar imagens para formato com legenda
@@ -128,8 +117,22 @@ function GallerySection({
       : img
   )
 
-  const goToPrev = () => setActiveIndex(i => i === 0 ? normalizedImages.length - 1 : i - 1)
-  const goToNext = () => setActiveIndex(i => i === normalizedImages.length - 1 ? 0 : i + 1)
+  const totalImages = normalizedImages.length
+
+  const goToPrev = () => setActiveIndex(i => i === 0 ? totalImages - 1 : i - 1)
+  const goToNext = () => setActiveIndex(i => i === totalImages - 1 ? 0 : i + 1)
+
+  // Keyboard navigation - usando evento diretamente no useEffect
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') setActiveIndex(i => i === 0 ? totalImages - 1 : i - 1)
+      if (e.key === 'ArrowRight') setActiveIndex(i => i === totalImages - 1 ? 0 : i + 1)
+      if (e.key === 'Escape' && isFullscreen) setIsFullscreen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isFullscreen, totalImages])
 
   return (
     <section className="py-10 lg:py-14 bg-background-soft">
