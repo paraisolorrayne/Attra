@@ -29,7 +29,7 @@ function ContatoSchema() {
       addressCountry: 'BR',
     },
     telephone: '+55-34-3256-3100',
-    email: 'contato@attraveiculos.com.br',
+    email: 'faleconosco@attraveiculos.com.br',
     url: 'https://attraveiculos.com.br',
     openingHoursSpecification: [
       { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '08:00', closes: '18:00' },
@@ -75,8 +75,8 @@ const contactChannels = [
   {
     icon: Mail,
     label: 'E-mail',
-    value: 'contato@attraveiculos.com.br',
-    href: 'mailto:contato@attraveiculos.com.br',
+    value: 'faleconosco@attraveiculos.com.br',
+    href: 'mailto:faleconosco@attraveiculos.com.br',
     description: 'Para propostas e documentos',
     primary: false,
   },

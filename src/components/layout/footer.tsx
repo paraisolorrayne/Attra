@@ -118,9 +118,9 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="mailto:contato@attraveiculos.com.br" className="flex items-start gap-2 text-foreground-secondary hover:text-primary text-sm transition-colors">
+                <a href="mailto:faleconosco@attraveiculos.com.br" className="flex items-start gap-2 text-foreground-secondary hover:text-primary text-sm transition-colors">
                   <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>contato@attraveiculos.com.br</span>
+                  <span>faleconosco@attraveiculos.com.br</span>
                 </a>
               </li>
               <li>

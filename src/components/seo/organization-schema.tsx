@@ -8,7 +8,7 @@ export function OrganizationSchema() {
     logo: 'https://attraveiculos.com.br/logo.png',
     image: 'https://attraveiculos.com.br/showroom.jpg',
     telephone: '+55-34-3256-3100',
-    email: 'contato@attraveiculos.com.br',
+    email: 'faleconosco@attraveiculos.com.br',
     address: [
       {
         '@type': 'PostalAddress',

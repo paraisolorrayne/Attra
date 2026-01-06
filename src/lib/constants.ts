@@ -16,7 +16,7 @@ export const ADDRESS = {
 }
 
 // Email
-export const EMAIL = 'contato@attraveiculos.com.br'
+export const EMAIL = 'faleconosco@attraveiculos.com.br'
 
 // URLs
 export const SITE_URL = 'https://attraveiculos.com.br'
