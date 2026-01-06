@@ -192,13 +192,19 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
         </div>
       </div>
 
-      {/* Fullscreen overlay */}
+      {/* Fullscreen overlay with blur background */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-[60] bg-black flex items-center justify-center">
+        <div
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center"
+          onClick={() => setIsFullscreen(false)}
+        >
+          {/* Blur backdrop */}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+
           {/* Close button */}
           <button
-            onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+            onClick={(e) => { e.stopPropagation(); setIsFullscreen(false) }}
+            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white z-20 transition-all hover:scale-110"
             aria-label="Fechar"
           >
             <X className="w-6 h-6" />
@@ -206,45 +212,74 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
 
           {/* Previous button */}
           <button
-            onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+            onClick={(e) => { e.stopPropagation(); goToPrevious() }}
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 md:p-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white z-20 transition-all hover:scale-110"
             aria-label="Imagem anterior"
           >
-            <ChevronLeft className="w-8 h-8" />
+            <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
           </button>
 
-          {/* Main image container - always visible */}
-          <div className="relative w-full h-full max-w-7xl max-h-[90vh] mx-4 md:mx-16">
-            <Image
-              src={photos[currentIndex]}
-              alt={`${vehicleName} - Imagem ${currentIndex + 1}`}
-              fill
-              className="object-contain"
-              quality={100}
-              sizes="100vw"
-              priority
-              unoptimized={false}
-            />
+          {/* Main image container with crossfade animation */}
+          <div
+            className="relative w-full h-[calc(100vh-180px)] max-w-6xl mx-4 md:mx-20 mt-16 mb-24"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {photos.map((photo, index) => {
+              // Only render current, previous, and next for performance
+              const shouldRender =
+                index === currentIndex ||
+                index === (currentIndex + 1) % photos.length ||
+                index === (currentIndex - 1 + photos.length) % photos.length
+
+              if (!shouldRender) return null
+
+              return (
+                <div
+                  key={photo}
+                  className={cn(
+                    'absolute inset-0 transition-all duration-500 ease-out',
+                    index === currentIndex
+                      ? 'opacity-100 scale-100 z-10'
+                      : 'opacity-0 scale-95 z-0'
+                  )}
+                >
+                  <Image
+                    src={photo}
+                    alt={`${vehicleName} - Imagem ${index + 1}`}
+                    fill
+                    className="object-contain"
+                    quality={100}
+                    sizes="100vw"
+                    priority={index === currentIndex}
+                  />
+                </div>
+              )
+            })}
           </div>
 
           {/* Next button */}
           <button
-            onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+            onClick={(e) => { e.stopPropagation(); goToNext() }}
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 md:p-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-white z-20 transition-all hover:scale-110"
             aria-label="Próxima imagem"
           >
-            <ChevronRight className="w-8 h-8" />
+            <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
           </button>
 
           {/* Thumbnail strip in fullscreen */}
-          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90%] overflow-x-auto py-2 px-4">
+          <div
+            className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90%] overflow-x-auto py-3 px-4 bg-black/30 backdrop-blur-md rounded-xl z-20"
+            onClick={(e) => e.stopPropagation()}
+          >
             {photos.map((photo, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={cn(
-                  'relative w-16 h-12 lg:w-20 lg:h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all',
-                  index === currentIndex ? 'border-primary' : 'border-white/30 opacity-60 hover:opacity-100'
+                  'relative w-14 h-10 md:w-20 md:h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all duration-300',
+                  index === currentIndex
+                    ? 'border-primary scale-110 shadow-lg shadow-primary/30'
+                    : 'border-white/20 opacity-50 hover:opacity-100 hover:border-white/50'
                 )}
               >
                 <Image
@@ -259,8 +294,8 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
             ))}
           </div>
 
-          {/* Counter */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-lg bg-black/50 px-4 py-2 rounded-full">
+          {/* Counter with improved styling */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-medium bg-black/40 backdrop-blur-sm px-4 py-1.5 rounded-full z-20">
             {currentIndex + 1} / {photos.length}
           </div>
         </div>
