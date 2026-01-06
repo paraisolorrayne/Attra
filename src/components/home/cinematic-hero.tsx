@@ -1,85 +1,51 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 import { HeroSearchWidget } from './hero-search-widget'
-import { Vehicle } from '@/types'
+import { HeroSlideData } from '@/lib/autoconf-api'
 
-interface HeroSlide {
-  image: string
-  vehicle?: Vehicle
-  headline: string
-  subheadline: string
-  ctaText: string
-  ctaLink: string
+// Background images for theme-aware hero (used only for vehicle slides)
+const HERO_BACKGROUNDS = {
+  light: '/images/background-banner-light.jpg',
+  dark: '/images/background-banner-dark.jpg',
 }
 
 interface CinematicHeroProps {
-  heroImages?: string[]
-  heroVehicles?: Vehicle[]
+  heroSlides?: HeroSlideData[]
 }
 
-// Dynamic slide content based on vehicle characteristics
-function generateSlideContent(vehicle: Vehicle, index: number): Omit<HeroSlide, 'image' | 'vehicle'> {
-  const isSupercar = vehicle.category === 'supercar' || (vehicle.horsepower && vehicle.horsepower > 500)
-  const isImported = vehicle.origin === 'imported'
-
-  // Alternate between storytelling and functional slides
-  const slideVariants: Omit<HeroSlide, 'image' | 'vehicle'>[] = [
-    {
-      headline: `${vehicle.brand}. Performance sem limites`,
-      subheadline: 'Encontre seu próximo superesportivo em nosso inventário exclusivo',
-      ctaText: `Ver ${vehicle.brand}`,
-      ctaLink: `/estoque?marca=${vehicle.brand.toLowerCase()}`,
-    },
-    {
-      headline: 'Potência e elegância em cada detalhe',
-      subheadline: `${vehicle.brand} ${vehicle.model} ${vehicle.year_model} - ${vehicle.mileage === 0 ? '0 km' : `${vehicle.mileage?.toLocaleString('pt-BR')} km`}`,
-      ctaText: 'Ver detalhes',
-      ctaLink: `/veiculo/${vehicle.slug}`,
-    },
-    {
-      headline: 'Exclusividade sobre rodas',
-      subheadline: isSupercar
-        ? `${vehicle.horsepower ? `${vehicle.horsepower} cv de pura emoção` : 'Performance incomparável'}`
-        : 'Seleção curada de nacionais, importados e superesportivos',
-      ctaText: isImported ? 'Importados exclusivos' : 'Explorar estoque',
-      ctaLink: isImported ? '/estoque?origem=importado' : '/estoque',
-    },
-    {
-      headline: `${vehicle.model}. Sonho realizado`,
-      subheadline: 'Seu próximo capítulo começa aqui',
-      ctaText: `Ver todos ${vehicle.brand}`,
-      ctaLink: `/estoque?marca=${vehicle.brand.toLowerCase()}`,
-    },
-  ]
-
-  return slideVariants[index % slideVariants.length]
-}
-
-export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicHeroProps) {
+export function CinematicHero({ heroSlides = [] }: CinematicHeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [mounted, setMounted] = useState(false)
   const slideContainerRef = useRef<HTMLDivElement>(null)
+  const { resolvedTheme } = useTheme()
 
-  // Build slides with vehicle data
-  const slides: HeroSlide[] = heroVehicles.length > 0
-    ? heroVehicles.slice(0, 4).map((vehicle, index) => ({
-        image: vehicle.photos?.[0] || '',
-        vehicle,
-        ...generateSlideContent(vehicle, index),
-      }))
-    : heroImages.slice(0, 4).map((image) => ({
-        image,
-        headline: 'Attra. Performance sem limites',
-        subheadline: 'Seleção curada de nacionais, importados e superesportivos de alto nível',
-        ctaText: 'Explorar estoque',
-        ctaLink: '/estoque',
-      }))
+  // Get theme-aware background image for vehicle slides
+  const backgroundImage = mounted
+    ? (resolvedTheme === 'dark' ? HERO_BACKGROUNDS.dark : HERO_BACKGROUNDS.light)
+    : HERO_BACKGROUNDS.light
+
+  // Use provided slides or create fallback
+  const slides: HeroSlideData[] = heroSlides.length > 0
+    ? heroSlides
+    : [{
+        type: 'banner',
+        image: HERO_BACKGROUNDS.light,
+        targetUrl: '/estoque',
+        ordem: 0,
+      }]
+
+  // Check if current slide is a banner or vehicle
+  const currentSlideData = slides[currentSlide]
+  const isBannerSlide = currentSlideData?.type === 'banner'
+  const currentVehicle = currentSlideData?.vehicle
 
   const totalSlides = slides.length
 
@@ -95,6 +61,11 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
   const goToPrev = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)
   }, [totalSlides])
+
+  // Set mounted state for theme detection
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Auto-advance slides - 4.5s timing for optimal mobile UX
   useEffect(() => {
@@ -126,9 +97,6 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
     setTimeout(() => setIsPaused(false), 3000)
   }
 
-  const currentSlideData = slides[currentSlide] || slides[0]
-  const currentVehicle = currentSlideData?.vehicle
-
   // Format price for display
   const formatPrice = (price: number | undefined) => {
     if (!price) return null
@@ -149,22 +117,62 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
   return (
     <>
     <section
-      className="relative h-[88svh] min-h-[520px] max-h-[780px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden bg-neutral-950"
+      className="relative h-[88svh] min-h-[520px] max-h-[780px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Background Images with Crossfade */}
+      {/* Layer 1: Background - Theme-aware for vehicle slides, hidden for banner slides */}
+      {!isBannerSlide && (
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={backgroundImage}
+            alt="Attra Veículos Background"
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+            quality={85}
+          />
+          <div className="absolute inset-0 bg-black/10" />
+        </div>
+      )}
+
+      {/* Layer 2: Slides with Crossfade - Banners or Vehicle Images */}
       <div
         ref={slideContainerRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="absolute inset-0"
+        className="absolute inset-0 z-[1]"
       >
         {slides.length > 0 ? (
           slides.map((slide, index) => {
             const slideClassName = `absolute inset-0 transition-opacity duration-700 ease-in-out ${
               index === currentSlide ? 'opacity-100 z-[1]' : 'opacity-0 z-0'
             }`
+
+            // Banner slides: full cover image with link
+            if (slide.type === 'banner') {
+              return (
+                <Link
+                  key={`banner-${index}`}
+                  href={slide.targetUrl}
+                  className={`${slideClassName} cursor-pointer`}
+                >
+                  <Image
+                    src={slide.image}
+                    alt={`Banner promocional ${index + 1}`}
+                    fill
+                    className="object-cover object-center"
+                    priority={index <= 1}
+                    sizes="100vw"
+                    quality={95}
+                    unoptimized={slide.image.includes('autoconf') || slide.image.includes('cdn')}
+                  />
+                </Link>
+              )
+            }
+
+            // Vehicle slides: contained image with vehicle link
             const imageElement = (
               <Image
                 src={slide.image}
@@ -181,18 +189,14 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
               />
             )
 
-            return slide.vehicle ? (
+            return (
               <Link
-                key={slide.image || index}
-                href={`/veiculo/${slide.vehicle.slug}`}
+                key={slide.vehicle?.id || `slide-${index}`}
+                href={slide.targetUrl}
                 className={`${slideClassName} cursor-pointer`}
               >
                 {imageElement}
               </Link>
-            ) : (
-              <div key={slide.image || index} className={slideClassName}>
-                {imageElement}
-              </div>
             )
           })
         ) : (
@@ -200,10 +204,13 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
         )}
       </div>
 
-      {/* Gradient Overlay - Minimal, vehicle-first approach */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 z-[2]" />
-      {/* Subtle bottom gradient for text legibility only */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-[2]" />
+      {/* Layer 3: Gradient Overlays - Hidden for banner slides to show full promotional image */}
+      {!isBannerSlide && (
+        <>
+          <div className="absolute inset-0 z-[2] hero-gradient-overlay" />
+          <div className="absolute bottom-0 left-0 right-0 h-1/3 z-[2] hero-bottom-gradient" />
+        </>
+      )}
 
       {/* Navigation Arrows - Side positioned, visible on larger screens */}
       {totalSlides > 1 && (
@@ -225,24 +232,25 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
         </>
       )}
 
-      {/* Bottom Stats Bar - Fixed at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-black/70 backdrop-blur-md border-t border-white/10">
+      {/* Bottom Stats Bar - Fixed at bottom, theme-aware */}
+      {/* Hidden for banner slides to show full promotional image */}
+      <div className={`absolute bottom-0 left-0 right-0 z-20 hero-stats-bar transition-opacity duration-300 ${isBannerSlide ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Vehicle Stats - Left side */}
             {currentVehicle ? (
               <div className={`flex items-center gap-4 sm:gap-6 md:gap-8 opacity-0 ${isLoaded ? 'animate-fade-in-up stagger-2' : ''}`}>
                 <div className="text-center">
-                  <p className="text-white/50 text-[10px] md:text-xs uppercase tracking-wider">Ano</p>
-                  <p className="text-white text-sm md:text-base font-medium">{currentVehicle.year_model}</p>
+                  <p className="hero-stats-label text-[10px] md:text-xs uppercase tracking-wider">Ano</p>
+                  <p className="hero-stats-text text-sm md:text-base font-medium">{currentVehicle.year_model}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-white/50 text-[10px] md:text-xs uppercase tracking-wider">Km</p>
-                  <p className="text-white text-sm md:text-base font-medium">{formatMileage(currentVehicle.mileage)}</p>
+                  <p className="hero-stats-label text-[10px] md:text-xs uppercase tracking-wider">Km</p>
+                  <p className="hero-stats-text text-sm md:text-base font-medium">{formatMileage(currentVehicle.mileage)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-white/50 text-[10px] md:text-xs uppercase tracking-wider">Valor</p>
-                  <p className="text-white text-sm md:text-base font-semibold">{formatPrice(currentVehicle.price)}</p>
+                  <p className="hero-stats-label text-[10px] md:text-xs uppercase tracking-wider">Valor</p>
+                  <p className="hero-stats-text text-sm md:text-base font-semibold">{formatPrice(currentVehicle.price)}</p>
                 </div>
                 {/* CTA Button */}
                 <Link
@@ -255,7 +263,7 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
               </div>
             ) : (
               <div className={`opacity-0 ${isLoaded ? 'animate-fade-in-up stagger-2' : ''}`}>
-                <p className="text-white/60 text-xs md:text-sm">Explore nossa seleção exclusiva</p>
+                <p className="hero-stats-label text-xs md:text-sm">Explore nossa seleção exclusiva</p>
               </div>
             )}
 
@@ -271,7 +279,7 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
                       className={`h-2 rounded-full transition-all duration-300 ${
                         index === currentSlide
                           ? 'bg-primary w-5'
-                          : 'bg-white/30 hover:bg-white/50 w-2'
+                          : 'bg-foreground/30 hover:bg-foreground/50 w-2'
                       }`}
                       aria-label={`Ir para slide ${index + 1}`}
                     />
@@ -281,14 +289,14 @@ export function CinematicHero({ heroImages = [], heroVehicles = [] }: CinematicH
                 <div className="flex gap-1.5">
                   <button
                     onClick={(e) => { e.preventDefault(); goToPrev() }}
-                    className="p-1.5 md:p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    className="p-1.5 md:p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 hero-stats-text transition-colors"
                     aria-label="Slide anterior"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => { e.preventDefault(); goToNext() }}
-                    className="p-1.5 md:p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    className="p-1.5 md:p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 hero-stats-text transition-colors"
                     aria-label="Próximo slide"
                   >
                     <ChevronRight className="w-4 h-4" />
