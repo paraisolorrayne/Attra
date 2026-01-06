@@ -7,16 +7,16 @@ import {
   LocationSection,
   CTASection,
 } from '@/components/home'
-import { getVehicles, getHomeVehicles } from '@/lib/autoconf-api'
+import { getVehicles, getHomeSlides, HeroSlideData } from '@/lib/autoconf-api'
 import { Vehicle } from '@/types'
 
 export default async function Home() {
-  // Fetch hero vehicles from /veiculos-home endpoint (for banner carousel)
-  let heroVehicles: Vehicle[] = []
+  // Fetch hero slides from /ads-home endpoint (banners have priority over vehicles)
+  let heroSlides: HeroSlideData[] = []
   try {
-    heroVehicles = await getHomeVehicles(4)
+    heroSlides = await getHomeSlides(4)
   } catch (error) {
-    console.error('Failed to fetch home vehicles:', error)
+    console.error('Failed to fetch home slides:', error)
   }
 
   // Fetch featured vehicles for the supercars section
@@ -36,7 +36,7 @@ export default async function Home() {
   return (
     <>
       {/* Full-screen cinematic hero with search widget */}
-      <CinematicHero heroVehicles={heroVehicles} />
+      <CinematicHero heroSlides={heroSlides} />
 
       {/* Featured supercar inventory with cinematic cards */}
       <FeaturedSupercars vehicles={featuredVehicles} />

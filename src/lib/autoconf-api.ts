@@ -188,10 +188,42 @@ interface AdsHomeVehicle extends AutoConfVehicle {
 }
 
 /**
- * Fetch featured/promotional vehicles from AutoConf API
- * Uses the /ads-home endpoint which returns highlighted vehicles
+ * Desktop banner from /ads-home endpoint
+ * Used for promotional banners configured in CRM
  */
-export async function fetchAdsHome(): Promise<AutoConfVehicle[]> {
+export interface AdsDesktopBanner {
+  url: string        // Image URL
+  target: string     // Destination URL when clicked
+  ordem?: number     // Display order (optional)
+}
+
+/**
+ * Complete response structure from /ads-home endpoint
+ */
+export interface AdsHomeResponse {
+  adsDesktop: AdsDesktopBanner[]  // Promotional banners (priority 1)
+  destaques: AdsHomeVehicle[]     // Featured vehicles (priority 2)
+}
+
+/**
+ * Hero slide that can be either a banner or a vehicle
+ */
+export interface HeroSlideData {
+  type: 'banner' | 'vehicle'
+  image: string
+  targetUrl: string
+  vehicle?: Vehicle              // Only present for vehicle slides
+  ordem: number
+}
+
+/**
+ * Fetch featured/promotional content from AutoConf API
+ * Uses the /ads-home endpoint which returns:
+ * - adsDesktop: Promotional banners (priority 1)
+ * - destaques: Featured vehicles (priority 2)
+ */
+export async function fetchAdsHome(): Promise<AdsHomeResponse> {
+  const emptyResponse: AdsHomeResponse = { adsDesktop: [], destaques: [] }
   const formData = new URLSearchParams()
   formData.append('token', DEALER_TOKEN)
 
@@ -208,35 +240,37 @@ export async function fetchAdsHome(): Promise<AutoConfVehicle[]> {
 
     if (!response.ok) {
       console.error(`AutoConf Ads Home API error: ${response.status}`)
-      return []
+      return emptyResponse
     }
 
     const data = await response.json()
+    console.log('[fetchAdsHome] Raw response keys:', Object.keys(data))
 
-    // The /ads-home endpoint returns { destaques: [...] }
-    const destaques: AdsHomeVehicle[] = data.destaques || []
+    // Extract adsDesktop banners
+    const adsDesktop: AdsDesktopBanner[] = (data.adsDesktop || []).map((banner: { url?: string; target?: string; ordem?: number }, index: number) => ({
+      url: banner.url || '',
+      target: banner.target || '',
+      ordem: banner.ordem ?? index,
+    })).filter((b: AdsDesktopBanner) => b.url) // Filter out empty banners
 
-    if (destaques.length === 0) {
-      console.log('No featured vehicles in ads-home response')
-      return []
-    }
+    // Extract destaques vehicles
+    const destaques: AdsHomeVehicle[] = (data.destaques || [])
+      .map((vehicle: AdsHomeVehicle) => ({
+        ...vehicle,
+        id: vehicle.veiculo_id ?? vehicle.id,
+      }))
+      .sort((a: AdsHomeVehicle, b: AdsHomeVehicle) => {
+        const ordemA = a.ordem ?? 999
+        const ordemB = b.ordem ?? 999
+        return ordemA - ordemB
+      })
 
-    // Sort by 'ordem' (ascending) if available, to respect CRM ordering
-    const sortedDestaques = [...destaques].sort((a, b) => {
-      const ordemA = a.ordem ?? 999
-      const ordemB = b.ordem ?? 999
-      return ordemA - ordemB
-    })
+    console.log(`[fetchAdsHome] Found ${adsDesktop.length} banners, ${destaques.length} vehicles`)
 
-    // Map to standard AutoConfVehicle structure
-    // Use veiculo_id as id if present, otherwise keep original id
-    return sortedDestaques.map(vehicle => ({
-      ...vehicle,
-      id: vehicle.veiculo_id ?? vehicle.id,
-    }))
+    return { adsDesktop, destaques }
   } catch (error) {
-    console.error('Error fetching ads home vehicles:', error)
-    return []
+    console.error('Error fetching ads home:', error)
+    return emptyResponse
   }
 }
 
@@ -578,64 +612,105 @@ function deduplicateMappedVehicles(vehicles: Vehicle[]): Vehicle[] {
 }
 
 /**
- * Get home/featured vehicles for hero banner
- * Returns mapped vehicles from /veiculos-home endpoint with fallback
+ * Get hero slides for home banner
+ * Returns HeroSlideData[] with proper priority:
  *
- * Fallback strategy:
- * 1. Try /veiculos-home endpoint (featured/priority vehicles)
- * 2. If empty, fetch most expensive vehicles from /veiculos (deduplicated)
- * 3. If API error, use local realInventoryVehicles data
+ * Priority strategy:
+ * 1. adsDesktop: Promotional banners from CRM (highest priority)
+ * 2. destaques: Featured vehicles from CRM
+ * 3. Fallback: Most expensive vehicles from /veiculos (deduplicated)
+ * 4. Final fallback: Local inventory data
  */
-export async function getHomeVehicles(limit = 4): Promise<Vehicle[]> {
+export async function getHomeSlides(limit = 4): Promise<HeroSlideData[]> {
   try {
-    // Primary: Try to get featured/promotional vehicles from /ads-home
-    const adsHomeVehicles = await fetchAdsHome()
+    const { adsDesktop, destaques } = await fetchAdsHome()
 
-    if (adsHomeVehicles.length > 0) {
-      // Deduplicate and limit (already sorted by 'ordem' from fetchAdsHome)
-      const uniqueVehicles = deduplicateVehicles(adsHomeVehicles)
-      console.log(`Found ${adsHomeVehicles.length} featured vehicles, ${uniqueVehicles.length} unique`)
-      return uniqueVehicles.slice(0, limit).map(mapAutoConfToVehicle)
+    // Priority 1: Use adsDesktop banners if available
+    if (adsDesktop.length > 0) {
+      console.log(`[getHomeSlides] Using ${adsDesktop.length} promotional banners`)
+      return adsDesktop.slice(0, limit).map((banner, index) => ({
+        type: 'banner' as const,
+        image: banner.url,
+        targetUrl: banner.target,
+        ordem: banner.ordem ?? index,
+      }))
     }
 
-    // Fallback: Get most expensive vehicles, fetching extra to account for duplicates
-    console.log('No ads-home vehicles found, fetching most expensive vehicles as fallback')
-    const fetchLimit = limit * 3 // Fetch more to have enough after deduplication
+    // Priority 2: Use destaques vehicles if available
+    if (destaques.length > 0) {
+      console.log(`[getHomeSlides] Using ${destaques.length} featured vehicles`)
+      const uniqueVehicles = deduplicateVehicles(destaques as AutoConfVehicle[])
+      return uniqueVehicles.slice(0, limit).map((v, index) => {
+        const vehicle = mapAutoConfToVehicle(v)
+        return {
+          type: 'vehicle' as const,
+          image: vehicle.photos?.[0] || '',
+          targetUrl: `/veiculo/${vehicle.slug}`,
+          vehicle,
+          ordem: index,
+        }
+      })
+    }
+
+    // Priority 3: Fallback to most expensive vehicles
+    console.log('[getHomeSlides] No ads-home content, fetching most expensive vehicles')
     const response = await fetchAutoConfVehicles({
       tipo: 'carros',
-      registros_por_pagina: fetchLimit,
+      registros_por_pagina: limit * 3,
       ordenar: 'preco',
       ordem: 'desc',
     })
 
     if (response.veiculos.length > 0) {
-      // Deduplicate based on brand + model + year
       const uniqueVehicles = deduplicateVehicles(response.veiculos)
-
-      // If still not enough unique vehicles, try fetching more
-      if (uniqueVehicles.length < limit && response.veiculos.length >= fetchLimit) {
-        console.log(`Only ${uniqueVehicles.length} unique vehicles, fetching more...`)
-        const moreResponse = await fetchAutoConfVehicles({
-          tipo: 'carros',
-          registros_por_pagina: limit * 5,
-          ordenar: 'preco',
-          ordem: 'desc',
-        })
-        const allUnique = deduplicateVehicles(moreResponse.veiculos)
-        return allUnique.slice(0, limit).map(mapAutoConfToVehicle)
-      }
-
-      return uniqueVehicles.slice(0, limit).map(mapAutoConfToVehicle)
+      return uniqueVehicles.slice(0, limit).map((v, index) => {
+        const vehicle = mapAutoConfToVehicle(v)
+        return {
+          type: 'vehicle' as const,
+          image: vehicle.photos?.[0] || '',
+          targetUrl: `/veiculo/${vehicle.slug}`,
+          vehicle,
+          ordem: index,
+        }
+      })
     }
 
-    // Final fallback: use local inventory data (deduplicated)
-    console.warn('API returned no vehicles, using local inventory data')
-    const sortedMock = mockVehicles.sort((a, b) => (b.price || 0) - (a.price || 0))
-    return deduplicateMappedVehicles(sortedMock).slice(0, limit)
+    // Priority 4: Final fallback to local data
+    console.warn('[getHomeSlides] API returned no vehicles, using local inventory')
+    const sortedMock = [...mockVehicles].sort((a, b) => (b.price || 0) - (a.price || 0))
+    const uniqueMock = deduplicateMappedVehicles(sortedMock)
+    return uniqueMock.slice(0, limit).map((vehicle, index) => ({
+      type: 'vehicle' as const,
+      image: vehicle.photos?.[0] || '',
+      targetUrl: `/veiculo/${vehicle.slug}`,
+      vehicle,
+      ordem: index,
+    }))
   } catch (error) {
-    console.error('Error fetching home vehicles:', error)
-    // Return most expensive vehicles from real inventory as final fallback (deduplicated)
-    const sortedMock = mockVehicles.sort((a, b) => (b.price || 0) - (a.price || 0))
-    return deduplicateMappedVehicles(sortedMock).slice(0, limit)
+    console.error('[getHomeSlides] Error:', error)
+    // Final fallback
+    const sortedMock = [...mockVehicles].sort((a, b) => (b.price || 0) - (a.price || 0))
+    const uniqueMock = deduplicateMappedVehicles(sortedMock)
+    return uniqueMock.slice(0, limit).map((vehicle, index) => ({
+      type: 'vehicle' as const,
+      image: vehicle.photos?.[0] || '',
+      targetUrl: `/veiculo/${vehicle.slug}`,
+      vehicle,
+      ordem: index,
+    }))
   }
+}
+
+/**
+ * @deprecated Use getHomeSlides() instead for proper banner/vehicle priority
+ * Kept for backwards compatibility
+ */
+export async function getHomeVehicles(limit = 4): Promise<Vehicle[]> {
+  const slides = await getHomeSlides(limit)
+  // Filter only vehicle slides and extract vehicles
+  return slides
+    .filter((slide): slide is HeroSlideData & { vehicle: Vehicle } =>
+      slide.type === 'vehicle' && !!slide.vehicle
+    )
+    .map(slide => slide.vehicle)
 }
