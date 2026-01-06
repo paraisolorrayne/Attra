@@ -223,7 +223,10 @@ export function EngineSoundSection() {
             Som do Poder
           </h2>
           <p className="text-foreground-secondary text-lg max-w-2xl mx-auto">
-            Selecione um modelo e ouça o ronco do motor em alta qualidade, sentindo a personalidade de cada máquina antes mesmo de ligar a ignição.
+            {engineTypes.length === 1
+              ? 'Ouça o ronco do motor em alta qualidade, sentindo a personalidade desta máquina antes mesmo de ligar a ignição.'
+              : 'Selecione um modelo e ouça o ronco do motor em alta qualidade, sentindo a personalidade de cada máquina antes mesmo de ligar a ignição.'
+            }
           </p>
         </div>
 

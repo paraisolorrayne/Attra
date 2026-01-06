@@ -7,7 +7,7 @@ const features = [
   {
     icon: Award,
     title: 'Referência em MG',
-    description: 'Mais de 15 anos sendo referência no mercado de veículos premium em Minas Gerais.',
+    description: 'Há 18 anos sendo referência no mercado de veículos premium em Minas Gerais.',
   },
   {
     icon: MapPin,
