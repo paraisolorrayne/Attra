@@ -77,24 +77,14 @@ export default async function Home() {
             description: 'Referência em veículos nacionais, importados, seminovos e supercarros em Uberlândia.',
             url: 'https://attraveiculos.com.br',
             telephone: '+55-34-3256-3100',
-            address: [
-              {
-                '@type': 'PostalAddress',
-                streetAddress: 'Av. João Pinheiro, 2564',
-                addressLocality: 'Uberlândia',
-                addressRegion: 'MG',
-                postalCode: '38400-714',
-                addressCountry: 'BR',
-              },
-              {
-                '@type': 'PostalAddress',
-                streetAddress: 'Av. Rondon Pacheco, 1670',
-                addressLocality: 'Uberlândia',
-                addressRegion: 'MG',
-                postalCode: '38400-242',
-                addressCountry: 'BR',
-              },
-            ],
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: 'Av. Rondon Pacheco, 1670',
+              addressLocality: 'Uberlândia',
+              addressRegion: 'MG',
+              postalCode: '38400-242',
+              addressCountry: 'BR',
+            },
             geo: {
               '@type': 'GeoCoordinates',
               latitude: -18.9186,

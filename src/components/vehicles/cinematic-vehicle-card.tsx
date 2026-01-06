@@ -14,22 +14,47 @@ interface CinematicVehicleCardProps {
 
 // Premium badges based on vehicle characteristics
 function getPremiumBadges(vehicle: Vehicle) {
-  const badges: { label: string; variant: 'primary' | 'success' | 'warning' | 'sold' }[] = []
+  const badges: { label: string; variant: 'primary' | 'success' | 'warning' | 'sold'; priority: number }[] = []
+  const brandLower = vehicle.brand.toLowerCase()
 
+  // Status badges (highest priority)
+  if (vehicle.status === 'sold') {
+    badges.push({ label: 'Vendido', variant: 'sold', priority: 0 })
+  }
+  if (vehicle.status === 'reserved') {
+    badges.push({ label: 'Reservado', variant: 'warning', priority: 1 })
+  }
+
+  // 0 km badge
   if (vehicle.is_new || vehicle.mileage === 0) {
-    badges.push({ label: '0 km', variant: 'success' })
-  }
-  if (vehicle.category === 'supercar' || vehicle.horsepower && vehicle.horsepower > 500) {
-    badges.push({ label: 'Superesportivo', variant: 'primary' })
-  }
-  if (vehicle.is_featured) {
-    badges.push({ label: 'Colecionável', variant: 'warning' })
-  }
-  if (vehicle.origin === 'imported') {
-    badges.push({ label: 'Importado', variant: 'primary' })
+    badges.push({ label: '0 km', variant: 'success', priority: 2 })
   }
 
-  return badges.slice(0, 2) // Max 2 badges
+  // Category badges based on brand/characteristics
+  const supercarBrands = ['ferrari', 'lamborghini', 'mclaren', 'bugatti', 'pagani', 'koenigsegg']
+  const luxuryBrands = ['bentley', 'rolls-royce', 'maybach']
+  const sportsBrands = ['porsche', 'aston martin', 'maserati', 'lotus']
+
+  if (supercarBrands.some(b => brandLower.includes(b)) || vehicle.category === 'supercar') {
+    badges.push({ label: 'Superesportivo', variant: 'primary', priority: 3 })
+  } else if (luxuryBrands.some(b => brandLower.includes(b)) || vehicle.category === 'luxury') {
+    badges.push({ label: 'Ultra Luxo', variant: 'warning', priority: 3 })
+  } else if (sportsBrands.some(b => brandLower.includes(b)) || vehicle.category === 'sports') {
+    badges.push({ label: 'Esportivo', variant: 'primary', priority: 4 })
+  }
+
+  // High performance badge (only if no category badge)
+  if (vehicle.horsepower && vehicle.horsepower >= 500 && !badges.some(b => b.priority === 3 || b.priority === 4)) {
+    badges.push({ label: `${vehicle.horsepower} cv`, variant: 'primary', priority: 5 })
+  }
+
+  // Low mileage badge for used cars (not 0km)
+  if (vehicle.mileage > 0 && vehicle.mileage <= 5000 && !badges.some(b => b.label === '0 km')) {
+    badges.push({ label: 'Semi-novo', variant: 'success', priority: 6 })
+  }
+
+  // Sort by priority and return max 2
+  return badges.sort((a, b) => a.priority - b.priority).slice(0, 2)
 }
 
 export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: CinematicVehicleCardProps) {

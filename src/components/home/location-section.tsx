@@ -6,17 +6,7 @@ import { Button } from '@/components/ui/button'
 const locations = [
   {
     id: '1',
-    name: 'Attra – Showroom João Pinheiro',
-    address: 'Av. João Pinheiro, 2564',
-    city: 'Uberlândia',
-    state: 'MG',
-    cep: '38400-714',
-    phone: '(34) 3256-3100',
-    hours: 'Seg-Sex: 8h às 18h | Sáb: 8h às 13h',
-  },
-  {
-    id: '2',
-    name: 'Attra – Showroom Rondon Pacheco',
+    name: 'Attra Veículos – Showroom',
     address: 'Av. Rondon Pacheco, 1670',
     city: 'Uberlândia',
     state: 'MG',

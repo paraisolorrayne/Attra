@@ -14,6 +14,32 @@ interface FeaturedSupercarsProps {
   vehicles?: Vehicle[]
 }
 
+// Get badges for featured supercar cards
+function getSupercarssBadges(vehicle: Vehicle) {
+  const badges: { label: string; variant: 'primary' | 'success' | 'warning' | 'sold' }[] = []
+  const brandLower = vehicle.brand.toLowerCase()
+
+  // 0 km badge
+  if (vehicle.is_new || vehicle.mileage === 0) {
+    badges.push({ label: '0 km', variant: 'success' })
+  }
+
+  // Category badges based on brand
+  const supercarBrands = ['ferrari', 'lamborghini', 'mclaren', 'bugatti', 'pagani', 'koenigsegg']
+  const luxuryBrands = ['bentley', 'rolls-royce', 'maybach']
+  const sportsBrands = ['porsche', 'aston martin', 'maserati', 'lotus']
+
+  if (supercarBrands.some(b => brandLower.includes(b)) || vehicle.category === 'supercar') {
+    badges.push({ label: 'Superesportivo', variant: 'primary' })
+  } else if (luxuryBrands.some(b => brandLower.includes(b)) || vehicle.category === 'luxury') {
+    badges.push({ label: 'Ultra Luxo', variant: 'warning' })
+  } else if (sportsBrands.some(b => brandLower.includes(b)) || vehicle.category === 'sports') {
+    badges.push({ label: 'Esportivo', variant: 'primary' })
+  }
+
+  return badges.slice(0, 2)
+}
+
 export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -74,11 +100,16 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 {/* Badges */}
-                <div className="absolute top-4 left-4 flex gap-2">
-                  {vehicle.is_new && <Badge variant="success">0 km</Badge>}
-                  {vehicle.category === 'supercar' && <Badge variant="primary">Superesportivo</Badge>}
-                  {vehicle.category === 'premium' && <Badge variant="secondary">Premium</Badge>}
-                </div>
+                {(() => {
+                  const badges = getSupercarssBadges(vehicle)
+                  return badges.length > 0 ? (
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      {badges.map((badge, i) => (
+                        <Badge key={i} variant={badge.variant}>{badge.label}</Badge>
+                      ))}
+                    </div>
+                  ) : null
+                })()}
               </div>
 
               {/* Content */}

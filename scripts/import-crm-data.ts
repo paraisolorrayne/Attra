@@ -13,7 +13,7 @@
  * - VENDEDOR: Salesperson
  * - VEÍCULO: Vehicle description
  * - VALOR: Sale value (Brazilian format)
- * - LOJA: Store code (RP = Ribeirão Preto, JP = João Pinheiro)
+ * - LOJA: Store code (RP = Rondon Pacheco)
  * 
  * Usage: npx tsx scripts/import-crm-data.ts [path-to-csv]
  */
