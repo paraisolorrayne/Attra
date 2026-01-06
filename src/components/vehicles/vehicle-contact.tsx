@@ -124,7 +124,7 @@ export function VehicleContact({ vehicle, compact = false }: VehicleContactProps
 
         {/* Email */}
         <a
-          href={`mailto:contato@attraveiculos.com.br?subject=Interesse: ${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`}
+          href={`mailto:faleconosco@attraveiculos.com.br?subject=Interesse: ${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`}
           className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-background border border-border rounded-lg text-foreground hover:bg-background-soft transition-colors"
         >
           <Mail className="w-5 h-5" />
