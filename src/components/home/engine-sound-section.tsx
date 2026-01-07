@@ -318,6 +318,7 @@ export function EngineSoundSection() {
                 className={`group relative bg-background-card border border-border rounded-2xl p-5 cursor-pointer
                   transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/10
                   card-premium opacity-0 w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(16.666%-14px)] min-w-[150px] max-w-[200px]
+                  flex flex-col
                   ${isVisible ? `animate-fade-in-up stagger-${Math.min(index + 1, 5)}` : ''}`}
               >
                 {/* Electric Badge */}
@@ -330,11 +331,14 @@ export function EngineSoundSection() {
                 {/* Icon */}
                 <div className="text-3xl mb-3">{engine.icon}</div>
 
-                {/* Engine Name */}
-                <h3 className="text-base font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
+                {/* Engine Name - fixed height for alignment */}
+                <h3 className="text-base font-bold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem]">
                   {engine.name}
                 </h3>
-                <p className="text-xs text-foreground-secondary mb-3 line-clamp-2">{engine.description}</p>
+                <p className="text-xs text-foreground-secondary mb-3 line-clamp-1 min-h-[1rem]">{engine.description || 'Som exclusivo'}</p>
+
+                {/* Spacer to push content to bottom */}
+                <div className="flex-grow" />
 
                 {/* Waveform Animation */}
                 <div className="flex items-end justify-center gap-0.5 h-6 mb-3">
