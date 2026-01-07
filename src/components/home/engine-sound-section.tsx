@@ -225,12 +225,12 @@ export function EngineSoundSection() {
             <span className="text-primary font-medium tracking-wide uppercase text-sm">Experiência Sonora</span>
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Som do Poder
+            Som do Motor
           </h2>
           <p className="text-foreground-secondary text-lg max-w-2xl mx-auto">
             {engineTypes.length === 1
-              ? 'Ouça o ronco do motor em alta qualidade, sentindo a personalidade desta máquina antes mesmo de ligar a ignição.'
-              : 'Selecione um modelo e ouça o ronco do motor em alta qualidade, sentindo a personalidade de cada máquina antes mesmo de ligar a ignição.'
+              ? 'Escute o ronco do motor em alta qualidade, conheça o caráter deste carro esportivo e tome sua decisão de compra com muito mais confiança.'
+              : 'Selecione um modelo e escute o ronco do motor em alta qualidade para comparar o caráter de cada carro esportivo e escolher com mais segurança o próximo da sua garagem.'
             }
           </p>
         </div>
@@ -263,21 +263,6 @@ export function EngineSoundSection() {
                       </div>
                     )}
 
-                    {/* Sound badge overlay */}
-                    <div className="absolute top-4 left-4 flex gap-2">
-                      <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-primary/95 text-white backdrop-blur-md shadow-sm">
-                        <Volume2 className="w-4 h-4" />
-                        Som disponível
-                      </span>
-                    </div>
-
-                    {/* Electric Badge */}
-                    {engine.isElectric && (
-                      <div className="absolute top-4 right-4 px-4 py-2 bg-emerald-500/90 text-white text-sm font-semibold rounded-full backdrop-blur-md">
-                        EV
-                      </div>
-                    )}
-
                     {/* Waveform overlay when playing */}
                     {isPlaying && activeEngine === engine.id && (
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
@@ -299,11 +284,6 @@ export function EngineSoundSection() {
 
                   {/* Content */}
                   <div className="p-6 md:p-8">
-                    {/* Brand */}
-                    <p className="text-sm font-medium text-primary uppercase tracking-wider mb-2">
-                      {engine.brand}
-                    </p>
-
                     {/* Model Name */}
                     <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                       {engine.name}
@@ -313,13 +293,6 @@ export function EngineSoundSection() {
                     <p className="text-base text-foreground-secondary mb-6">
                       {engine.year || ''} {engine.description && `• ${engine.description}`}
                     </p>
-
-                    {/* Price if available */}
-                    {engine.price && (
-                      <p className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-                        {formatPrice(engine.price)}
-                      </p>
-                    )}
 
                     {/* Play Button */}
                     <button
