@@ -7,6 +7,10 @@ export const WHATSAPP_NUMBER = '5534999444747'
 export const PHONE_NUMBER = '+553432563100'
 export const PHONE_DISPLAY = '(34) 3256-3100'
 
+// Telefone secundário (não WhatsApp)
+export const PHONE_NUMBER_2 = '+553432260202'
+export const PHONE_DISPLAY_2 = '(34) 3226-0202'
+
 // Endereço
 export const ADDRESS = {
   street: 'Av. Rondon Pacheco',

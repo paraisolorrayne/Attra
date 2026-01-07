@@ -5,7 +5,7 @@ import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ContactForm } from '@/components/forms/contact-form'
-import { WHATSAPP_NUMBER, getWhatsAppUrl, PHONE_NUMBER, PHONE_DISPLAY } from '@/lib/constants'
+import { WHATSAPP_NUMBER, getWhatsAppUrl, PHONE_NUMBER, PHONE_DISPLAY, PHONE_NUMBER_2, PHONE_DISPLAY_2 } from '@/lib/constants'
 
 export const metadata: Metadata = {
   title: 'Contato | Attra Veículos Uberlândia - Atendimento Nacional',
@@ -68,7 +68,9 @@ const contactChannels = [
     icon: Phone,
     label: 'Telefone',
     value: PHONE_DISPLAY,
+    secondValue: PHONE_DISPLAY_2,
     href: `tel:${PHONE_NUMBER}`,
+    secondHref: `tel:${PHONE_NUMBER_2}`,
     description: 'Atendimento comercial',
     primary: false,
   },
@@ -146,7 +148,12 @@ export default function ContatoPage() {
                 <item.icon className="w-8 h-8 mx-auto mb-2" />
                 <p className="text-sm text-white/80">{item.label}</p>
                 {item.href ? (
-                  <a href={item.href} target={item.label === 'WhatsApp' ? '_blank' : undefined} className="font-medium hover:underline">{item.value}</a>
+                  <div className="flex flex-col">
+                    <a href={item.href} target={item.label === 'WhatsApp' ? '_blank' : undefined} className="font-medium hover:underline">{item.value}</a>
+                    {item.secondValue && item.secondHref && (
+                      <a href={item.secondHref} className="font-medium hover:underline text-sm mt-0.5">{item.secondValue}</a>
+                    )}
+                  </div>
                 ) : (
                   <p className="font-medium">{item.value}</p>
                 )}

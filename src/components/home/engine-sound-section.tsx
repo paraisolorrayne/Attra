@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { Volume2, VolumeX, Play, ArrowRight, Loader2 } from 'lucide-react'
+import { Volume2, VolumeX, Play, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 
 interface VehicleWithSound {
@@ -127,7 +127,6 @@ export function EngineSoundSection() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [engineTypes, setEngineTypes] = useState<EngineType[]>(fallbackEngineTypes)
-  const [isLoading, setIsLoading] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -147,8 +146,6 @@ export function EngineSoundSection() {
       } catch (error) {
         console.error('Failed to fetch engine sounds:', error)
         // Keep fallback data on error
-      } finally {
-        setIsLoading(false)
       }
     }
     fetchSounds()
@@ -311,8 +308,8 @@ export function EngineSoundSection() {
             ))}
           </div>
         ) : (
-          // Multiple vehicles grid layout
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          // Multiple vehicles grid layout - centered
+          <div className="flex flex-wrap justify-center gap-4">
             {engineTypes.map((engine, index) => (
               <div
                 key={engine.id}
@@ -320,7 +317,8 @@ export function EngineSoundSection() {
                 onMouseLeave={handleEngineLeave}
                 className={`group relative bg-background-card border border-border rounded-2xl p-5 cursor-pointer
                   transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/10
-                  card-premium opacity-0 ${isVisible ? `animate-fade-in-up stagger-${Math.min(index + 1, 5)}` : ''}`}
+                  card-premium opacity-0 w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(16.666%-14px)] min-w-[150px] max-w-[200px]
+                  ${isVisible ? `animate-fade-in-up stagger-${Math.min(index + 1, 5)}` : ''}`}
               >
                 {/* Electric Badge */}
                 {engine.isElectric && (
