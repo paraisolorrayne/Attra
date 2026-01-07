@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Volume2, VolumeX, Play, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 
@@ -15,6 +16,9 @@ interface VehicleWithSound {
   soundUrl: string
   icon: string
   isElectric: boolean
+  imageUrl: string | null
+  year: number | null
+  price: number | null
 }
 
 interface EngineType {
@@ -27,6 +31,19 @@ interface EngineType {
   icon: string
   isElectric?: boolean
   electricLabel?: string
+  imageUrl?: string | null
+  year?: number | null
+  price?: number | null
+}
+
+// Format price for display
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price)
 }
 
 // Fallback data when no sounds are configured in admin
@@ -119,6 +136,9 @@ function convertToEngineType(vehicle: VehicleWithSound): EngineType {
     icon: vehicle.icon,
     isElectric: vehicle.isElectric,
     electricLabel: vehicle.isElectric ? 'Tecnologia silenciosa' : undefined,
+    imageUrl: vehicle.imageUrl,
+    year: vehicle.year,
+    price: vehicle.price,
   }
 }
 
@@ -159,18 +179,6 @@ export function EngineSoundSection() {
     if (sectionRef.current) observer.observe(sectionRef.current)
     return () => observer.disconnect()
   }, [])
-
-  const handleEngineHover = (engineId: string) => {
-    setActiveEngine(engineId)
-  }
-
-  const handleEngineLeave = () => {
-    setActiveEngine(null)
-    if (audioRef.current) {
-      audioRef.current.pause()
-      setIsPlaying(false)
-    }
-  }
 
   const togglePlay = async (engine: EngineType) => {
     // If currently playing this engine, pause it
@@ -229,182 +237,230 @@ export function EngineSoundSection() {
 
         {/* Engine Cards - Single Card Layout or Grid */}
         {engineTypes.length === 1 ? (
-          // Single vehicle hero layout
-          <div className="max-w-[800px] mx-auto">
+          // Single vehicle hero layout with image
+          <div className="max-w-2xl mx-auto">
             {engineTypes.map((engine) => (
-              <div
+              <Link
                 key={engine.id}
-                onMouseEnter={() => handleEngineHover(engine.id)}
-                onMouseLeave={handleEngineLeave}
-                className={`group relative bg-background-card border border-border rounded-2xl p-6 md:p-8 cursor-pointer
-                  transition-all duration-300 hover:border-primary shadow-lg hover:shadow-xl hover:shadow-primary/10
-                  card-premium opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}
+                href={`/veiculo/${engine.vehicles[0]?.slug || '#'}`}
+                className={`group block opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}
               >
-                {/* Electric Badge */}
-                {engine.isElectric && (
-                  <div className="absolute top-4 right-4 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded-full">
-                    EV
-                  </div>
-                )}
-
-                {/* Content - Centered Column Layout */}
-                <div className="flex flex-col items-center text-center">
-                  {/* Engine Name - Larger */}
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {engine.name}
-                  </h3>
-
-                  {/* Subtitle */}
-                  <p className="text-sm md:text-base text-foreground-secondary mb-6">
-                    {engine.isElectric ? 'Tecnologia silenciosa de ponta' : 'Som exclusivo de esportivo'}
-                  </p>
-
-                  {/* Waveform Animation - Larger */}
-                  <div className="flex items-end justify-center gap-1 h-10 mb-6">
-                    {[1, 2, 3, 4, 5, 6, 7].map((bar) => (
-                      <div
-                        key={bar}
-                        className={`w-1.5 rounded-full transition-all duration-150 ${
-                          engine.isElectric ? 'bg-emerald-400' : 'bg-primary'
-                        } ${activeEngine === engine.id ? 'animate-pulse' : 'h-2'}`}
-                        style={{
-                          height: activeEngine === engine.id ? `${20 + Math.random() * 60}%` : '8px',
-                          animationDelay: `${bar * 0.1}s`,
-                        }}
+                <div className="bg-background-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1 hover:border-primary card-premium">
+                  {/* Image container with 16:9 aspect ratio for hero */}
+                  <div className="relative aspect-[16/9] bg-background-soft overflow-hidden vehicle-image-container">
+                    {engine.imageUrl ? (
+                      <Image
+                        src={engine.imageUrl}
+                        alt={engine.name}
+                        fill
+                        className="card-vehicle-image transition-transform duration-500 group-hover:scale-[1.03]"
+                        sizes="(max-width: 768px) 100vw, 672px"
+                        priority
                       />
-                    ))}
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20">
+                        <span className="text-8xl">{engine.icon}</span>
+                      </div>
+                    )}
+
+                    {/* Sound badge overlay */}
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-primary/95 text-white backdrop-blur-md shadow-sm">
+                        <Volume2 className="w-4 h-4" />
+                        Som disponível
+                      </span>
+                    </div>
+
+                    {/* Electric Badge */}
+                    {engine.isElectric && (
+                      <div className="absolute top-4 right-4 px-4 py-2 bg-emerald-500/90 text-white text-sm font-semibold rounded-full backdrop-blur-md">
+                        EV
+                      </div>
+                    )}
+
+                    {/* Waveform overlay when playing */}
+                    {isPlaying && activeEngine === engine.id && (
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                        <div className="flex items-end justify-center gap-1.5 h-16">
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((bar) => (
+                            <div
+                              key={bar}
+                              className="w-2 rounded-full bg-white animate-pulse"
+                              style={{
+                                height: `${20 + Math.random() * 60}%`,
+                                animationDelay: `${bar * 0.1}s`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Play Button - Centered, Medium Width on Desktop, Full on Mobile */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      togglePlay(engine)
-                    }}
-                    className={`w-full md:w-48 flex items-center justify-center gap-2 py-3 rounded-lg text-base font-medium transition-all
-                      ${engine.isElectric
-                        ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'
-                        : 'bg-primary/10 hover:bg-primary/20 text-primary'
-                      }`}
-                  >
-                    {isPlaying && activeEngine === engine.id ? (
-                      <><VolumeX className="w-5 h-5" /> Pausar</>
-                    ) : (
-                      <><Play className="w-5 h-5" /> {engine.isElectric ? 'Ambiente' : 'Ouvir ronco'}</>
-                    )}
-                  </button>
+                  {/* Content */}
+                  <div className="p-6 md:p-8">
+                    {/* Brand */}
+                    <p className="text-sm font-medium text-primary uppercase tracking-wider mb-2">
+                      {engine.brand}
+                    </p>
 
-                  {/* Link to vehicle */}
-                  <Link
-                    href={`/veiculo/${engine.vehicles[0]?.slug}`}
-                    className={`flex items-center gap-2 text-sm font-medium mt-4 ${
-                      engine.isElectric ? 'text-emerald-400' : 'text-primary'
-                    } hover:underline`}
-                  >
-                    Ver detalhes do veículo <ArrowRight className="w-4 h-4" />
-                  </Link>
+                    {/* Model Name */}
+                    <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                      {engine.name}
+                    </h3>
+
+                    {/* Year and description */}
+                    <p className="text-base text-foreground-secondary mb-6">
+                      {engine.year || ''} {engine.description && `• ${engine.description}`}
+                    </p>
+
+                    {/* Price if available */}
+                    {engine.price && (
+                      <p className="text-2xl md:text-3xl font-bold text-foreground mb-6">
+                        {formatPrice(engine.price)}
+                      </p>
+                    )}
+
+                    {/* Play Button */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        togglePlay(engine)
+                      }}
+                      className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-base font-semibold transition-all
+                        ${engine.isElectric
+                          ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500'
+                          : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                        }`}
+                    >
+                      {isPlaying && activeEngine === engine.id ? (
+                        <><VolumeX className="w-6 h-6" /> Pausar som</>
+                      ) : (
+                        <><Play className="w-6 h-6" /> {engine.isElectric ? 'Ouvir ambiente' : 'Ouvir o ronco'}</>
+                      )}
+                    </button>
+
+                    {/* View vehicle link */}
+                    <div className="mt-4 flex items-center justify-center gap-2 text-base text-foreground-secondary group-hover:text-primary transition-colors">
+                      Ver detalhes do veículo <ArrowRight className="w-5 h-5" />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
-          // Multiple vehicles grid layout - centered
-          <div className="flex flex-wrap justify-center gap-4">
+          // Multiple vehicles grid layout - styled like VehicleCard
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
             {engineTypes.map((engine, index) => (
-              <div
+              <Link
                 key={engine.id}
-                onMouseEnter={() => handleEngineHover(engine.id)}
-                onMouseLeave={handleEngineLeave}
-                className={`group relative bg-background-card border border-border rounded-2xl p-5 cursor-pointer
-                  transition-all duration-300 hover:border-primary hover:shadow-lg hover:shadow-primary/10
-                  card-premium opacity-0 w-[calc(50%-8px)] md:w-[calc(33.333%-11px)] lg:w-[calc(16.666%-14px)] min-w-[150px] max-w-[200px]
-                  flex flex-col
-                  ${isVisible ? `animate-fade-in-up stagger-${Math.min(index + 1, 5)}` : ''}`}
+                href={`/veiculo/${engine.vehicles[0]?.slug || '#'}`}
+                className={`group block w-full max-w-sm opacity-0 ${isVisible ? `animate-fade-in-up stagger-${Math.min(index + 1, 5)}` : ''}`}
               >
-                {/* Electric Badge */}
-                {engine.isElectric && (
-                  <div className="absolute top-3 right-3 px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full">
-                    EV
-                  </div>
-                )}
-
-                {/* Icon */}
-                <div className="text-3xl mb-3">{engine.icon}</div>
-
-                {/* Engine Name - fixed height for alignment */}
-                <h3 className="text-base font-bold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem]">
-                  {engine.name}
-                </h3>
-                <p className="text-xs text-foreground-secondary mb-3 line-clamp-1 min-h-[1rem]">{engine.description || 'Som exclusivo'}</p>
-
-                {/* Spacer to push content to bottom */}
-                <div className="flex-grow" />
-
-                {/* Waveform Animation */}
-                <div className="flex items-end justify-center gap-0.5 h-6 mb-3">
-                  {[1, 2, 3, 4, 5].map((bar) => (
-                    <div
-                      key={bar}
-                      className={`w-1 rounded-full transition-all duration-150 ${
-                        engine.isElectric ? 'bg-emerald-400' : 'bg-primary'
-                      } ${activeEngine === engine.id ? 'animate-pulse' : 'h-1.5'}`}
-                      style={{
-                        height: activeEngine === engine.id ? `${20 + Math.random() * 60}%` : '6px',
-                        animationDelay: `${bar * 0.1}s`,
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* Hover overlay with vehicles and CTA - pointer-events-none except for interactive elements */}
-                {activeEngine === engine.id && (
-                  <div className="absolute inset-0 bg-background-card/98 backdrop-blur-sm rounded-2xl p-5 pb-14 flex flex-col justify-start z-10 animate-fade-in pointer-events-none">
-                    <div className="pointer-events-auto">
-                      <p className="text-xs text-foreground-secondary mb-2">
-                        {engine.isElectric ? 'Tecnologia de ponta:' : `Veículos com ${engine.name}:`}
-                      </p>
-                      <div className="space-y-1.5">
-                        {engine.vehicles.map((v) => (
-                          <Link
-                            key={v.slug}
-                            href={`/veiculo/${v.slug}`}
-                            className="block text-sm text-foreground hover:text-primary transition-colors"
-                          >
-                            {v.name}
-                          </Link>
-                        ))}
+                <div className="bg-background-card border border-border rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1 hover:border-primary card-premium">
+                  {/* Image container with 4:3 aspect ratio */}
+                  <div className="relative aspect-[4/3] bg-background-soft overflow-hidden vehicle-image-container">
+                    {engine.imageUrl ? (
+                      <Image
+                        src={engine.imageUrl}
+                        alt={engine.name}
+                        fill
+                        className="card-vehicle-image transition-transform duration-500 group-hover:scale-[1.03]"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20">
+                        <span className="text-6xl">{engine.icon}</span>
                       </div>
-                    </div>
-                    <Link
-                      href={`/estoque?marca=${engine.brand.toLowerCase()}`}
-                      className={`flex items-center gap-2 text-sm font-medium mt-3 pointer-events-auto ${
-                        engine.isElectric ? 'text-emerald-400' : 'text-primary'
-                      }`}
-                    >
-                      Ver estoque desse perfil <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                )}
+                    )}
 
-                {/* Play Button - always on top with z-20 */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    togglePlay(engine)
-                  }}
-                  className={`relative z-20 w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all
-                    ${engine.isElectric
-                      ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'
-                      : 'bg-primary/10 hover:bg-primary/20 text-primary'
-                    }`}
-                >
-                  {isPlaying && activeEngine === engine.id ? (
-                    <><VolumeX className="w-4 h-4" /> Pausar</>
-                  ) : (
-                    <><Play className="w-4 h-4" /> {engine.isElectric ? 'Ambiente' : 'Ouvir ronco'}</>
-                  )}
-                </button>
-              </div>
+                    {/* Sound badge overlay */}
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/95 text-white backdrop-blur-md shadow-sm">
+                        <Volume2 className="w-3.5 h-3.5" />
+                        Som disponível
+                      </span>
+                    </div>
+
+                    {/* Electric Badge */}
+                    {engine.isElectric && (
+                      <div className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500/90 text-white text-xs font-semibold rounded-full backdrop-blur-md">
+                        EV
+                      </div>
+                    )}
+
+                    {/* Waveform overlay when playing */}
+                    {isPlaying && activeEngine === engine.id && (
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                        <div className="flex items-end justify-center gap-1 h-12">
+                          {[1, 2, 3, 4, 5, 6, 7].map((bar) => (
+                            <div
+                              key={bar}
+                              className="w-1.5 rounded-full bg-white animate-pulse"
+                              style={{
+                                height: `${20 + Math.random() * 60}%`,
+                                animationDelay: `${bar * 0.1}s`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5">
+                    {/* Brand */}
+                    <p className="text-xs font-medium text-primary uppercase tracking-wider mb-1">
+                      {engine.brand}
+                    </p>
+
+                    {/* Model Name */}
+                    <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                      {engine.name}
+                    </h3>
+
+                    {/* Year and description */}
+                    <p className="text-sm text-foreground-secondary mb-4 line-clamp-1">
+                      {engine.year || ''} {engine.description && `• ${engine.description}`}
+                    </p>
+
+                    {/* Price if available */}
+                    {engine.price && (
+                      <p className="text-xl font-bold text-foreground mb-4">
+                        {formatPrice(engine.price)}
+                      </p>
+                    )}
+
+                    {/* Play Button */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        togglePlay(engine)
+                      }}
+                      className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all
+                        ${engine.isElectric
+                          ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500'
+                          : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                        }`}
+                    >
+                      {isPlaying && activeEngine === engine.id ? (
+                        <><VolumeX className="w-5 h-5" /> Pausar som</>
+                      ) : (
+                        <><Play className="w-5 h-5" /> {engine.isElectric ? 'Ouvir ambiente' : 'Ouvir o ronco'}</>
+                      )}
+                    </button>
+
+                    {/* View vehicle link */}
+                    <div className="mt-3 flex items-center justify-center gap-2 text-sm text-foreground-secondary group-hover:text-primary transition-colors">
+                      Ver detalhes do veículo <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}
