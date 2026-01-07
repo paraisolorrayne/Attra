@@ -92,7 +92,9 @@ const achievements = [
   { year: 2015, title: 'Primeiro Ferrari', description: 'Comercialização do primeiro superesportivo italiano' },
   { year: 2018, title: 'Novo Showroom', description: 'Inauguração do showroom de 5.000m² climatizado' },
   { year: 2023, title: '500+ Supercarros', description: 'Marco de 500 supercarros vendidos para todo Brasil' },
-  { year: 2024, title: 'Referência Nacional', description: 'Attra Veículos segue em constante evolução, com expansao do showroom com mais de 1000m2,  mantendo sua essência familiar, mas com uma visão moderna de negócio, sempre focada em excelência, confiança e relacionamento de longo prazo com seus clientes.' },
+  { year: 2024, title: 'Referência Nacional', description: 'A gestão da empresa é conduzida de forma estruturada, com papéis bem definidos e hierarquia clara, garantindo decisões estratégicas eficientes e um crescimento sustentável. Essa postura profissional permitiu à Attra Veículos consolidar sua reputação no mercado sendo a maior dealer premium do Triângulo Mineiro.' },
+  { year: 2025, title: 'Expansão e constante evolução', description: 'A Attra Veículos segue em constante evolução, com expansão do showroom com mais de 1000m2,  mantendo sua essência familiar, mas com uma visão moderna de negócio, sempre focada em excelência, confiança e relacionamento de longo prazo com seus clientes.' },
+
 ]
 
 export default function JornadaPage() {
