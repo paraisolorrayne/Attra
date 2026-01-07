@@ -16,6 +16,7 @@ import {
   X,
   RefreshCw,
   Settings,
+  Pencil,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
@@ -59,6 +60,14 @@ export function EngineSoundsAdmin() {
     icon: '🏎️',
     is_electric: false,
   })
+  const [editingSound, setEditingSound] = useState<VehicleSound | null>(null)
+  const [editFormData, setEditFormData] = useState({
+    vehicle_name: '',
+    description: '',
+    icon: '🏎️',
+    is_electric: false,
+  })
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const router = useRouter()
 
@@ -221,6 +230,43 @@ export function EngineSoundsAdmin() {
     setNewSoundData({ description: '', icon: '🏎️', is_electric: false })
   }
 
+  // Open edit modal
+  const openEditModal = (sound: VehicleSound) => {
+    setEditingSound(sound)
+    setEditFormData({
+      vehicle_name: sound.vehicle_name,
+      description: sound.description || '',
+      icon: sound.icon,
+      is_electric: sound.is_electric,
+    })
+  }
+
+  // Save edit
+  const saveEdit = async () => {
+    if (!editingSound) return
+    setIsSavingEdit(true)
+    try {
+      const res = await fetch(`/api/admin/engine-sounds/${editingSound.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vehicle_name: editFormData.vehicle_name,
+          description: editFormData.description || null,
+          icon: editFormData.icon,
+          is_electric: editFormData.is_electric,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to update')
+      await fetchSounds()
+      setEditingSound(null)
+    } catch (error) {
+      console.error('Error updating sound:', error)
+      alert('Erro ao atualizar som')
+    } finally {
+      setIsSavingEdit(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <audio ref={audioRef} onEnded={() => setPlayingId(null)} />
@@ -325,8 +371,17 @@ export function EngineSoundsAdmin() {
                       <button
                         onClick={() => togglePlay(sound.sound_file_url, sound.id)}
                         className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                        title="Ouvir som"
                       >
                         {playingId === sound.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                      </button>
+                      {/* Edit Button */}
+                      <button
+                        onClick={() => openEditModal(sound)}
+                        className="p-2 rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
+                        title="Editar"
+                      >
+                        <Pencil className="w-5 h-5" />
                       </button>
                       {/* Active Toggle */}
                       <button
@@ -344,6 +399,7 @@ export function EngineSoundsAdmin() {
                       <button
                         onClick={() => deleteSound(sound.id)}
                         className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                        title="Remover"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -497,6 +553,92 @@ export function EngineSoundsAdmin() {
                   <>
                     <Check className="w-5 h-5" />
                     Salvar Som
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Sound Modal */}
+        {editingSound && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-background-card border border-border rounded-2xl p-6 w-full max-w-lg">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-foreground">Editar Som</h2>
+                <button onClick={() => setEditingSound(null)} className="text-foreground-secondary hover:text-foreground">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Vehicle Name */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-foreground mb-2">Nome do Veículo</label>
+                <input
+                  type="text"
+                  value={editFormData.vehicle_name}
+                  onChange={(e) => setEditFormData({ ...editFormData, vehicle_name: e.target.value })}
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                />
+              </div>
+
+              {/* Description */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-foreground mb-2">Descrição</label>
+                <input
+                  type="text"
+                  value={editFormData.description}
+                  onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                  placeholder="Ex: V12 naturalmente aspirado"
+                  className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                />
+              </div>
+
+              {/* Icon and Electric */}
+              <div className="flex gap-4 mb-6">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-foreground mb-2">Ícone</label>
+                  <select
+                    value={editFormData.icon}
+                    onChange={(e) => setEditFormData({ ...editFormData, icon: e.target.value })}
+                    className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground"
+                  >
+                    <option value="🏎️">🏎️ Supercarro</option>
+                    <option value="🔥">🔥 Esportivo</option>
+                    <option value="⚡">⚡ Elétrico/Performance</option>
+                    <option value="🏁">🏁 Corrida</option>
+                    <option value="🦅">🦅 Americano</option>
+                    <option value="🚀">🚀 Turbo</option>
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editFormData.is_electric}
+                      onChange={(e) => setEditFormData({ ...editFormData, is_electric: e.target.checked })}
+                      className="w-5 h-5 rounded border-border"
+                    />
+                    <span className="text-foreground">Elétrico</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Submit */}
+              <button
+                onClick={saveEdit}
+                disabled={!editFormData.vehicle_name.trim() || isSavingEdit}
+                className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSavingEdit ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-5 h-5" />
+                    Salvar Alterações
                   </>
                 )}
               </button>
