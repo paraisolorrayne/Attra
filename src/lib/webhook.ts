@@ -261,3 +261,73 @@ export async function sendToLeadsterWithAI(
   }
 }
 
+/**
+ * Chat message type for conversation history
+ */
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+/**
+ * Chat response from AI
+ */
+export interface ChatResponse {
+  success: boolean
+  response: string
+  fallback?: boolean
+  error?: boolean
+}
+
+/**
+ * Sends a chat message and gets AI response
+ * Uses internal API route to avoid CORS issues
+ */
+export async function sendChatMessage(
+  message: string,
+  history: ChatMessage[] = [],
+  context?: { sourcePage?: string; vehicleInfo?: string }
+): Promise<ChatResponse> {
+  try {
+    const sessionId = getSessionId()
+
+    console.log('[Chat] Sending message:', message.substring(0, 50))
+
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message,
+        sessionId,
+        history,
+        context,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Chat API failed: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    console.log('[Chat] Response received:', data.response?.substring(0, 50))
+
+    return {
+      success: true,
+      response: data.response || 'Como posso ajudar?',
+      fallback: data.fallback,
+      error: data.error,
+    }
+  } catch (error) {
+    console.error('[Chat] Error:', error)
+
+    return {
+      success: false,
+      response: 'Desculpe, ocorreu um erro. Por favor, tente novamente.',
+      error: true,
+    }
+  }
+}
+

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { MessageCircle, X, Car, Wrench, HelpCircle, Loader2, Bot } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { sendWhatsAppWebhook, sendToLeadsterWithoutAI, sendToLeadsterWithAI, getGeoLocation, generateVehicleMessage } from '@/lib/webhook'
+import { sendWhatsAppWebhook, sendToLeadsterWithoutAI, sendToLeadsterWithAI, sendChatMessage, getGeoLocation, generateVehicleMessage, ChatMessage } from '@/lib/webhook'
 import { useToast } from '@/components/ui/toast'
 import { WHATSAPP_NUMBER } from '@/lib/constants'
 import { GeoLocation } from '@/types'
@@ -99,9 +99,19 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatMessages, setChatMessages] = useState<Array<{ role: 'assistant' | 'user'; content: string }>>([])
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
+  const [inputValue, setInputValue] = useState('')
   const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
   const { showToast, hideToast } = useToast()
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [chatMessages, isSendingMessage])
 
   // Get vehicle data from context (set by VehicleContextSetter on vehicle pages)
   const vehicleId = vehicle?.vehicleId
@@ -243,6 +253,53 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
     setIsChatOpen(false)
   }
 
+  // Send message to AI and get response
+  const handleSendMessage = async () => {
+    const message = inputValue.trim()
+    if (!message || isSendingMessage) return
+
+    // Add user message immediately
+    const userMessage: ChatMessage = { role: 'user', content: message }
+    setChatMessages(prev => [...prev, userMessage])
+    setInputValue('')
+    setIsSendingMessage(true)
+
+    // For estoque behavior, just show static response
+    if (pageBehavior === 'estoque') {
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Mensagem recebida! Um consultor especializado entrará em contato em breve. Obrigado!'
+      }])
+      setIsSendingMessage(false)
+      return
+    }
+
+    // Send to AI for general pages
+    try {
+      const result = await sendChatMessage(
+        message,
+        chatMessages,
+        {
+          sourcePage: currentPage,
+          vehicleInfo: vehicleBrand && vehicleModel ? `${vehicleBrand} ${vehicleModel}` : undefined,
+        }
+      )
+
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: result.response
+      }])
+    } catch (error) {
+      console.error('[Chat] Error:', error)
+      setChatMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Desculpe, ocorreu um erro. Um consultor entrará em contato em breve.'
+      }])
+    } finally {
+      setIsSendingMessage(false)
+    }
+  }
+
   // Get loading text based on behavior
   const getLoadingText = () => {
     switch (pageBehavior) {
@@ -368,7 +425,7 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {chatMessages.map((msg, idx) => (
               <div
                 key={idx}
@@ -384,31 +441,43 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
             ))}
           </div>
 
+          {/* Loading indicator for AI typing */}
+          {isSendingMessage && (
+            <div className="px-4 pb-2">
+              <div className="flex items-center gap-2 text-foreground-secondary">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-xs">Digitando...</span>
+              </div>
+            </div>
+          )}
+
           {/* Chat Input */}
           <div className="p-4 border-t border-border">
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Digite sua mensagem..."
-                className="flex-1 px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={isSendingMessage ? 'Aguarde...' : 'Digite sua mensagem...'}
+                disabled={isSendingMessage}
+                className="flex-1 px-4 py-3 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                    const userMessage = e.currentTarget.value.trim()
-                    // Different response based on page behavior
-                    const assistantResponse = pageBehavior === 'estoque'
-                      ? 'Mensagem recebida! Um consultor irá responder em breve. Obrigado pela paciência.'
-                      : 'Obrigado pela sua mensagem! Um consultor especializado entrará em contato em breve. Enquanto isso, posso ajudar com informações gerais sobre nossos veículos e serviços.'
-                    setChatMessages(prev => [
-                      ...prev,
-                      { role: 'user', content: userMessage },
-                      { role: 'assistant', content: assistantResponse }
-                    ])
-                    e.currentTarget.value = ''
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSendMessage()
                   }
                 }}
               />
-              <button className="px-4 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl transition-colors">
-                <MessageCircle className="w-5 h-5" />
+              <button
+                onClick={handleSendMessage}
+                disabled={isSendingMessage || !inputValue.trim()}
+                className="px-4 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSendingMessage ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <MessageCircle className="w-5 h-5" />
+                )}
               </button>
             </div>
             <p className="text-xs text-foreground-secondary text-center mt-2">
