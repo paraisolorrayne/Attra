@@ -12,4 +12,6 @@ export * from './featured-supercars'
 export * from './engine-sound-section'
 export * from './experience-section'
 export * from './testimonials-section'
+export * from './faq-section'
+export * from './about-section-expanded'
 

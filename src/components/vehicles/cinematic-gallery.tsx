@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Expand, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,12 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   const [errorImages, setErrorImages] = useState<Set<number>>(new Set())
+  const [mounted, setMounted] = useState(false)
+
+  // Track if component is mounted (for Portal SSR compatibility)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Mark image as loaded
   const handleImageLoad = useCallback((index: number) => {
@@ -154,10 +161,10 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
           <ChevronRight className="w-6 h-6" />
         </button>
 
-        {/* Fullscreen button - z-40 to stay below header (z-50) but above content */}
+        {/* Fullscreen button - positioned below header (top-24 = 96px to clear 80px header) */}
         <button
           onClick={(e) => { e.stopPropagation(); setIsFullscreen(true) }}
-          className="absolute top-4 right-4 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full text-white transition-all z-40"
+          className="absolute top-24 right-4 p-3 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full text-white transition-all z-40"
           aria-label="Tela cheia"
         >
           <Expand className="w-5 h-5" />
@@ -192,8 +199,8 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
         </div>
       </div>
 
-      {/* Fullscreen Modal - 100vh sem scroll */}
-      {isFullscreen && (
+      {/* Fullscreen Modal - rendered via Portal to ensure it's above everything including header */}
+      {isFullscreen && mounted && createPortal(
         <div
           className="fixed inset-0 z-[9999] bg-black overflow-hidden"
           style={{
@@ -208,7 +215,7 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
           {/* Close button - top right */}
           <button
             onClick={() => setIsFullscreen(false)}
-            className="absolute top-3 right-3 z-50 p-2 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
+            className="absolute top-4 right-4 z-50 p-3 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
             aria-label="Fechar"
           >
             <X className="w-5 h-5" />
@@ -280,7 +287,8 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
               {currentIndex + 1} / {photos.length}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

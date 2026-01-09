@@ -56,6 +56,7 @@ export async function getGeoLocation(): Promise<GeoLocation | null> {
 
 /**
  * Generates formatted message with vehicle info and location
+ * Gracefully handles cases where geolocation is unavailable or has invalid data
  */
 export function generateVehicleMessage(
   vehicleBrand?: string,
@@ -67,11 +68,20 @@ export function generateVehicleMessage(
     ? `${vehicleBrand} ${vehicleModel}${vehicleYear ? ` ${vehicleYear}` : ''}`
     : 'um veículo'
 
-  const location = geoLocation
-    ? `${geoLocation.city}/${geoLocation.region}`
-    : 'localização não identificada'
+  // Check if we have valid geolocation data
+  // Gracefully omit location if city/region are undefined, empty, or "Não identificada"
+  const hasValidLocation = geoLocation &&
+    geoLocation.city &&
+    geoLocation.region &&
+    geoLocation.city !== 'Não identificada' &&
+    geoLocation.region !== 'Não identificada'
 
-  return `Vim do site e tenho interesse no ${vehicle}, sou de ${location}.`
+  if (hasValidLocation) {
+    return `Vim do site e tenho interesse no ${vehicle}, sou de ${geoLocation.city}/${geoLocation.region}.`
+  }
+
+  // Omit location entirely when unavailable for cleaner message
+  return `Vim do site e tenho interesse no ${vehicle}.`
 }
 
 /**

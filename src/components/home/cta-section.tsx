@@ -55,15 +55,16 @@ export function CTASection() {
               href={item.href}
               className={`group backdrop-blur-sm border rounded-xl p-6 transition-all hover:scale-[1.02] ${
                 item.featured
-                  ? 'bg-white text-foreground border-white shadow-xl'
+                  ? 'bg-white border-white shadow-xl'
                   : 'bg-white/10 hover:bg-white/20 border-white/20'
               }`}
             >
+              {/* Featured card uses hardcoded dark colors for contrast against white background */}
               <item.icon className={`w-10 h-10 mb-4 ${item.featured ? 'text-primary' : 'text-white'}`} />
-              <h3 className={`text-lg font-semibold mb-2 ${item.featured ? 'text-foreground' : 'text-white'}`}>
+              <h3 className={`text-lg font-semibold mb-2 ${item.featured ? 'text-gray-900' : 'text-white'}`}>
                 {item.title}
               </h3>
-              <p className={`mb-4 text-sm ${item.featured ? 'text-foreground-secondary' : 'text-white/80'}`}>
+              <p className={`mb-4 text-sm ${item.featured ? 'text-gray-600' : 'text-white/80'}`}>
                 {item.description}
               </p>
               <span className={`inline-flex items-center font-medium group-hover:gap-2 transition-all text-sm ${

@@ -6,7 +6,11 @@ import {
   TestimonialsSection,
   LocationSection,
   CTASection,
+  FAQSection,
+  AboutSectionExpanded,
 } from '@/components/home'
+import { FAQSchema } from '@/components/seo'
+import { homepageFAQs } from '@/lib/faq-data'
 import { getVehicles, getHomeSlides, HeroSlideData } from '@/lib/autoconf-api'
 import { Vehicle } from '@/types'
 
@@ -57,8 +61,15 @@ export default async function Home() {
       {/* Attra experience showcase */}
       <ExperienceSection />
 
+      {/* Expanded About Section - SEO optimized with 400+ words */}
+      <AboutSectionExpanded />
+
       {/* Customer testimonials from Google */}
       <TestimonialsSection />
+
+      {/* FAQ Section with Schema */}
+      <FAQSection faqs={homepageFAQs} />
+      <FAQSchema faqs={homepageFAQs} />
 
       {/* Final CTA */}
       <CTASection />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Expand, Play, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -14,9 +15,15 @@ interface VehicleGalleryProps {
 export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   const allMedia = [...photos, ...(videos || [])]
   const hasMedia = allMedia.length > 0
+
+  // Track if component is mounted (for Portal SSR compatibility)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? allMedia.length - 1 : prev - 1))
@@ -86,11 +93,11 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
           </>
         )}
 
-        {/* Fullscreen button */}
+        {/* Fullscreen button - positioned below header (top-24 = 96px to clear 80px header) */}
         {hasMedia && (
           <button
             onClick={() => setIsFullscreen(true)}
-            className="absolute top-4 right-4 p-2 bg-background/80 hover:bg-background rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-24 right-4 p-2 bg-background/80 hover:bg-background rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             aria-label="Tela cheia"
           >
             <Expand className="w-5 h-5 text-foreground" />
@@ -135,13 +142,13 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
         </div>
       )}
 
-      {/* Fullscreen overlay */}
-      {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-          {/* Close button */}
+      {/* Fullscreen overlay - rendered via Portal to ensure it's above everything including header */}
+      {isFullscreen && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
+          {/* Close button - z-50 to stay above content within the modal */}
           <button
             onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+            className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-50 transition-colors"
             aria-label="Fechar"
           >
             <X className="w-6 h-6" />
@@ -151,7 +158,7 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
           {allMedia.length > 1 && (
             <button
               onClick={goToPrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-50 transition-colors"
               aria-label="Imagem anterior"
             >
               <ChevronLeft className="w-8 h-8" />
@@ -181,7 +188,7 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
           {allMedia.length > 1 && (
             <button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-50 transition-colors"
               aria-label="Próxima imagem"
             >
               <ChevronRight className="w-8 h-8" />
@@ -223,7 +230,8 @@ export function VehicleGallery({ photos, videos, vehicleName }: VehicleGalleryPr
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-lg bg-black/50 px-4 py-2 rounded-full">
             {currentIndex + 1} / {allMedia.length}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

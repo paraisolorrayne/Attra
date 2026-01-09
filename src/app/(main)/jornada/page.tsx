@@ -329,7 +329,7 @@ export default function JornadaPage() {
             <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">Pronto para sua jornada?</h2>
             <p className="text-lg text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">
               Agende uma visita ao showroom em Uberlândia ou comece sua curadoria à distância agora mesmo.
-              Atendemos colecionadores de todo o Brasil com a mesma excelência.
+              Atendemos clientes de todo o Brasil com a mesma excelência.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6">
