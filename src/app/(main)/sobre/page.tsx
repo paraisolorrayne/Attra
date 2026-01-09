@@ -363,7 +363,7 @@ export default function SobrePage() {
             </h2>
             <p className="text-lg text-white/80 mb-8 leading-relaxed">
               Conheça de perto nossa estrutura de 5.000m² em Uberlândia e encontre o veículo dos seus sonhos.
-              Atendemos colecionadores de todo o Brasil com a mesma excelência.
+              Atendemos apaixonados por carros de todo o Brasil com excelência.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 font-semibold">

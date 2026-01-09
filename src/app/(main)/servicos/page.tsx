@@ -76,7 +76,7 @@ const whyChooseAttra = [
   {
     icon: Truck,
     title: 'Atendimento Nacional',
-    description: 'Atendemos colecionadores de todo o Brasil com logística especializada e seguro premium.'
+    description: 'Atendemos clientes de todo o Brasil com logística especializada e seguro premium.'
   },
   {
     icon: Crown,

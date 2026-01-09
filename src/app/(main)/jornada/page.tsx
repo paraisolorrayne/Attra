@@ -300,7 +300,7 @@ export default function JornadaPage() {
           <div className="text-center mb-16">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Users className="w-6 h-6 text-primary" />
-              <span className="text-primary font-medium uppercase tracking-wider text-sm">Colecionadores Attra</span>
+              <span className="text-primary font-medium uppercase tracking-wider text-sm">Aficionados Attra</span>
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground">Histórias de quem já viveu a jornada</h2>
           </div>
