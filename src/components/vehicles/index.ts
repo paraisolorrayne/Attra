@@ -19,3 +19,6 @@ export * from './sort-dropdown'
 
 // AI-powered components
 export * from './ai-vehicle-description'
+
+// CTA components
+export * from './vehicle-card-ctas'

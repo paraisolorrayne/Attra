@@ -4,6 +4,7 @@ import { WhatsAppButton } from '@/components/layout/whatsapp-button'
 import { RacingProgress } from '@/components/ui/racing-progress'
 import { OrganizationSchema, WebsiteSchema } from '@/components/seo'
 import { VehicleProvider } from '@/contexts/vehicle-context'
+import { StickyContactForm } from '@/components/forms'
 
 export default function MainLayout({
   children,
@@ -21,6 +22,7 @@ export default function MainLayout({
         <Footer />
       </div>
       <WhatsAppButton />
+      <StickyContactForm />
     </VehicleProvider>
   )
 }

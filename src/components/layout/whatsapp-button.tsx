@@ -62,7 +62,7 @@ const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleMod
   if (sourcePage.includes('financiamento') || sourcePage.includes('servico')) {
     return {
       title: 'Dúvidas sobre serviços?',
-      subtitle: 'Atendimento com IA inteligente',
+      subtitle: 'Tire suas dúvidas agora',
       message: 'Olá! Gostaria de informações sobre os serviços da Attra.',
       icon: Wrench,
       buttonText: 'Iniciar chat',
@@ -73,7 +73,7 @@ const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleMod
   if (sourcePage.includes('jornada')) {
     return {
       title: 'Quer agendar uma visita?',
-      subtitle: 'Nosso assistente pode ajudar',
+      subtitle: 'Agende agora mesmo',
       message: 'Olá! Gostaria de agendar uma visita ao showroom da Attra.',
       icon: Car,
       buttonText: 'Iniciar chat',
@@ -83,7 +83,7 @@ const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleMod
 
   return {
     title: 'Fale conosco!',
-    subtitle: 'Atendimento inteligente 24h',
+    subtitle: '',
     message: 'Olá! Gostaria de mais informações sobre a Attra Veículos.',
     icon: Bot,
     buttonText: 'Iniciar chat',
@@ -230,7 +230,7 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
     }
 
     // BEHAVIOR 3: General pages - Leadster com IA + chat widget
-    const loadingId = showToast('loading', 'Iniciando chat inteligente...')
+    const loadingId = showToast('loading', 'Iniciando chat...')
 
     const result = await sendToLeadsterWithAI(basePayload)
 
@@ -244,7 +244,9 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
       ])
       setIsChatOpen(true)
     } else {
-      showToast('error', result.message)
+      // Silently fallback to WhatsApp on error - no error message to user
+      console.warn('[WhatsApp] AI chat error, falling back to WhatsApp:', result.message)
+      window.open(getWhatsAppRedirectUrl(), '_blank')
     }
   }
 
@@ -309,12 +311,12 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
     }
   }
 
-  // Get subtitle text based on behavior
+  // Get subtitle text based on behavior (removed from tooltip footer)
   const getSubtitleText = () => {
     switch (pageBehavior) {
       case 'vehicle': return 'Nossa equipe entrará em contato'
       case 'estoque': return 'Atendimento direto no WhatsApp'
-      case 'general': return 'Atendimento inteligente 24h'
+      case 'general': return '' // Removed "Atendimento inteligente 24h"
     }
   }
 
@@ -371,7 +373,9 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
           </div>
           <div>
             <p className="text-foreground font-semibold">{context.title}</p>
-            <p className="text-foreground-secondary text-sm">{context.subtitle}</p>
+            {context.subtitle && (
+              <p className="text-foreground-secondary text-sm">{context.subtitle}</p>
+            )}
           </div>
         </div>
 
@@ -394,9 +398,11 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
           {isLoading ? getLoadingText() : context.buttonText}
         </button>
 
-        <p className="text-xs text-foreground-secondary text-center mt-3">
-          {getSubtitleText()}
-        </p>
+        {getSubtitleText() && (
+          <p className="text-xs text-foreground-secondary text-center mt-3">
+            {getSubtitleText()}
+          </p>
+        )}
       </div>
 
       {/* Chat Widget - appears for both estoque (static) and general (AI) pages */}
@@ -481,7 +487,7 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
               </button>
             </div>
             <p className="text-xs text-foreground-secondary text-center mt-2">
-              {pageBehavior === 'estoque' ? 'Atendimento humano' : 'Powered by Leadster AI'}
+              {pageBehavior === 'estoque' ? 'Atendimento humano' : 'Attra Veículos'}
             </p>
           </div>
         </div>

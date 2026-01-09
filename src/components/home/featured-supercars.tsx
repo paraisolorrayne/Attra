@@ -76,7 +76,7 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
             Últimos veículos em destaque
           </h2>
           <p className="text-foreground-secondary text-lg max-w-2xl">
-            Máquinas exclusivas selecionadas para entusiastas exigentes
+            Veículos selecionados para quem exige a perfeição em cada detalhe
           </p>
         </div>
 

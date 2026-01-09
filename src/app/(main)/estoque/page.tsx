@@ -8,6 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getVehicles, type AutoConfFilters } from '@/lib/autoconf-api'
 import { Vehicle } from '@/types'
 import { VehicleRequestForm } from '@/components/forms/vehicle-request-form'
+import { FAQSection } from '@/components/home'
+import { FAQSchema } from '@/components/seo'
+import { estoqueFAQs } from '@/lib/faq-data'
 import { Search, Globe, Shield, Check } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -320,6 +323,14 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
           </div>
         </Container>
       </section>
+
+      {/* FAQ Section */}
+      <FAQSection
+        faqs={estoqueFAQs}
+        title="Dúvidas sobre nosso Estoque"
+        subtitle="Perguntas frequentes sobre compra de veículos na Attra"
+      />
+      <FAQSchema faqs={estoqueFAQs} />
     </>
   )
 }

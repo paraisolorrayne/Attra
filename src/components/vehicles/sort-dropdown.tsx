@@ -32,7 +32,6 @@ export function SortDropdown({ currentSort }: SortDropdownProps) {
       <option value="preco-asc">Menor preço</option>
       <option value="preco-desc">Maior preço</option>
       <option value="km-asc">Menor km</option>
-      <option value="ano-desc">Mais novos</option>
     </select>
   )
 }

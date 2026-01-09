@@ -8,6 +8,7 @@ import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/utils'
+import { ListenToContent } from './listen-to-content'
 
 interface EducativoTemplateProps {
   post: DualBlogPost
@@ -75,6 +76,14 @@ export function EducativoTemplate({ post }: EducativoTemplateProps) {
               <Clock className="w-4 h-4" />
               <span>{post.reading_time} de leitura</span>
             </div>
+          </div>
+
+          {/* Listen to Content Button */}
+          <div className="mt-6">
+            <ListenToContent
+              content={post.content}
+              title={post.title}
+            />
           </div>
         </Container>
       </section>

@@ -11,25 +11,21 @@ const experiences = [
     icon: Building2,
     title: 'Showrooms com Curadoria',
     description: 'Ambientação exclusiva projetada para exibir cada veículo como uma obra de arte. Iluminação profissional, climatização e espaço pensado para apreciação.',
-    gradient: 'from-primary/20 via-primary/10 to-transparent',
   },
   {
     icon: Truck,
     title: 'Logística Nacional Premium',
     description: 'Entrega em qualquer estado do Brasil com seguro especializado para veículos de alto valor, rastreamento em tempo real e cuidado obsessivo.',
-    gradient: 'from-blue-500/20 via-blue-500/10 to-transparent',
   },
   {
     icon: Shield,
     title: 'Procedência Verificada',
     description: 'Cada veículo passa por análise rigorosa de histórico, documentação e inspeção técnica de 200 itens antes de integrar nosso acervo.',
-    gradient: 'from-green-500/20 via-green-500/10 to-transparent',
   },
   {
     icon: UserCheck,
     title: 'Atendimento Sob Medida',
     description: 'Consultores especializados dedicados a entender seu perfil e apresentar as melhores opções com discrição, agilidade e total personalização.',
-    gradient: 'from-purple-500/20 via-purple-500/10 to-transparent',
   },
 ]
 
@@ -66,28 +62,36 @@ export function ExperienceSection() {
             <div
               key={exp.title}
               className={`group relative bg-background-card border border-border rounded-2xl overflow-hidden
-                card-premium opacity-0 ${isVisible ? `animate-fade-in-up stagger-${index + 1}` : ''}`}
+                transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5
+                opacity-0 ${isVisible ? `animate-fade-in-up stagger-${index + 1}` : ''}`}
             >
-              {/* Gradient Background */}
-              <div className="relative aspect-[16/9] overflow-hidden">
-                <div className={`absolute inset-0 bg-gradient-to-br ${exp.gradient}`} />
+              {/* Premium Gradient Background - Subtle monochromatic */}
+              <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-background-soft via-background-card to-background-soft">
+                {/* Subtle radial glow */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(154,28,28,0.08),transparent_60%)]" />
+
+                {/* Large background icon */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <exp.icon className="w-24 h-24 text-foreground/5" />
+                  <exp.icon className="w-28 h-28 text-foreground/[0.03] dark:text-foreground/[0.05]" />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-background-card via-background-card/50 to-transparent" />
+
+                {/* Bottom fade to card */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background-card via-background-card/60 to-transparent" />
               </div>
 
               {/* Content */}
               <div className="absolute bottom-0 left-0 right-0 p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-primary/10 rounded-xl">
+                <div className="flex gap-4">
+                  <div className="p-3 bg-primary/10 rounded-xl border border-primary/10
+                                  group-hover:bg-primary/15 group-hover:border-primary/20 transition-colors
+                                  shrink-0 self-start">
                     <exp.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                       {exp.title}
                     </h3>
-                    <p className="text-foreground-secondary">
+                    <p className="text-foreground-secondary leading-relaxed">
                       {exp.description}
                     </p>
                   </div>

@@ -24,7 +24,7 @@ export function Breadcrumb({ items, className, afterHero = false }: BreadcrumbPr
     >
       <ol className="flex items-center flex-wrap gap-1 text-sm">
         {allItems.map((item, index) => (
-          <li key={item.href || `breadcrumb-${index}`} className="flex items-center">
+          <li key={`breadcrumb-${index}-${item.label}`} className="flex items-center">
             {index > 0 && (
               <ChevronRight className="w-4 h-4 mx-2 text-foreground-secondary" />
             )}

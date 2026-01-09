@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { MapPin, Phone, Clock, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 const locations = [
   {
@@ -29,7 +30,10 @@ export function LocationSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className={cn(
+          "grid gap-6 mb-8",
+          locations.length === 1 ? "max-w-lg mx-auto" : "md:grid-cols-2"
+        )}>
           {locations.map((location) => (
             <div
               key={location.id}

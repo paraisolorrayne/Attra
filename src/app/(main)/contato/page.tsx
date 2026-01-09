@@ -120,8 +120,8 @@ export default function ContatoPage() {
               Fale com a <span className="text-metallic text-metallic-animate">Attra Veículos</span>
             </h1>
             <p className="text-lg lg:text-xl text-foreground-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-              Estamos prontos para atender colecionadores de <strong className="text-foreground">todo o Brasil</strong>.
-              Agende uma visita ao showroom em Uberlândia ou inicie sua jornada à distância.
+              Atendemos clientes de todo o Brasil cujos  <strong className="text-foreground">padrões de qualidade são inegociáveis.</strong>.
+              Agende uma visita ao nosso showroom em Uberlândia ou inicie sua consultoria personalizada de forma remota
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="text-lg px-8 py-6">
