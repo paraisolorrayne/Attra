@@ -173,7 +173,7 @@ export default function ContatoPage() {
               <span className="text-xs font-semibold text-primary uppercase tracking-wider">Atendimento Nacional</span>
             </div>
             <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">
-              Atendemos Colecionadores de Todo o Brasil
+              Atendemos clientes de Todos os Estados do Brasil
             </h2>
             <p className="text-foreground-secondary max-w-2xl mx-auto">
               Com base em Uberlândia, a Attra oferece atendimento nacional com logística especializada para entrega em qualquer cidade.

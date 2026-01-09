@@ -67,7 +67,7 @@ export function Footer() {
               Atendimento nacional a partir de Minas Gerais.
             </p>
             <div className="flex gap-3">
-              <a href="https://instagram.com/attraveiculos" target="_blank" rel="noopener noreferrer" className="p-2 bg-background hover:bg-primary hover:text-white rounded-lg transition-colors">
+              <a href="https://instagram.com/attra.veiculos" target="_blank" rel="noopener noreferrer" className="p-2 bg-background hover:bg-primary hover:text-white rounded-lg transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
               <a href="https://facebook.com/attraveiculos" target="_blank" rel="noopener noreferrer" className="p-2 bg-background hover:bg-primary hover:text-white rounded-lg transition-colors">
