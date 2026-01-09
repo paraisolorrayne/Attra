@@ -5,6 +5,31 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2026-01-09
+
+### Adicionado
+- **Seção de experiência redesenhada**: Cards com estilo monocromático premium e visual sofisticado
+- **Componente Listen to Content**: Recurso de leitura em voz alta para artigos do blog
+- **Calculadora de financiamento**: Componente interativo para simulação de financiamento
+- **Inscrição de newsletter**: Formulário de inscrição para newsletter
+- **Alerta de veículos**: Sistema de notificação para novos veículos
+- **Seção FAQ na home**: Perguntas frequentes com schema SEO
+- **Página glossário automotivo**: Conteúdo educativo sobre termos automotivos
+- **Página guia supercarros**: Lead magnet com guia gratuito
+- **Componentes de urgência**: CountdownTimer, UrgencyBanner, InventoryStatusBar
+- **Schemas SEO**: FAQSchema, LocalBusinessSchema, VehicleSchema
+- **CTAs aprimoradas**: Novo componente vehicle-card-ctas para cards de veículos
+
+### Corrigido
+- **Erro de chave duplicada no breadcrumb**: Corrigido uso de `index` como chave para evitar duplicação
+- **Filtro "Mais novos" removido**: Removida opção de ordenação "Mais novos" na página de estoque
+
+### Melhorado
+- **Componentes de blog**: Templates educativo e car-review atualizados
+- **Galeria de veículos**: Melhorias visuais na galeria cinematográfica
+- **Botão WhatsApp**: Comportamento refinado baseado na página
+- **Seções da home**: CTA, Location e Featured Supercars atualizados
+
 ## [1.3.0] - 2026-01-01
 
 ### Corrigido
