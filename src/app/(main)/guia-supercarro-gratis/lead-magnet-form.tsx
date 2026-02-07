@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2, Download, CheckCircle } from 'lucide-react'
 import { sendWhatsAppWebhook, getGeoLocation } from '@/lib/webhook'
+import { useAnalytics } from '@/hooks/use-analytics'
+import { useVisitorTracking } from '@/components/providers/visitor-tracking-provider'
 
 const schema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -20,6 +22,8 @@ type FormData = z.infer<typeof schema>
 export function LeadMagnetForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const { trackGuideDownload, trackFormSubmission } = useAnalytics()
+  const { getVisitorContext, identifyVisitor } = useVisitorTracking()
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -29,7 +33,7 @@ export function LeadMagnetForm() {
     setIsSubmitting(true)
     try {
       const geoLocation = await getGeoLocation()
-      
+
       await sendWhatsAppWebhook({
         eventType: 'general_inquiry',
         sourcePage: 'lead_magnet_guia_supercarro',
@@ -37,9 +41,24 @@ export function LeadMagnetForm() {
           userMessage: `Lead Magnet Download - Nome: ${data.name}, Email: ${data.email}, Telefone: ${data.phone || 'Não informado'}`,
         },
       }, geoLocation)
-      
+
+      // Track form submission and guide download in analytics with visitor context (includes geolocation)
+      const visitorContext = getVisitorContext()
+      trackFormSubmission({
+        formName: 'lead_magnet_form',
+        formLocation: '/guia-supercarro-gratis',
+      }, visitorContext)
+      trackGuideDownload('Guia Supercarro Attra', data.email, visitorContext)
+
+      // Identify visitor for GA4 User Properties and Clarity
+      identifyVisitor({
+        email: data.email,
+        phone: data.phone || undefined,
+        name: data.name,
+      })
+
       setIsSuccess(true)
-      
+
       // Simulate PDF download after short delay
       setTimeout(() => {
         // In production, this would be a real PDF URL

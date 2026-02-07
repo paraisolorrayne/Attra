@@ -10,6 +10,8 @@ import { WHATSAPP_NUMBER } from '@/lib/constants'
 import { GeoLocation } from '@/types'
 import { useVehicleContext } from '@/contexts/vehicle-context'
 import { usePageChannel, mapChannelToBehavior, type PageBehavior } from '@/hooks/use-page-channel'
+import { useAnalytics } from '@/hooks/use-analytics'
+import { useVisitorTracking } from '@/components/providers/visitor-tracking-provider'
 
 interface WhatsAppButtonProps {
   sourcePage?: string // Optional - will auto-detect from pathname if not provided
@@ -101,6 +103,8 @@ const getContextMessage = (sourcePage: string, pageBehavior: PageBehavior, vehic
 export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
   const pathname = usePathname()
   const { vehicle } = useVehicleContext()
+  const { trackWhatsAppClick } = useAnalytics()
+  const { getVisitorContext } = useVisitorTracking()
   const [isOpen, setIsOpen] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -194,6 +198,15 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
     setHasInteracted(true)
     setIsOpen(false)
     setIsLoading(true)
+
+    // Track WhatsApp click in analytics with visitor context (includes geolocation)
+    const visitorContext = getVisitorContext()
+    trackWhatsAppClick(currentPage, vehicleId ? {
+      id: vehicleId,
+      name: `${vehicleBrand} ${vehicleModel}`,
+      brand: vehicleBrand || '',
+      price: 0, // Price not available in context
+    } : undefined, visitorContext)
 
     const basePayload = {
       eventType: vehicleId ? 'vehicle_inquiry' : 'chat_request' as const,

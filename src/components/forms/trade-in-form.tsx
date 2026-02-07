@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
+import { useAnalytics } from '@/hooks/use-analytics'
+import { useVisitorTracking } from '@/components/providers/visitor-tracking-provider'
 
 const schema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -32,6 +34,8 @@ const conditionOptions = [
 export function TradeInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const { trackFormSubmission } = useAnalytics()
+  const { getVisitorContext, identifyVisitor } = useVisitorTracking()
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -45,6 +49,22 @@ export function TradeInForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, subject: 'Avaliação de Veículo', sourcePage: '/compramos-seu-carro' }),
       })
+
+      // Track form submission in analytics with visitor context (includes geolocation)
+      const visitorContext = getVisitorContext()
+      trackFormSubmission({
+        formName: 'trade_in_form',
+        formLocation: '/compramos-seu-carro',
+        vehicleName: `${data.brand} ${data.model} ${data.year}`,
+      }, visitorContext)
+
+      // Identify visitor for GA4 User Properties and Clarity
+      identifyVisitor({
+        email: data.email,
+        phone: data.phone,
+        name: data.name,
+      })
+
       setIsSuccess(true)
       reset()
     } catch (error) {

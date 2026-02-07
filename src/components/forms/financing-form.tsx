@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
+import { useAnalytics } from '@/hooks/use-analytics'
+import { useVisitorTracking } from '@/components/providers/visitor-tracking-provider'
 
 const schema = z.object({
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -53,6 +55,8 @@ export function FinancingForm() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [vehicleValueDisplay, setVehicleValueDisplay] = useState('')
   const [downPaymentDisplay, setDownPaymentDisplay] = useState('')
+  const { trackFormSubmission, trackFinancingCalculation } = useAnalytics()
+  const { getVisitorContext, identifyVisitor } = useVisitorTracking()
 
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -75,11 +79,43 @@ export function FinancingForm() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
     try {
+      // Parse currency values for analytics
+      const parseValue = (str: string) => {
+        const num = str.replace(/[^\d,]/g, '').replace(',', '.')
+        return parseFloat(num) || 0
+      }
+      const vehiclePrice = parseValue(data.vehicleValue)
+      const downPayment = parseValue(data.downPayment || '')
+      const installments = parseInt(data.installments) || 48
+
       await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, subject: 'Simulação de Financiamento', sourcePage: '/financiamento' }),
       })
+
+      // Track financing calculation in analytics with visitor context (includes geolocation)
+      const visitorContext = getVisitorContext()
+      trackFinancingCalculation({
+        vehiclePrice,
+        downPayment,
+        installments,
+        monthlyPayment: (vehiclePrice - downPayment) / installments,
+      }, visitorContext)
+
+      // Track form submission with visitor context
+      trackFormSubmission({
+        formName: 'financing_form',
+        formLocation: '/financiamento',
+      }, visitorContext)
+
+      // Identify visitor for GA4 User Properties and Clarity
+      identifyVisitor({
+        email: data.email,
+        phone: data.phone,
+        name: data.name,
+      })
+
       setIsSuccess(true)
       reset()
       setVehicleValueDisplay('')

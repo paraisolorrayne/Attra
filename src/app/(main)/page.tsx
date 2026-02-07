@@ -1,7 +1,6 @@
 import {
   CinematicHero,
   FeaturedSupercars,
-  EngineSoundSection,
   ExperienceSection,
   TestimonialsSection,
   LocationSection,
@@ -54,9 +53,6 @@ export default async function Home() {
 
       {/* Featured supercar inventory with cinematic cards */}
       <FeaturedSupercars vehicles={featuredVehicles} />
-
-      {/* Interactive engine sound experience */}
-      <EngineSoundSection />
 
       {/* Attra experience showcase */}
       <ExperienceSection />

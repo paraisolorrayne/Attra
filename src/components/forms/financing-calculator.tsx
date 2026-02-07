@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Calculator, MessageCircle, TrendingDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getWhatsAppUrl } from '@/lib/constants'
+import { useAnalytics } from '@/hooks/use-analytics'
+import { useVisitorTracking } from '@/components/providers/visitor-tracking-provider'
 
 interface FinancingCalculatorProps {
   defaultVehicleValue?: number
@@ -14,7 +16,10 @@ export function FinancingCalculator({ defaultVehicleValue = 500000 }: FinancingC
   const [downPayment, setDownPayment] = useState(Math.round(defaultVehicleValue * 0.3))
   const [months, setMonths] = useState(48)
   const [monthlyPayment, setMonthlyPayment] = useState(0)
-  
+  const { trackFinancingCalculation, trackWhatsAppClick } = useAnalytics()
+  const { getVisitorContext } = useVisitorTracking()
+  const lastTrackedRef = useRef<string | null>(null)
+
   // Premium financing rate (monthly) - estimated 1.49% for luxury vehicles
   const annualRate = 0.1788 // 17.88% annual
   const monthlyRate = annualRate / 12
@@ -25,12 +30,28 @@ export function FinancingCalculator({ defaultVehicleValue = 500000 }: FinancingC
       setMonthlyPayment(0)
       return
     }
-    
+
     // PMT formula for loan calculation
-    const payment = financedAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / 
+    const payment = financedAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) /
                    (Math.pow(1 + monthlyRate, months) - 1)
     setMonthlyPayment(Math.round(payment))
-  }, [vehicleValue, downPayment, months, monthlyRate])
+
+    // Track financing calculation when values change (debounced by tracking key)
+    const trackingKey = `${vehicleValue}-${downPayment}-${months}`
+    if (lastTrackedRef.current !== trackingKey && financedAmount > 0) {
+      // Only track after user interaction (not initial render)
+      if (lastTrackedRef.current !== null) {
+        const visitorContext = getVisitorContext()
+        trackFinancingCalculation({
+          vehiclePrice: vehicleValue,
+          downPayment,
+          installments: months,
+          monthlyPayment: Math.round(payment),
+        }, visitorContext)
+      }
+      lastTrackedRef.current = trackingKey
+    }
+  }, [vehicleValue, downPayment, months, monthlyRate, trackFinancingCalculation])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -150,7 +171,11 @@ Gostaria de mais informações sobre financiamento.`
         </div>
 
         <Button asChild className="w-full">
-          <a href={getWhatsAppUrl(whatsappMessage)} target="_blank">
+          <a
+            href={getWhatsAppUrl(whatsappMessage)}
+            target="_blank"
+            onClick={() => trackWhatsAppClick('/financiamento-calculator', undefined, getVisitorContext())}
+          >
             <MessageCircle className="w-4 h-4 mr-2" />
             Solicitar Proposta Real
           </a>

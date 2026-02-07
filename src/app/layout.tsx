@@ -5,6 +5,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ToastProvider } from '@/components/ui/toast'
 import { VisitorTrackingProvider } from '@/components/providers/visitor-tracking-provider'
+import { AnalyticsProvider, AnalyticsNoScript } from '@/components/analytics'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -65,7 +66,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        {/* Analytics scripts loaded in head for optimal tracking */}
+        <AnalyticsProvider />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* GTM NoScript fallback for users without JavaScript */}
+        <AnalyticsNoScript />
         <ThemeProvider>
           <ToastProvider>
             <Suspense fallback={null}>
