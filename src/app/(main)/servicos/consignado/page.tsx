@@ -167,6 +167,28 @@ export default function ConsignadoPage() {
         </Container>
       </section>
 
+      {/* VIDEO SECTION */}
+      <section className="py-16 bg-background-soft">
+        <Container>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-4">Conheça Nosso Consignado</h2>
+              <p className="text-foreground-secondary">Assista ao vídeo e entenda como funciona o processo de consignação na Attra.</p>
+            </div>
+            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl">
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/0Q0nJUjrp1A"
+                title="Consignado Automotivo - Attra Veículos"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </Container>
+      </section>
+
       {/* FAQ SECTION */}
       <section className="py-16 bg-background" id="perguntas-frequentes">
         <Container>

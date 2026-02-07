@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { sendNotification, logNotificationEvent, NotificationType } from '@/lib/notifications'
+import { checkRateLimit, getClientIP, RATE_LIMIT_PRESETS } from '@/lib/rate-limit'
 
 const contactSchema = z.object({
   name: z.string().min(3),
@@ -54,6 +55,26 @@ function getNotificationType(formType?: string, sourcePage?: string): Notificati
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting for form submissions
+    const clientIP = getClientIP(request)
+    const rateLimitResult = checkRateLimit(clientIP, RATE_LIMIT_PRESETS.form)
+
+    if (!rateLimitResult.success) {
+      console.warn(`[Contact API] Rate limit exceeded for IP: ${clientIP}`)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Muitas requisições. Aguarde um momento antes de enviar novamente.'
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.retryAfter),
+          }
+        }
+      )
+    }
+
     const body = await request.json()
     const data = contactSchema.parse(body)
 

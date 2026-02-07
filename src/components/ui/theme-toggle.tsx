@@ -12,7 +12,7 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ className, iconClassName }: ThemeToggleProps) {
   const [mounted, setMounted] = useState(false)
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
 
   useEffect(() => {
     setMounted(true)
@@ -37,17 +37,20 @@ export function ThemeToggle({ className, iconClassName }: ThemeToggleProps) {
     )
   }
 
+  // Use resolvedTheme to get the actual current theme (handles 'system' correctly)
+  const isDark = resolvedTheme === 'dark'
+
   return (
     <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className={cn(
         'p-2 rounded-xl transition-colors',
         !hasCustomStyles && defaultStyles,
         className
       )}
-      aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+      aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
     >
-      {theme === 'dark' ? (
+      {isDark ? (
         <Sun className={cn('w-5 h-5', iconClassName || 'text-current')} strokeWidth={2.5} />
       ) : (
         <Moon className={cn('w-5 h-5', iconClassName || 'text-current')} strokeWidth={2.5} />

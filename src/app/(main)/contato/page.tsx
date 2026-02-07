@@ -50,7 +50,7 @@ const locations = [
     phone: PHONE_DISPLAY,
     whatsapp: WHATSAPP_NUMBER,
     hours: 'Seg a Sex: 8h às 18h | Sáb: 8h às 13h',
-    mapUrl: 'https://maps.google.com/?q=Attra+Veiculos+Uberlandia+MG',
+    mapUrl: 'https://maps.app.goo.gl/wBpftykDQRQJmB1z8',
     features: ['Showroom climatizado', 'Estacionamento privativo', 'Ambiente exclusivo para negociação'],
   },
 ]

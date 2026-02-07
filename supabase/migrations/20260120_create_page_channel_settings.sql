@@ -53,18 +53,21 @@ CREATE INDEX IF NOT EXISTS idx_page_channel_settings_page_path
     ON public.page_channel_settings(page_path);
 
 -- Insert default configurations for common pages
+-- Most pages use whatsapp_direct for immediate customer contact
 INSERT INTO public.page_channel_settings (page_path, page_name, channel_behavior, custom_greeting) VALUES
-    ('/', 'Página Inicial', 'leadster_ai', 'Olá! Bem-vindo à Attra Veículos. Como posso ajudar?'),
-    ('/estoque', 'Estoque', 'leadster_static', 'Olá! Procurando algo específico? Um consultor entrará em contato em breve.'),
-    ('/estoque/*', 'Páginas de Estoque (Filtros)', 'leadster_static', NULL),
+    ('/', 'Página Inicial', 'whatsapp_direct', NULL),
+    ('/estoque', 'Estoque', 'whatsapp_direct', NULL),
+    ('/estoque/*', 'Páginas de Estoque (Filtros)', 'whatsapp_direct', NULL),
     ('/veiculo/*', 'Página de Veículo', 'whatsapp_direct', NULL),
-    ('/financiamento', 'Financiamento', 'leadster_ai', 'Olá! Posso ajudar com informações sobre financiamento.'),
-    ('/servicos', 'Serviços', 'leadster_ai', 'Olá! Precisa de informações sobre nossos serviços?'),
-    ('/contato', 'Contato', 'leadster_ai', 'Olá! Como podemos ajudar você hoje?'),
-    ('/blog', 'Blog', 'leadster_ai', NULL),
-    ('/blog/*', 'Artigos do Blog', 'leadster_ai', NULL),
-    ('/sobre', 'Sobre', 'leadster_ai', NULL),
-    ('/jornada-cliente', 'Jornada do Cliente', 'leadster_ai', 'Olá! Quer agendar uma visita ao nosso showroom?')
+    ('/financiamento', 'Financiamento', 'whatsapp_direct', NULL),
+    ('/servicos', 'Serviços', 'whatsapp_direct', NULL),
+    ('/servicos/*', 'Páginas de Serviços', 'whatsapp_direct', NULL),
+    ('/contato', 'Contato', 'whatsapp_direct', NULL),
+    ('/blog', 'Blog', 'whatsapp_direct', NULL),
+    ('/blog/*', 'Artigos do Blog', 'whatsapp_direct', NULL),
+    ('/sobre', 'Sobre', 'whatsapp_direct', NULL),
+    ('/jornada', 'Jornada do Cliente', 'whatsapp_direct', NULL),
+    ('/jornada-cliente', 'Jornada do Cliente (Alternativo)', 'whatsapp_direct', NULL)
 ON CONFLICT (page_path) DO NOTHING;
 
 -- Add comment explaining the table

@@ -94,8 +94,8 @@ export function ListenToContent({ content, title }: ListenToContentProps) {
     // Create utterance
     const utterance = new SpeechSynthesisUtterance(textToSpeak)
     utterance.lang = 'pt-BR'
-    utterance.rate = 1.25
-    utterance.pitch = 1.4
+    utterance.rate = 0.9  // Reduced from 1.25 for better comprehension
+    utterance.pitch = 1.1  // Slightly reduced pitch for more natural sound
 
     // Event handlers
     utterance.onstart = () => setPlaybackState('playing')

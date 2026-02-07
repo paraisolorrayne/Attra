@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -20,6 +20,26 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
+// Currency mask helper - formats to BRL (R$ 1.234,56)
+function formatCurrency(value: string): string {
+  // Remove tudo exceto números
+  const numericValue = value.replace(/\D/g, '')
+
+  if (!numericValue) return ''
+
+  // Converter para número (centavos)
+  const cents = parseInt(numericValue, 10)
+
+  // Formatar como moeda BRL
+  const formatted = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  }).format(cents / 100)
+
+  return formatted
+}
+
 const installmentOptions = [
   { value: '12', label: '12x' },
   { value: '24', label: '24x' },
@@ -31,10 +51,26 @@ const installmentOptions = [
 export function FinancingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [vehicleValueDisplay, setVehicleValueDisplay] = useState('')
+  const [downPaymentDisplay, setDownPaymentDisplay] = useState('')
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  // Handler for vehicle value input with currency mask
+  const handleVehicleValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCurrency(e.target.value)
+    setVehicleValueDisplay(formatted)
+    setValue('vehicleValue', formatted)
+  }, [setValue])
+
+  // Handler for down payment input with currency mask
+  const handleDownPaymentChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCurrency(e.target.value)
+    setDownPaymentDisplay(formatted)
+    setValue('downPayment', formatted)
+  }, [setValue])
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
@@ -46,6 +82,8 @@ export function FinancingForm() {
       })
       setIsSuccess(true)
       reset()
+      setVehicleValueDisplay('')
+      setDownPaymentDisplay('')
     } catch (error) {
       console.error('Error:', error)
     } finally {
@@ -84,11 +122,26 @@ export function FinancingForm() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Valor do veículo</label>
-          <Input {...register('vehicleValue')} type="number" placeholder="R$ 500.000" error={errors.vehicleValue?.message} />
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={vehicleValueDisplay}
+            onChange={handleVehicleValueChange}
+            placeholder="R$ 0,00"
+            error={errors.vehicleValue?.message}
+          />
+          <input type="hidden" {...register('vehicleValue')} />
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Entrada (opcional)</label>
-          <Input {...register('downPayment')} type="number" placeholder="R$ 100.000" />
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={downPaymentDisplay}
+            onChange={handleDownPaymentChange}
+            placeholder="R$ 0,00"
+          />
+          <input type="hidden" {...register('downPayment')} />
         </div>
       </div>
 

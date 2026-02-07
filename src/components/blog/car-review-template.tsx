@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import {
   Calendar, Clock, User, ArrowRight, Gauge, Zap, RotateCcw, Fuel,
   CheckCircle, ChevronLeft, ChevronRight, MessageCircle, Car,
-  Shield, TrendingUp, Star, Settings, Disc, X, Expand
+  Shield, TrendingUp, Star, Settings, Disc
 } from 'lucide-react'
 import type {
   DualBlogPost, CarReviewSpecs, CarReviewFAQ, CarReviewHighlight,
@@ -107,7 +107,6 @@ function GallerySection({
   model?: string
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   if (!images || images.length === 0) return null
 
@@ -123,17 +122,16 @@ function GallerySection({
   const goToPrev = () => setActiveIndex(i => i === 0 ? totalImages - 1 : i - 1)
   const goToNext = () => setActiveIndex(i => i === totalImages - 1 ? 0 : i + 1)
 
-  // Keyboard navigation - usando evento diretamente no useEffect
+  // Keyboard navigation
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') setActiveIndex(i => i === 0 ? totalImages - 1 : i - 1)
       if (e.key === 'ArrowRight') setActiveIndex(i => i === totalImages - 1 ? 0 : i + 1)
-      if (e.key === 'Escape' && isFullscreen) setIsFullscreen(false)
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isFullscreen, totalImages])
+  }, [totalImages])
 
   return (
     <section className="py-10 lg:py-14 bg-background-soft">
@@ -143,8 +141,7 @@ function GallerySection({
         </h2>
 
         {/* Imagem principal com navegação */}
-        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-4 group cursor-pointer"
-             onClick={() => setIsFullscreen(true)}>
+        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-4 group">
           <Image
             src={normalizedImages[activeIndex].url}
             alt={normalizedImages[activeIndex].alt}
@@ -153,20 +150,11 @@ function GallerySection({
             priority={activeIndex === 0}
           />
 
-          {/* Botão de expandir */}
-          <button
-            onClick={(e) => { e.stopPropagation(); setIsFullscreen(true) }}
-            className="absolute top-4 right-4 p-3 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors opacity-0 group-hover:opacity-100"
-            aria-label="Tela cheia"
-          >
-            <Expand className="w-5 h-5" />
-          </button>
-
           {/* Navegação */}
           {normalizedImages.length > 1 && (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); goToPrev() }}
+                onClick={goToPrev}
                 className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50
                            text-white hover:bg-black/70 transition-colors"
                 aria-label="Imagem anterior"
@@ -174,7 +162,7 @@ function GallerySection({
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); goToNext() }}
+                onClick={goToNext}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50
                            text-white hover:bg-black/70 transition-colors"
                 aria-label="Próxima imagem"
@@ -214,86 +202,6 @@ function GallerySection({
           </div>
         )}
 
-        {/* Fullscreen overlay */}
-        {isFullscreen && (
-          <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-            {/* Close button */}
-            <button
-              onClick={() => setIsFullscreen(false)}
-              className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
-              aria-label="Fechar"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            {/* Navigation - Previous */}
-            {normalizedImages.length > 1 && (
-              <button
-                onClick={goToPrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
-                aria-label="Imagem anterior"
-              >
-                <ChevronLeft className="w-8 h-8" />
-              </button>
-            )}
-
-            {/* Main image */}
-            <div className="relative w-full h-full max-w-7xl max-h-[90vh] mx-16">
-              <Image
-                src={normalizedImages[activeIndex].url}
-                alt={normalizedImages[activeIndex].alt}
-                fill
-                className="object-contain"
-                quality={100}
-                sizes="100vw"
-                priority
-              />
-            </div>
-
-            {/* Navigation - Next */}
-            {normalizedImages.length > 1 && (
-              <button
-                onClick={goToNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white z-10 transition-colors"
-                aria-label="Próxima imagem"
-              >
-                <ChevronRight className="w-8 h-8" />
-              </button>
-            )}
-
-            {/* Thumbnail strip in fullscreen */}
-            {normalizedImages.length > 1 && (
-              <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90%] overflow-x-auto py-2 px-4">
-                {normalizedImages.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveIndex(index)}
-                    className={cn(
-                      'relative w-16 h-12 lg:w-20 lg:h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all',
-                      index === activeIndex ? 'border-primary' : 'border-white/30 opacity-60 hover:opacity-100'
-                    )}
-                  >
-                    <Image src={img.url} alt="" fill className="object-cover" sizes="80px" quality={60} />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Caption in fullscreen */}
-            {normalizedImages[activeIndex].caption && (
-              <div className="absolute bottom-32 left-1/2 -translate-x-1/2 text-white text-center max-w-2xl px-4">
-                <p className="text-sm lg:text-base bg-black/50 px-4 py-2 rounded-lg">
-                  {normalizedImages[activeIndex].caption}
-                </p>
-              </div>
-            )}
-
-            {/* Counter */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-lg bg-black/50 px-4 py-2 rounded-full">
-              {activeIndex + 1} / {normalizedImages.length}
-            </div>
-          </div>
-        )}
       </Container>
     </section>
   )

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { 
-  sendNotification, 
-  sendEmailNotification, 
+import {
+  sendNotification,
+  sendEmailNotification,
   sendWhatsAppNotification,
   logNotificationEvent,
-  NotificationType 
+  NotificationType
 } from '@/lib/notifications'
+import { checkRateLimit, getClientIP, RATE_LIMIT_PRESETS } from '@/lib/rate-limit'
 
 // Schema for notification requests
 const notificationSchema = z.object({
@@ -56,12 +57,24 @@ export async function POST(request: NextRequest) {
     // Validate authorization (optional - for internal use)
     const authHeader = request.headers.get('authorization')
     const webhookSecret = process.env.WEBHOOK_SECRET
-    
+
     // If webhook secret is set, require authorization
     if (webhookSecret && authHeader !== `Bearer ${webhookSecret}`) {
       // Allow requests without auth for now (internal API calls)
       // Uncomment below to enforce auth:
       // return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting for notification requests
+    const clientIP = getClientIP(request)
+    const rateLimitResult = checkRateLimit(clientIP, RATE_LIMIT_PRESETS.form)
+
+    if (!rateLimitResult.success) {
+      console.warn(`[Notifications API] Rate limit exceeded for IP: ${clientIP}`)
+      return NextResponse.json(
+        { success: false, error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
+      )
     }
 
     const body = await request.json()
