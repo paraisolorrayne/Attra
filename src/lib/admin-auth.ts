@@ -13,8 +13,9 @@ import {
   type AdminUser
 } from './admin-auth-supabase'
 
-// Re-export types for backwards compatibility
+// Re-export for backwards compatibility
 export type { AdminUser }
+export { getCurrentAdmin }
 
 /**
  * Check if current request is authenticated

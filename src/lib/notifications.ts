@@ -1,8 +1,19 @@
 import { Resend } from 'resend'
 import { WHATSAPP_NUMBER } from './constants'
 
-// Resend client instance
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy-loaded Resend client instance to avoid build-time errors
+let resendClient: Resend | null = null
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY environment variable is not set')
+    }
+    resendClient = new Resend(apiKey)
+  }
+  return resendClient
+}
 
 // Notification email destination
 const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'faleconosco@attraveiculos.com.br'
@@ -215,7 +226,7 @@ export async function sendEmailNotification(data: NotificationData): Promise<Ema
 
     console.log(`[Email] Sending ${data.type} notification to ${NOTIFICATION_EMAIL}`)
 
-    const { data: result, error } = await resend.emails.send({
+    const { data: result, error } = await getResendClient().emails.send({
       from: 'Attra Veículos <notificacoes@attraveiculos.com.br>',
       to: [NOTIFICATION_EMAIL],
       replyTo: data.senderEmail,

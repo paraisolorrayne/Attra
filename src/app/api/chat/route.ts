@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, getClientIP, RATE_LIMIT_PRESETS } from '@/lib/rate-limit'
 
 // N8N Webhook URL for AI chat
 const LEADSTER_AI_CHAT_URL = process.env.NEXT_PUBLIC_LEADSTER_AI_WEBHOOK_URL ||
@@ -21,6 +22,18 @@ interface ChatRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting for chat requests (moderate)
+    const clientIP = getClientIP(request)
+    const rateLimitResult = checkRateLimit(clientIP, RATE_LIMIT_PRESETS.api)
+
+    if (!rateLimitResult.success) {
+      console.warn(`[Chat API] Rate limit exceeded for IP: ${clientIP}`)
+      return NextResponse.json(
+        { success: false, error: 'Muitas mensagens. Aguarde um momento.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
+      )
+    }
+
     const body: ChatRequest = await request.json()
     const { message, sessionId, history = [], context = {} } = body
 

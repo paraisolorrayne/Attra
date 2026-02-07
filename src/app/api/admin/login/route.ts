@@ -2,9 +2,33 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createAdminClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import { checkRateLimit, getClientIP, RATE_LIMIT_PRESETS } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting - very strict for login attempts
+    const clientIP = getClientIP(request)
+    const rateLimitResult = checkRateLimit(clientIP, RATE_LIMIT_PRESETS.auth)
+
+    if (!rateLimitResult.success) {
+      console.warn(`[Admin Login] Rate limit exceeded for IP: ${clientIP}`)
+      return NextResponse.json(
+        {
+          error: 'Muitas tentativas de login. Tente novamente mais tarde.',
+          retryAfter: rateLimitResult.retryAfter
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateLimitResult.retryAfter),
+            'X-RateLimit-Limit': String(RATE_LIMIT_PRESETS.auth.limit),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': String(rateLimitResult.resetTime),
+          }
+        }
+      )
+    }
+
     const { email, password } = await request.json()
 
     if (!email || !password) {
