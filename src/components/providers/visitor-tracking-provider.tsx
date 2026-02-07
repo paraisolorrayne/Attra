@@ -99,6 +99,7 @@ export function VisitorTrackingProvider({ children }: Props) {
       // Get stored DB IDs
       fingerprintDbIdRef.current = getFingerprintDbId()
       sessionDbIdRef.current = getSessionDbId()
+      console.log('[VisitorTracking] Initial fingerprintDbId from localStorage:', fingerprintDbIdRef.current)
 
       // Collect device data and UTM params
       const collectedDeviceData = collectDeviceData()
@@ -136,14 +137,19 @@ export function VisitorTrackingProvider({ children }: Props) {
 
         if (response.ok) {
           const data = await response.json()
+          console.log('[VisitorTracking] Session API response:', data)
           if (data.fingerprint_db_id) {
             setFingerprintDbId(data.fingerprint_db_id)
             fingerprintDbIdRef.current = data.fingerprint_db_id
+            console.log('[VisitorTracking] fingerprintDbId set:', data.fingerprint_db_id)
           }
           if (data.session_db_id) {
             setSessionDbId(data.session_db_id)
             sessionDbIdRef.current = data.session_db_id
           }
+        } else {
+          const errorData = await response.json().catch(() => ({}))
+          console.error('[VisitorTracking] Session API error:', response.status, errorData)
         }
 
         // Push session_start event to dataLayer with all collected data
@@ -350,7 +356,17 @@ export function VisitorTrackingProvider({ children }: Props) {
 
   // Identify visitor with email/phone - integrates with GA4 and Clarity
   const identifyVisitor = useCallback((data: { email?: string; phone?: string; name?: string }) => {
-    if (!fingerprintDbIdRef.current) return
+    console.log('[VisitorTracking] identifyVisitor called', {
+      fingerprintDbId: fingerprintDbIdRef.current,
+      hasEmail: !!data.email,
+      hasPhone: !!data.phone,
+      hasName: !!data.name,
+    })
+
+    if (!fingerprintDbIdRef.current) {
+      console.warn('[VisitorTracking] Cannot identify: fingerprintDbId is null. Session may not be initialized yet.')
+      return
+    }
 
     // Send to internal tracking API
     fetch('/api/tracking/identify', {
@@ -361,7 +377,18 @@ export function VisitorTrackingProvider({ children }: Props) {
         source: 'form',
         ...data,
       }),
-    }).catch(() => {})
+    })
+      .then(async (res) => {
+        const responseData = await res.json()
+        if (res.ok) {
+          console.log('[VisitorTracking] Identify success:', responseData)
+        } else {
+          console.error('[VisitorTracking] Identify API error:', responseData)
+        }
+      })
+      .catch((err) => {
+        console.error('[VisitorTracking] Identify fetch error:', err)
+      })
 
     // Push visitor_identified event to dataLayer
     pushVisitorIdentifiedEvent(
