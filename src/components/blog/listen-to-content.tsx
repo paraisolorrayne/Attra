@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Play, Pause, Volume2, Loader2, AlertCircle } from 'lucide-react'
+import { Play, Pause, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 
 interface ListenToContentProps {
   content: string // HTML content from post
@@ -43,6 +44,9 @@ export function ListenToContent({ content, title }: ListenToContentProps) {
   const [errorMessage, setErrorMessage] = useState<string>('')
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   const synthRef = useRef<SpeechSynthesis | null>(null)
+
+  // Check if this feature is enabled in site settings
+  const { settings, isLoading: settingsLoading } = useSiteSettings()
 
   // Check for browser support on mount
   useEffect(() => {
@@ -141,8 +145,13 @@ export function ListenToContent({ content, title }: ListenToContentProps) {
     }
   }, [handleToggle, handleStop, playbackState])
 
-  // Don't render if not supported
+  // Don't render if not supported or if feature is disabled
   if (!isSupported) {
+    return null
+  }
+
+  // Don't render if feature is disabled in site settings
+  if (!settingsLoading && !settings.listen_to_content_enabled) {
     return null
   }
 

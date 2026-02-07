@@ -73,6 +73,14 @@ NEXT_PUBLIC_SITE_URL=https://seudominio.com.br
 
 # N8N Webhook Configuration (opcional)
 NEXT_PUBLIC_LEADSTER_SDR_WEBHOOK_URL=https://seu-webhook-url
+
+# Resend Email Configuration (obrigatório para notificações por email)
+RESEND_API_KEY=sua_api_key_resend
+NOTIFICATION_EMAIL=faleconosco@attraveiculos.com.br
+
+# WhatsApp Notification Webhook (opcional - usa N8N webhook como fallback)
+WHATSAPP_NOTIFICATION_WEBHOOK_URL=https://seu-webhook-url
+WEBHOOK_SECRET=seu_webhook_secret
 ```
 
 ---

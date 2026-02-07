@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Volume2, VolumeX, Play, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { useSiteSettings } from '@/hooks/use-site-settings'
 
 interface VehicleWithSound {
   id: string
@@ -149,6 +150,14 @@ export function EngineSoundSection() {
   const [engineTypes, setEngineTypes] = useState<EngineType[]>(fallbackEngineTypes)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const sectionRef = useRef<HTMLElement>(null)
+
+  // Check if this section is enabled in site settings
+  const { settings, isLoading: settingsLoading } = useSiteSettings()
+
+  // Don't render if section is disabled
+  if (!settingsLoading && !settings.engine_sound_section_enabled) {
+    return null
+  }
 
   // Fetch dynamic sounds from API
   useEffect(() => {
