@@ -12,7 +12,9 @@ import {
   ChevronDown,
   Menu,
   X,
-  Home
+  Home,
+  Settings,
+  Megaphone
 } from 'lucide-react'
 import type { AdminUser } from '@/lib/admin-auth-supabase'
 
@@ -57,9 +59,21 @@ export function AdminHeader({ admin }: AdminHeaderProps) {
       allowedRoles: ['admin', 'gerente'],
     },
     {
+      label: 'Marketing',
+      href: '/admin/marketing',
+      icon: <Megaphone className="w-4 h-4" />,
+      allowedRoles: ['admin', 'gerente'],
+    },
+    {
       label: 'CRM',
       href: '/admin/crm/leads',
       icon: <Users className="w-4 h-4" />,
+      allowedRoles: ['admin'],
+    },
+    {
+      label: 'Configurações',
+      href: '/admin/settings',
+      icon: <Settings className="w-4 h-4" />,
       allowedRoles: ['admin'],
     },
   ]

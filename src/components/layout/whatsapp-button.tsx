@@ -9,16 +9,14 @@ import { useToast } from '@/components/ui/toast'
 import { WHATSAPP_NUMBER } from '@/lib/constants'
 import { GeoLocation } from '@/types'
 import { useVehicleContext } from '@/contexts/vehicle-context'
+import { usePageChannel, mapChannelToBehavior, type PageBehavior } from '@/hooks/use-page-channel'
 
 interface WhatsAppButtonProps {
   sourcePage?: string // Optional - will auto-detect from pathname if not provided
 }
 
-// Page behavior types
-type PageBehavior = 'vehicle' | 'estoque' | 'general'
-
-// Determine page behavior based on sourcePage
-const getPageBehavior = (sourcePage: string, vehicleId?: string): PageBehavior => {
+// Fallback: Determine page behavior based on sourcePage (used when DB returns 'default')
+const getDefaultPageBehavior = (sourcePage: string, vehicleId?: string): PageBehavior => {
   // Vehicle page: /veiculo/[slug] - uses N8N webhook, shows toast
   if (sourcePage.includes('/veiculo/') || vehicleId) {
     return 'vehicle'
@@ -34,9 +32,7 @@ const getPageBehavior = (sourcePage: string, vehicleId?: string): PageBehavior =
 }
 
 // Context-aware messages based on page and behavior
-const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleModel?: string) => {
-  const behavior = getPageBehavior(sourcePage, vehicleBrand ? 'temp' : undefined)
-
+const getContextMessage = (sourcePage: string, pageBehavior: PageBehavior, vehicleBrand?: string, vehicleModel?: string) => {
   if (vehicleBrand && vehicleModel) {
     return {
       title: `Interesse no ${vehicleBrand} ${vehicleModel}?`,
@@ -48,7 +44,7 @@ const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleMod
     }
   }
 
-  if (behavior === 'estoque') {
+  if (pageBehavior === 'estoque') {
     return {
       title: 'Procurando algo específico?',
       subtitle: 'Fale diretamente no WhatsApp',
@@ -56,6 +52,17 @@ const getContextMessage = (sourcePage: string, vehicleBrand?: string, vehicleMod
       icon: Car,
       buttonText: 'Abrir WhatsApp',
       behavior: 'estoque' as PageBehavior,
+    }
+  }
+
+  if (pageBehavior === 'vehicle') {
+    return {
+      title: 'Precisa de ajuda?',
+      subtitle: 'Fale pelo WhatsApp',
+      message: 'Olá! Gostaria de mais informações sobre este veículo.',
+      icon: Car,
+      buttonText: 'Abrir WhatsApp',
+      behavior: 'vehicle' as PageBehavior,
     }
   }
 
@@ -106,13 +113,6 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const { showToast, hideToast } = useToast()
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
-    }
-  }, [chatMessages, isSendingMessage])
-
   // Get vehicle data from context (set by VehicleContextSetter on vehicle pages)
   const vehicleId = vehicle?.vehicleId
   const vehicleBrand = vehicle?.vehicleBrand
@@ -122,12 +122,30 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
   // Use pathname for auto-detection, or fallback to sourcePage prop
   const currentPage = sourcePage && sourcePage !== 'global' ? sourcePage : pathname
 
-  const context = getContextMessage(currentPage, vehicleBrand, vehicleModel)
+  // Fetch page channel settings from database
+  const {
+    channelBehavior,
+    customGreeting,
+    isLoading: isLoadingChannel,
+    isEnabled: isChannelEnabled
+  } = usePageChannel(currentPage)
+
+  // Determine page behavior: use DB settings or fallback to default
+  const hasVehicle = Boolean(vehicleId || (vehicleBrand && vehicleModel))
+  const pageBehavior = mapChannelToBehavior(channelBehavior, currentPage, hasVehicle)
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [chatMessages, isSendingMessage])
+
+  const context = getContextMessage(currentPage, pageBehavior, vehicleBrand, vehicleModel)
   const IconComponent = context.icon
-  const pageBehavior = getPageBehavior(currentPage, vehicleId)
 
   // Debug: log current behavior
-  console.log('[WhatsAppButton] pathname:', pathname, 'behavior:', pageBehavior, 'vehicle:', vehicleBrand, vehicleModel)
+  console.log('[WhatsAppButton] pathname:', pathname, 'channelBehavior:', channelBehavior, 'pageBehavior:', pageBehavior, 'vehicle:', vehicleBrand, vehicleModel)
 
   // Fetch geolocation on mount (only once)
   useEffect(() => {
@@ -220,9 +238,10 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
       hideToast(loadingId)
       setIsLoading(false)
 
-      // Open static chat widget (no AI)
+      // Open static chat widget (no AI) - use custom greeting if available
+      const greeting = customGreeting || 'Olá! Bem-vindo ao atendimento da Attra Veículos. Em que posso ajudar?'
       setChatMessages([
-        { role: 'assistant', content: 'Olá! Bem-vindo ao atendimento da Attra Veículos. Em que posso ajudar?' },
+        { role: 'assistant', content: greeting },
         { role: 'assistant', content: 'Um consultor especializado irá responder sua mensagem em breve. Enquanto isso, pode me contar o que está procurando!' }
       ])
       setIsChatOpen(true)
@@ -238,9 +257,10 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
     setIsLoading(false)
 
     if (result.success) {
-      // Open chat widget with initial message
+      // Open chat widget with initial message - use custom greeting if available
+      const greeting = customGreeting || 'Olá! Sou o assistente virtual da Attra Veículos. Como posso ajudar você hoje?'
       setChatMessages([
-        { role: 'assistant', content: 'Olá! Sou o assistente virtual da Attra Veículos. Como posso ajudar você hoje?' }
+        { role: 'assistant', content: greeting }
       ])
       setIsChatOpen(true)
     } else {
@@ -318,6 +338,11 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
       case 'estoque': return 'Atendimento direto no WhatsApp'
       case 'general': return '' // Removed "Atendimento inteligente 24h"
     }
+  }
+
+  // Don't render if channel is disabled for this page or still loading settings
+  if (!isChannelEnabled || isLoadingChannel) {
+    return null
   }
 
   return (

@@ -13,7 +13,9 @@ import {
   LogOut,
   Volume2,
   ChevronRight,
-  Home
+  Home,
+  Settings,
+  Megaphone
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
@@ -34,6 +36,8 @@ const navItems: NavItem[] = [
 
 const otherAdminItems: NavItem[] = [
   { name: 'Sons de Motor', href: '/admin/engine-sounds', icon: Volume2 },
+  { name: 'Marketing', href: '/admin/marketing', icon: Megaphone },
+  { name: 'Configurações', href: '/admin/settings', icon: Settings },
 ]
 
 export default function CRMLayout({ children }: { children: React.ReactNode }) {
