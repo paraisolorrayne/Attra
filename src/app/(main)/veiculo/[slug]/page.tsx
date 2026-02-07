@@ -66,7 +66,7 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 
 	return (
 		<main className="min-h-screen bg-background">
-			{/* Set vehicle data in global context for WhatsApp button */}
+			{/* Set vehicle data in global context for WhatsApp button and analytics tracking */}
 			<VehicleContextSetter
 				vehicleId={vehicle.id}
 				vehicleBrand={vehicle.brand}
@@ -74,6 +74,7 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 				vehicleYear={vehicle.year_model}
 				vehiclePrice={vehicle.price}
 				vehicleSlug={slug}
+				vehicleCategory={vehicle.category}
 			/>
 
 			{/* Hero Gallery - 60-70% viewport */}
