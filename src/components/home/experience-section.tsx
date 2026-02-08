@@ -57,41 +57,27 @@ export function ExperienceSection() {
         </div>
 
         {/* Experience Grid */}
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {experiences.map((exp, index) => (
             <div
               key={exp.title}
-              className={`group relative bg-background-card border border-border rounded-2xl overflow-hidden
+              className={`group bg-background-card border border-border rounded-2xl overflow-hidden
                 transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5
                 opacity-0 ${isVisible ? `animate-fade-in-up stagger-${index + 1}` : ''}`}
             >
-              {/* Premium Gradient Background - Subtle monochromatic */}
-              <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-background-soft via-background-card to-background-soft">
-                {/* Subtle radial glow */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(154,28,28,0.08),transparent_60%)]" />
-
-                {/* Large background icon */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <exp.icon className="w-28 h-28 text-foreground/[0.03] dark:text-foreground/[0.05]" />
-                </div>
-
-                {/* Bottom fade to card */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background-card via-background-card/60 to-transparent" />
-              </div>
-
-              {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              {/* Content - Static layout for mobile, overlay for desktop */}
+              <div className="p-5 sm:p-6">
                 <div className="flex gap-4">
                   <div className="p-3 bg-primary/10 rounded-xl border border-primary/10
                                   group-hover:bg-primary/15 group-hover:border-primary/20 transition-colors
                                   shrink-0 self-start">
                     <exp.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  <div className="min-w-0">
+                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                       {exp.title}
                     </h3>
-                    <p className="text-foreground-secondary leading-relaxed">
+                    <p className="text-sm sm:text-base text-foreground-secondary leading-relaxed">
                       {exp.description}
                     </p>
                   </div>
