@@ -42,6 +42,28 @@ export function generateBlogSlug(title: string): string {
     .replace(/(^-|-$)/g, '')
 }
 
+/**
+ * Generate a URL-friendly slug for news articles
+ * Includes a short hash to ensure uniqueness
+ */
+export function generateNewsSlug(title: string, id?: string): string {
+  const baseSlug = title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+    .replace(/(^-|-$)/g, '') // Remove leading/trailing hyphens
+    .substring(0, 80) // Limit length
+
+  // Add short ID suffix for uniqueness (first 8 chars of UUID)
+  if (id) {
+    const shortId = id.substring(0, 8)
+    return `${baseSlug}-${shortId}`
+  }
+
+  return baseSlug
+}
+
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text
   return text.substring(0, maxLength).trim() + '...'

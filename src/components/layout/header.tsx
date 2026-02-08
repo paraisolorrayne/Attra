@@ -15,6 +15,7 @@ const navigation = [
   { name: 'Estoque', href: '/estoque' },
   { name: 'Jornada Attra', href: '/jornada' },
   { name: 'Serviços', href: '/servicos' },
+  { name: 'Notícias', href: '/news' },
   { name: EDITORIAL_SECTION.menuLabel, href: EDITORIAL_SECTION.route },
   { name: 'Contato', href: '/contato' },
 ]
