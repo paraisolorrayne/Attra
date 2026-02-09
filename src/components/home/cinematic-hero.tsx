@@ -144,10 +144,17 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
     return `${km.toLocaleString('pt-BR')} km`
   }
 
+  // Dynamic height classes based on slide type
+  // Banner mobile (720x400) has ~1.8:1 ratio, so height should be ~56% of viewport width
+  // Vehicle slides need more height to show the full car
+  const heroHeightClass = isBannerSlide && isMobile
+    ? "relative h-[56vw] min-h-[280px] max-h-[450px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden"
+    : "relative h-[88svh] min-h-[520px] max-h-[780px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden"
+
   return (
     <>
     <section
-      className="relative h-[88svh] min-h-[520px] max-h-[780px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden"
+      className={heroHeightClass}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -181,6 +188,7 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
             }`
 
             // Banner slides: full cover image with link
+            // Mobile banners (720x400) have different aspect ratio than desktop (1920x450)
             if (slide.type === 'banner') {
               return (
                 <Link
@@ -192,7 +200,7 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
                     src={slide.image}
                     alt={`Banner promocional ${index + 1}`}
                     fill
-                    className="object-cover object-center"
+                    className="hero-banner-image"
                     priority={index <= 1}
                     sizes="100vw"
                     quality={95}

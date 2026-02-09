@@ -86,6 +86,124 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   // Powered by header removal
   poweredByHeader: false,
+
+  // 301 Redirects for old URLs (SEO - permanent redirects)
+  async redirects() {
+    return [
+      // Old brand pages → stock filter
+      {
+        source: '/marca/:brand',
+        destination: '/estoque?marca=:brand',
+        permanent: true,
+      },
+      // Old model pages → stock
+      {
+        source: '/modelo/:model',
+        destination: '/estoque',
+        permanent: true,
+      },
+      // Old pagination pattern
+      {
+        source: '/estoque-2-2',
+        destination: '/estoque',
+        permanent: true,
+      },
+      // Old company page → about
+      {
+        source: '/empresa',
+        destination: '/sobre',
+        permanent: true,
+      },
+      // Old blog posts without /blog/ prefix (specific slugs from Google Search Console)
+      {
+        source: '/mercedes-amg-gt63-s-e-performance-coupe-2025-a-revolucao-hibrida-da-performance',
+        destination: '/blog/mercedes-amg-gt63-s-e-performance-coupe-2025-a-revolucao-hibrida-da-performance',
+        permanent: true,
+      },
+      {
+        source: '/bmw-r1300-gs-2024-a-revolucao-que-redefine-a-adventure-premium',
+        destination: '/blog/bmw-r1300-gs-2024-a-revolucao-que-redefine-a-adventure-premium',
+        permanent: true,
+      },
+      {
+        source: '/lamborghini-huracan-tecnica-lp640-2-a-obra-prima-italiana-que-a-attra-veiculos-trouxe-para-o-brasil',
+        destination: '/blog/lamborghini-huracan-tecnica-lp640-2-a-obra-prima-italiana-que-a-attra-veiculos-trouxe-para-o-brasil',
+        permanent: true,
+      },
+      {
+        source: '/bmw-m2-2025-a-nova-geracao-do-icone-esportivo-compacto',
+        destination: '/blog/bmw-m2-2025-a-nova-geracao-do-icone-esportivo-compacto',
+        permanent: true,
+      },
+      {
+        source: '/volvo-xc90-t8-ultimate-dark-luxo-escandinavo-com-consciencia-sustentavel',
+        destination: '/blog/volvo-xc90-t8-ultimate-dark-luxo-escandinavo-com-consciencia-sustentavel',
+        permanent: true,
+      },
+      {
+        source: '/mercedes-amg-gt-63-s-e-performance-2025-quando-843cv-redefinem-o-conceito-de-torque',
+        destination: '/blog/mercedes-amg-gt-63-s-e-performance-2025-quando-843cv-redefinem-o-conceito-de-torque',
+        permanent: true,
+      },
+      {
+        source: '/land-rover-defender-110d-hse-lendaria-capacidade-off-road-em-versao-premium',
+        destination: '/blog/land-rover-defender-110d-hse-lendaria-capacidade-off-road-em-versao-premium',
+        permanent: true,
+      },
+      {
+        source: '/audi-r8-v10-vs-ferrari-812-gts-o-duelo-dos-titas',
+        destination: '/blog/audi-r8-v10-vs-ferrari-812-gts-o-duelo-dos-titas',
+        permanent: true,
+      },
+      {
+        source: '/lamborghini-aventador-roadster-a-furia-italiana-em-sua-forma-mais-pura',
+        destination: '/blog/lamborghini-aventador-roadster-a-furia-italiana-em-sua-forma-mais-pura',
+        permanent: true,
+      },
+      {
+        source: '/mercedes-benz-e-300-exclusive-a-expressao-do-luxo-alemao',
+        destination: '/blog/mercedes-benz-e-300-exclusive-a-expressao-do-luxo-alemao',
+        permanent: true,
+      },
+      {
+        source: '/hummer-h1-1985-um-icone-militar-para-colecionadores',
+        destination: '/blog/hummer-h1-1985-um-icone-militar-para-colecionadores',
+        permanent: true,
+      },
+      {
+        source: '/duas-faces-da-liberdade-bmw-z4-30i-e-430i-cabriolet',
+        destination: '/blog/duas-faces-da-liberdade-bmw-z4-30i-e-430i-cabriolet',
+        permanent: true,
+      },
+      {
+        source: '/porsche-911-targa-4-gts-a-perfeita-fusao-entre-design-iconico-e-performance-extraordinaria',
+        destination: '/blog/porsche-911-targa-4-gts-a-perfeita-fusao-entre-design-iconico-e-performance-extraordinaria',
+        permanent: true,
+      },
+      {
+        source: '/bmw-m2-a-revolucao-da-nova-geracao-g87',
+        destination: '/blog/bmw-m2-a-revolucao-da-nova-geracao-g87',
+        permanent: true,
+      },
+      // Old vehicle URLs with specific slugs → stock (vehicles may have been sold)
+      {
+        source: '/veiculo/ferrari-sf90-spider-2024-0km',
+        destination: '/estoque?marca=Ferrari',
+        permanent: true,
+      },
+      {
+        source: '/veiculo/porsche-718-boxster-2023-scp-8a88',
+        destination: '/estoque?marca=Porsche',
+        permanent: true,
+      },
+      {
+        source: '/veiculo/lamborghini-aventador-roadster-2015-bsy-2122',
+        destination: '/estoque?marca=Lamborghini',
+        permanent: true,
+      },
+    ]
+  },
+
   images: {
     remotePatterns: [
       {
