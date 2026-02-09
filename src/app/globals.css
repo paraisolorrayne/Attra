@@ -796,6 +796,43 @@ html {
   }
 }
 
+/* ===== HERO BANNER IMAGE - Promotional banners ===== */
+/* Desktop banners: 1920x450 (4.27:1 ratio) - use cover to fill */
+/* Mobile banners: 720x400 (1.8:1 ratio) - use contain to show full content */
+.hero-banner-image {
+  object-fit: cover;
+  object-position: center center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Mobile: use contain to show full banner without cropping */
+/* Banner mobile ratio is 720x400 = 1.8:1 */
+@media (max-width: 767px) {
+  .hero-banner-image {
+    object-fit: contain !important;
+    object-position: center center !important;
+    /* Dark background to fill empty space around banner */
+    background: #111111 !important;
+  }
+}
+
+/* Tablet: transition between mobile and desktop */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-banner-image {
+    object-fit: cover;
+    object-position: center center;
+  }
+}
+
+/* Desktop: cover to fill the wide banner area */
+@media (min-width: 1024px) {
+  .hero-banner-image {
+    object-fit: cover;
+    object-position: center center;
+  }
+}
+
 /* Card-specific image positioning - consistent across sizes */
 .card-vehicle-image {
   object-fit: cover !important;
