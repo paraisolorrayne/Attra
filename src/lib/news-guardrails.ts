@@ -1,6 +1,7 @@
 /**
  * News Guardrails Service
- * Uses Gemini AI to validate if news articles are truly about automotive topics
+ * Uses Gemini AI to validate if news articles are relevant for Attra's HNWI audience
+ * Covers: F1, Supercars, Haute Horlogerie, High-End Finance
  */
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
@@ -8,7 +9,7 @@ const GEMINI_MODEL = 'gemini-2.0-flash'
 const API_TIMEOUT = 10000 // 10 seconds
 
 interface ArticleValidation {
-  isAutomotive: boolean
+  isAutomotive: boolean // Mantido para compatibilidade - conceito expandido para "IsAttraRelevant"
   confidence: number // 0-100
   reason: string
   category?: 'formula1' | 'supercar' | 'luxury' | 'market' | 'other'
@@ -21,7 +22,7 @@ interface ArticleInput {
 }
 
 /**
- * Validate if an article is truly about automotive topics using Gemini AI
+ * Validate if an article is relevant for Attra's HNWI audience using Gemini AI
  */
 export async function validateArticleWithAI(article: ArticleInput): Promise<ArticleValidation> {
   if (!GEMINI_API_KEY) {
@@ -29,26 +30,38 @@ export async function validateArticleWithAI(article: ArticleInput): Promise<Arti
     return { isAutomotive: true, confidence: 50, reason: 'AI validation skipped - no API key' }
   }
 
-  const prompt = `Você é um especialista em classificação de notícias automotivas. Analise o seguinte artigo e determine se é REALMENTE sobre carros, automóveis, Formula 1, ou o mercado automotivo.
+  const prompt = `Você é o Editor Chefe da "Attra", uma plataforma exclusiva para indivíduos de altíssima renda (High-Net-Worth Individuals).
 
-TÍTULO: ${article.title}
-DESCRIÇÃO: ${article.description || 'Sem descrição'}
-FONTE: ${article.source || 'Desconhecida'}
+Sua missão é filtrar notícias para um feed que mistura:
+1. Automobilismo de Elite (F1, Hypercars, Lançamentos Premium).
+2. Alta Relojoaria (Rolex, Patek, Leilões, Recordes).
+3. Mercado Financeiro Premium (Private Banking, Tendências de Investimento, Wealth Management) - SOMENTE notícias positivas ou analíticas, sem escândalos policiais.
 
-REGRAS DE CLASSIFICAÇÃO:
-1. ACEITAR: Notícias sobre carros, modelos de veículos, lançamentos, exposições de carros, museus de carros, corridas (F1, automobilismo), mercado automotivo, vendas de veículos, tecnologia automotiva.
-2. REJEITAR: Notícias sobre pessoas famosas que apenas mencionam marcas de carros (ex: "Celebridade X comprou Ferrari"), crimes envolvendo carros (roubos, acidentes fatais), notícias de fofoca/entretenimento, procedimentos estéticos, política, esportes não-automotivos.
-3. REJEITAR: Se o foco principal NÃO é o veículo/automóvel em si.
+Analise a seguinte notícia:
+Título: "${article.title}"
+Descrição: "${article.description || 'Sem descrição'}"
+Fonte: "${article.source || 'Desconhecida'}"
 
-Responda APENAS com um JSON válido no formato:
+Regras de Aprovação (Deve retornar true para 'isAutomotive'):
+- É sobre supercarros ou marcas de luxo (Ferrari, Porsche, etc.)? SIM.
+- É sobre Fórmula 1 (Pilotos, Tecnologia, Bastidores)? SIM.
+- É sobre relógios de luxo ou joias de alto valor? SIM.
+- É sobre investimentos, fusões de grandes empresas ou tendências de riqueza? SIM.
+
+Regras de Rejeição (Deve retornar false):
+- Carros populares (Gol, Onix, Uber), trânsito comum, IPVA, multas.
+- Crime, polícia, roubos, mortes, tragédias.
+- Fofoca de celebridades que não envolve o lifestyle de luxo.
+- Política partidária polarizada ou escândalos de corrupção (a menos que afete diretamente o mercado financeiro global).
+- Notícias puramente negativas ou deprimentes.
+
+Retorne APENAS um JSON neste formato, sem markdown:
 {
-  "isAutomotive": true/false,
-  "confidence": 0-100,
-  "reason": "explicação breve",
+  "isAutomotive": boolean,
+  "confidence": number,
+  "reason": "string curta explicando a decisão",
   "category": "formula1" | "supercar" | "luxury" | "market" | "other"
-}
-
-Responda SOMENTE o JSON, sem markdown ou texto adicional.`
+}`
 
   try {
     const controller = new AbortController()

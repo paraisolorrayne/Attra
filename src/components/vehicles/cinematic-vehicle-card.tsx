@@ -164,15 +164,15 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
           )}
         </div>
 
-        {/* Price and CTAs - CTAs are outside the link to avoid nested <a> */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <Link href={`/veiculo/${vehicle.slug}`}>
-            <p className="text-2xl lg:text-3xl font-bold text-foreground hover:text-primary transition-colors">
-              {formatPrice(vehicle.price)}
-            </p>
-          </Link>
-          <VehicleCardCTAs vehicle={vehicle} variant="compact" className="md:flex-row-reverse" />
-        </div>
+        {/* Price */}
+        <Link href={`/veiculo/${vehicle.slug}`}>
+          <p className="text-2xl lg:text-3xl font-bold text-foreground hover:text-primary transition-colors mb-4">
+            {formatPrice(vehicle.price)}
+          </p>
+        </Link>
+
+        {/* CTA Button - full width below price */}
+        <VehicleCardCTAs vehicle={vehicle} variant="compact" />
       </div>
     </div>
   )

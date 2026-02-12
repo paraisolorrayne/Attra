@@ -66,7 +66,7 @@ export function VehicleInfo({ vehicle }: VehicleInfoProps) {
 
       {/* Price */}
       <div className="mb-6">
-        <p className="text-sm text-foreground-secondary mb-1">Preço</p>
+        <p className="text-sm text-foreground-secondary mb-1">Valor</p>
         <p className="text-3xl font-bold text-primary">
           {formatPrice(vehicle.price)}
         </p>

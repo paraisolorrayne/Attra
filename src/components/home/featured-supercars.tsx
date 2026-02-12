@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/utils'
 import { Vehicle } from '@/types'
+import { VehicleCardCTAs } from '@/components/vehicles/vehicle-card-ctas'
 
 interface FeaturedSupercarsProps {
   vehicles?: Vehicle[]
@@ -61,7 +62,7 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
   }
 
   return (
-    <section ref={sectionRef} className="py-24 bg-background relative overflow-hidden">
+    <section ref={sectionRef} className="py-12 md:py-24 bg-background relative overflow-hidden">
       {/* Background accent */}
       <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
 
@@ -83,49 +84,55 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
         {/* Featured Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
           {displayVehicles.map((vehicle, index) => (
-            <Link
+            <div
               key={vehicle.id}
-              href={`/veiculo/${vehicle.slug}`}
               className={`group card-premium bg-background-card border border-border rounded-2xl overflow-hidden opacity-0 ${
                 isVisible ? `animate-fade-in-up stagger-${index + 1}` : ''
               }`}
             >
-              {/* Image container with consistent 4:3 aspect ratio */}
-              <div className="relative aspect-[4/3] overflow-hidden bg-background-soft vehicle-image-container">
-                <Image
-                  src={vehicle.photos?.[0] || '/placeholder.jpg'}
-                  alt={`${vehicle.brand} ${vehicle.model}`}
-                  fill
-                  className="card-vehicle-image transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                {/* Badges */}
-                {(() => {
-                  const badges = getSupercarssBadges(vehicle)
-                  return badges.length > 0 ? (
-                    <div className="absolute top-4 left-4 flex gap-2">
-                      {badges.map((badge, i) => (
-                        <Badge key={i} variant={badge.variant}>{badge.label}</Badge>
-                      ))}
-                    </div>
-                  ) : null
-                })()}
-              </div>
+              {/* Image container - clickable link */}
+              <Link href={`/veiculo/${vehicle.slug}`} className="block">
+                <div className="relative aspect-[4/3] overflow-hidden bg-background-soft vehicle-image-container">
+                  <Image
+                    src={vehicle.photos?.[0] || '/placeholder.jpg'}
+                    alt={`${vehicle.brand} ${vehicle.model}`}
+                    fill
+                    className="card-vehicle-image transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  {/* Badges */}
+                  {(() => {
+                    const badges = getSupercarssBadges(vehicle)
+                    return badges.length > 0 ? (
+                      <div className="absolute top-4 left-4 flex gap-2">
+                        {badges.map((badge, i) => (
+                          <Badge key={i} variant={badge.variant}>{badge.label}</Badge>
+                        ))}
+                      </div>
+                    ) : null
+                  })()}
+                </div>
+              </Link>
 
               {/* Content */}
               <div className="p-6">
-                <p className="text-primary text-sm font-medium mb-1">{vehicle.brand}</p>
-                <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                  {vehicle.model}
-                </h3>
-                <p className="text-foreground-secondary mb-4">
-                  {vehicle.year_model} • {vehicle.mileage === 0 ? '0 km' : `${vehicle.mileage?.toLocaleString('pt-BR')} km`}
-                </p>
-                <p className="text-3xl font-bold text-foreground">
-                  {formatPrice(vehicle.price || 0)}
-                </p>
+                <Link href={`/veiculo/${vehicle.slug}`} className="block">
+                  <p className="text-primary text-sm font-medium mb-1">{vehicle.brand}</p>
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {vehicle.model}
+                  </h3>
+                  <p className="text-foreground-secondary mb-4">
+                    {vehicle.year_model} • {vehicle.mileage === 0 ? '0 km' : `${vehicle.mileage?.toLocaleString('pt-BR')} km`}
+                  </p>
+                  <p className="text-3xl font-bold text-foreground mb-4">
+                    {formatPrice(vehicle.price || 0)}
+                  </p>
+                </Link>
+
+                {/* WhatsApp CTA - outside Link to avoid nested <a> */}
+                <VehicleCardCTAs vehicle={vehicle} variant="compact" />
               </div>
-            </Link>
+            </div>
           ))}
         </div>
 

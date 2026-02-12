@@ -147,9 +147,11 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
   // Dynamic height classes based on slide type
   // Banner mobile (720x400) has ~1.8:1 ratio, so height should be ~56% of viewport width
   // Vehicle slides need more height to show the full car
+  // mt-20 compensates for fixed header (h-20 = 80px)
+  // Reduced heights to make room for CTA button below
   const heroHeightClass = isBannerSlide && isMobile
-    ? "relative h-[56vw] min-h-[280px] max-h-[450px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden"
-    : "relative h-[88svh] min-h-[520px] max-h-[780px] md:h-[80svh] md:min-h-[580px] lg:max-h-[750px] w-full overflow-hidden"
+    ? "relative mt-20 h-[50vw] min-h-[220px] max-h-[350px] md:h-[60svh] md:min-h-[400px] lg:max-h-[550px] w-full overflow-hidden"
+    : "relative mt-20 h-[65svh] min-h-[380px] max-h-[550px] md:h-[60svh] md:min-h-[400px] lg:max-h-[550px] w-full overflow-hidden"
 
   return (
     <>
@@ -361,7 +363,7 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
     </section>
 
     {/* Search Widget - Below Hero Section */}
-    <div className="bg-background py-6 md:py-8 px-4 sm:px-6 lg:px-8">
+    <div className="bg-background py-3 md:py-8 px-3 md:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <HeroSearchWidget />
       </div>
