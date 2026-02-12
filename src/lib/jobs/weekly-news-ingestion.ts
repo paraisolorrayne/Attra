@@ -1,11 +1,11 @@
 /**
- * Weekly News Ingestion Job
- * 
- * Fetches news from GNews API, classifies them by category,
- * and stores in Supabase with weekly cache.
- * 
+ * Weekly News Ingestion Job - Attra Luxury Edition
+ *
+ * Fetches news about F1, Supercars, Haute Horlogerie, and High-End Finance.
+ * Classifies/Filters via Gemini AI and stores in Supabase.
+ *
  * Run: Every Sunday at 00:00
- * 
+ *
  * Usage:
  * - Vercel Cron: Add to vercel.json
  * - Manual: Call /api/cron/news-ingestion endpoint
@@ -39,68 +39,76 @@ interface GNewsResponse {
   articles: GNewsArticle[]
 }
 
-// Keywords for classification
-const F1_KEYWORDS = ['formula 1', 'f1', 'grand prix', 'gp ', 'verstappen', 'hamilton', 'ferrari f1', 'mclaren f1', 'red bull racing', 'fia', 'pole position', 'pit stop', 'corrida de f1', 'campeonato de f1']
-const PREMIUM_KEYWORDS = ['ferrari', 'lamborghini', 'porsche', 'mclaren', 'aston martin', 'bentley', 'rolls-royce', 'bugatti', 'pagani', 'koenigsegg', 'supercar', 'hypercar', 'luxury car', 'carro de luxo', 'esportivo', 'supercarro']
+// 1. Mapeamento de Categorias
+// 2 = F1/Racing, 3 = Premium/Lifestyle (Carros, Relógios, Business)
+const F1_KEYWORDS = [
+  'formula 1', 'f1', 'grand prix', 'gp ', 'grande prêmio',
+  'verstappen', 'hamilton', 'leclerc', 'norris', 'piastri', 'bortoleto', 'colapinto',
+  'ferrari f1', 'red bull racing', 'mercedes f1', 'aston martin f1', 'mclaren f1',
+  'paddock', 'interlagos', 'monaco', 'adrian newey',
+]
 
-// Keywords that indicate the article is NOT about cars (false positives)
+const PREMIUM_KEYWORDS = [
+  // Supercars
+  'ferrari', 'lamborghini', 'porsche', 'mclaren', 'aston martin', 'bugatti', 'pagani', 'koenigsegg',
+  // Luxury Lifestyle (Watches)
+  'rolex', 'patek philippe', 'richard mille', 'audemars piguet', 'vacheron constantin', 'cartier',
+  'alta relojoaria', 'turbilhão', 'cronógrafo',
+  // High-End Finance/Business
+  'private banking', 'wealth management', 'gestão de patrimônio', 'family office',
+  'banco safra', 'btg pactual', 'xp private', 'jpmorgan', 'goldman sachs',
+  'mercado de luxo', 'investimento', 'ipo',
+]
+
+// 2. Filtros de Exclusão (Anti-Ruído e Anti-Negatividade)
 const EXCLUDE_KEYWORDS = [
-  // People with car brand names
-  'juju ferrari', 'juju', 'puerpério', 'maternidade', 'gravidez', 'grávida',
-  // Crime/Police news
-  'roubo', 'assalto', 'furto', 'polícia', 'pm ', 'policial', 'suspeito', 'morre', 'morte', 'baleado', 'tiro', 'crime', 'criminoso', 'preso', 'prisão', 'despejo', 'aluguel', 'alugueis',
-  // Medical/Beauty
-  'silicone', 'cirurgia', 'plástica', 'estética',
-  // Politics/Business unrelated
-  'cfo ', 'vice-presidente', 'americanas',
-  // Other false positives
-  'tronco', 'praça', 'homenagem', 'político',
+  // Crime/Polícia
+  'roubo', 'assalto', 'furto', 'polícia', 'preso', 'prisão', 'tiro', 'baleado', 'morte', 'morre', 'tragédia', 'crime', 'quadrilha', 'golpe',
+  // Popular/Massa
+  'popular', 'usado', 'seminovo', 'financiamento', 'consórcio', 'uber', '99', 'taxista', 'ônibus', 'caminhão',
+  'futebol', 'brasileirão', 'bbb', 'reality', 'fofoca',
+  // Política Partidária/Crise
+  'bolsonaro', 'lula', 'impeachment', 'cpi', 'escândalo', 'corrupção', 'lavagem de dinheiro',
+  // Falsos positivos comuns
+  'juju ferrari', 'banco de praça', 'banco de sangue',
 ]
 
-// Keywords that CONFIRM the article is about cars (positive signals)
-const AUTOMOTIVE_CONFIRM_KEYWORDS = [
-  'museu', 'exposição', 'modelo', 'motor', 'cv', 'hp', 'cavalos', 'velocidade', 'km/h', 'mph',
-  'lançamento', 'novo modelo', 'test drive', 'avaliação', 'review',
-  'showroom', 'concessionária', 'vendas', 'mercado automotivo',
-  'f40', 'f50', 'sf90', '812', '296', 'huracan', 'aventador', 'urus',
-  '911', 'cayenne', 'taycan', 'panamera', 'macan',
-  'automóvel', 'veículo', 'carro', 'esportivo', 'superesportivo',
+// 3. Palavras de Confirmação (Sinais de Luxo)
+const LUXURY_CONFIRM_KEYWORDS = [
+  // Auto
+  'v12', 'v10', 'v8', 'cavalos', '0-100', 'superesportivo', 'hypercar', 'conversível', 'coupé',
+  // Relógios/Joias
+  'quilates', 'ouro', 'platina', 'titânio', 'safira', 'leilão', 'sothebys', 'christies', 'colecionador', 'limitada', 'edição especial',
+  // Finance/Geral
+  'alta renda', 'exclusivo', 'premium', 'luxo', 'milhões', 'bilhões', 'recorde', 'performance', 'inovação',
 ]
 
-/**
- * Check if an article should be excluded (not about cars)
- */
 function shouldExcludeArticle(title: string, description: string): boolean {
   const text = `${title} ${description}`.toLowerCase()
 
-  // Check for exclusion keywords
   for (const keyword of EXCLUDE_KEYWORDS) {
     if (text.includes(keyword)) {
-      // But if it also has strong automotive confirmation, keep it
-      const hasAutomotiveConfirm = AUTOMOTIVE_CONFIRM_KEYWORDS.some(k => text.includes(k))
-      if (!hasAutomotiveConfirm) {
-        return true // Exclude
+      // Se tiver confirmação FORTE de luxo, salvamos
+      const hasLuxuryConfirm = LUXURY_CONFIRM_KEYWORDS.some(k => text.includes(k))
+      if (!hasLuxuryConfirm) {
+        return true
       }
     }
   }
-
-  return false // Keep
+  return false
 }
 
 function classifyArticle(title: string, description: string): number {
   const text = `${title} ${description}`.toLowerCase()
-
-  // Check for F1 keywords first (more specific)
+  // F1 tem prioridade de categoria
   for (const keyword of F1_KEYWORDS) {
-    if (text.includes(keyword)) return 2 // formula-1
+    if (text.includes(keyword)) return 2
   }
-
-  // Check for premium/luxury keywords
+  // Verifica keywords premium (carros, relógios, finanças)
   for (const keyword of PREMIUM_KEYWORDS) {
-    if (text.includes(keyword)) return 3 // premium-market
+    if (text.includes(keyword)) return 3
   }
-
-  // Default to premium market for automotive news
+  // Todo o resto cai na categoria "Premium/Lifestyle"
   return 3
 }
 
@@ -109,7 +117,7 @@ function classifyArticle(title: string, description: string): number {
  * Removes common words and normalizes the text
  */
 function extractKeyTerms(title: string): Set<string> {
-  const stopWords = ['a', 'o', 'e', 'de', 'da', 'do', 'em', 'no', 'na', 'para', 'com', 'por', 'que', 'um', 'uma', 'os', 'as', 'dos', 'das', 'ao', 'à', 'é', 'são', 'foi', 'será', 'após', 'entre', 'sobre', 'como', 'mais', 'seu', 'sua', 'seus', 'suas']
+  const stopWords = ['a', 'o', 'e', 'de', 'da', 'do', 'em', 'no', 'na', 'para', 'com', 'por', 'que', 'um', 'uma', 'os', 'as', 'dos', 'das', 'ao', 'à', 'é', 'são', 'foi', 'será', 'após', 'entre', 'sobre', 'como', 'mais', 'seu', 'sua', 'seus', 'suas', 'novo', 'nova']
 
   const normalized = title
     .toLowerCase()
@@ -158,7 +166,7 @@ function isDuplicateArticle(
   return false
 }
 
-async function fetchGNewsArticles(query: string, max: number = 10): Promise<GNewsArticle[]> {
+async function fetchGNewsArticles(query: string, max: number = 15): Promise<GNewsArticle[]> {
   const params = new URLSearchParams({
     q: query,
     lang: 'pt',
@@ -244,28 +252,33 @@ export async function runWeeklyNewsIngestion(): Promise<{
       throw new Error('Failed to get or create cycle')
     }
 
-    // 2. Fetch articles from GNews API
+    // 2. Fetching Strategies (Queries expandidas para Público Attra)
+    const ARTICLES_PER_QUERY = 12
+
     const queries = [
-      { query: 'Formula 1 OR F1 OR Grand Prix', category: 2 },
-      { query: 'supercar OR hypercar OR Ferrari OR Lamborghini OR Porsche', category: 3 },
-      { query: 'carro luxo OR mercado automotivo premium', category: 3 },
+      // F1 & Racing Lifestyle
+      { query: '"Fórmula 1" OR "F1" (Bortoleto OR Hamilton OR Ferrari)', category: 2 },
+      { query: '"Paddock Club" OR "VIP" Interlagos F1', category: 2 },
+      // Supercars & Hypercars (Sonho de consumo)
+      { query: '"Ferrari" OR "Lamborghini" OR "Porsche" OR "McLaren" (lançamento OR novo OR exclusivo)', category: 3 },
+      { query: 'Hypercar "Bugatti" OR "Pagani" OR "Koenigsegg"', category: 3 },
+      // Haute Horlogerie (O que eles usam no pulso)
+      { query: '"Rolex" OR "Patek Philippe" OR "Richard Mille" OR "Audemars Piguet" (leilão OR recorde OR novo)', category: 3 },
+      // High Finance & Wealth (O dinheiro deles)
+      { query: '"Private Banking" OR "Wealth Management" OR "Family Office" (tendências OR investimentos)', category: 3 },
+      { query: '"Mercado de luxo" crescimento OR tendências', category: 3 },
     ]
 
-    const allArticles: Array<{
-      article: GNewsArticle
-      category_id: number
-    }> = []
+    const allArticles: Array<{ article: GNewsArticle, category_id: number }> = []
 
-    for (const { query } of queries) {
+    for (const { query, category } of queries) {
       try {
-        const articles = await fetchGNewsArticles(query, 10)
+        const articles = await fetchGNewsArticles(query, ARTICLES_PER_QUERY)
         articles.forEach(article => {
-          // Reclassify based on actual content
-          const classifiedCategory = classifyArticle(article.title, article.description)
-          allArticles.push({ article, category_id: classifiedCategory })
+          allArticles.push({ article, category_id: category })
         })
       } catch (err) {
-        errors.push(`Failed to fetch "${query}": ${err}`)
+        errors.push(`Query failed "${query}": ${err}`)
       }
     }
 
@@ -281,10 +294,10 @@ export async function runWeeklyNewsIngestion(): Promise<{
 
     console.log(`[NewsIngestion] ${uniqueArticles.length} unique articles after URL deduplication`)
 
-    // 3.5. Deduplicate by title similarity (avoid same story from different sources)
+    // 3.5. Deduplicate by title similarity (threshold mais alto para mais rigor)
     const seenTitles: string[] = []
     const deduplicatedArticles = uniqueArticles.filter(({ article }) => {
-      if (isDuplicateArticle(article.title, seenTitles, 0.4)) {
+      if (isDuplicateArticle(article.title, seenTitles, 0.5)) {
         return false
       }
       seenTitles.push(article.title)
@@ -304,7 +317,7 @@ export async function runWeeklyNewsIngestion(): Promise<{
 
     console.log(`[NewsIngestion] ${preFilteredArticles.length} articles after keyword pre-filter`)
 
-    // 5. AI Guardrails - Validate articles are truly automotive using Gemini
+    // 5. AI Guardrails (O filtro de Ouro - Gemini como Editor Chefe)
     const filteredArticles: typeof preFilteredArticles = []
     for (const item of preFilteredArticles) {
       const validation = await validateArticleWithAI({
@@ -313,14 +326,15 @@ export async function runWeeklyNewsIngestion(): Promise<{
         source: item.article.source.name
       })
 
-      if (validation.isAutomotive && validation.confidence >= 70) {
+      // Aceitamos se for relevante para o público (isAutomotive = "Attra Relevant")
+      if (validation.isAutomotive && validation.confidence >= 75) {
         filteredArticles.push(item)
       } else {
-        console.log(`[NewsIngestion] AI rejected: "${item.article.title.substring(0, 60)}..." - ${validation.reason}`)
+        console.log(`[AI Reject] ${item.article.title.substring(0, 40)}... (${validation.reason})`)
       }
     }
 
-    console.log(`[NewsIngestion] ${filteredArticles.length} articles after AI guardrails validation`)
+    console.log(`[NewsIngestion] Approved by AI: ${filteredArticles.length}`)
 
     // 6. Select 3 featured articles (most recent from premium category)
     const premiumArticles = filteredArticles
@@ -331,23 +345,19 @@ export async function runWeeklyNewsIngestion(): Promise<{
     console.log(`[NewsIngestion] Premium articles found: ${premiumArticles.length}`)
 
     // 7. Insert articles
-    for (let i = 0; i < filteredArticles.length; i++) {
-      const { article, category_id } = filteredArticles[i]
-
-      // Check if this is a featured article
+    for (const { article } of filteredArticles) {
+      const isFeatured = premiumArticles.some(p => p.article.url === article.url)
       const featuredIndex = premiumArticles.findIndex(p => p.article.url === article.url)
-      const isFeatured = featuredIndex !== -1
 
-      // Generate UUID for the article
       const articleId = crypto.randomUUID()
       const slug = generateNewsSlug(article.title, articleId)
 
-      const articleData = {
+      const { error: insertError } = await supabase.from('news_articles').insert({
         id: articleId,
         slug,
         news_cycle_id: newCycle.id,
-        category_id: isFeatured ? 1 : category_id, // Featured uses category 1
-        source_id: 1, // GNews
+        category_id: isFeatured ? 1 : classifyArticle(article.title, article.description),
+        source_id: 1,
         title: article.title,
         description: article.description,
         image_url: article.image,
@@ -356,25 +366,12 @@ export async function runWeeklyNewsIngestion(): Promise<{
         published_at: article.publishedAt,
         is_featured: isFeatured,
         featured_order: isFeatured ? featuredIndex + 1 : null,
-      }
+      })
 
-      console.log(`[NewsIngestion] Inserting article ${i + 1}/${filteredArticles.length}: "${article.title.substring(0, 50)}..." (category: ${articleData.category_id}, featured: ${isFeatured})`)
-
-      const { error: insertError } = await supabase
-        .from('news_articles')
-        .insert(articleData)
-
-      if (insertError) {
-        console.log(`[NewsIngestion] Insert error: ${insertError.code} - ${insertError.message}`)
-        if (insertError.code === '23505') {
-          // Duplicate URL, skip
-          console.log(`[NewsIngestion] Skipping duplicate article`)
-          continue
-        }
-        errors.push(`Failed to insert "${article.title}": ${insertError.message}`)
-      } else {
+      if (insertError && insertError.code !== '23505') {
+        errors.push(`Insert failed "${article.title}": ${insertError.message}`)
+      } else if (!insertError) {
         articlesInserted++
-        console.log(`[NewsIngestion] Article inserted successfully`)
       }
     }
 

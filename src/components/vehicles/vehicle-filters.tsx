@@ -136,7 +136,7 @@ export function VehicleFilters() {
 
           {/* Price Range */}
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Preço</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Valor</label>
             <div className="grid grid-cols-2 gap-2">
               <Input type="number" placeholder="Min" value={searchParams.get('preco_min') || ''} onChange={(e) => handleFilterChange('preco_min', e.target.value)} />
               <Input type="number" placeholder="Max" value={searchParams.get('preco_max') || ''} onChange={(e) => handleFilterChange('preco_max', e.target.value)} />

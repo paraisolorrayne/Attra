@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { X, SlidersHorizontal, ChevronDown, Search, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Full brand list - scalable
-const allBrands = [
+// Fallback brand list - used when no dynamic brands are provided
+const fallbackBrands = [
   'Audi', 'Aston Martin', 'BMW', 'Bentley', 'Bugatti', 'Cadillac',
   'Chevrolet', 'Ferrari', 'Ford', 'Honda', 'Jaguar', 'Lamborghini',
   'Land Rover', 'Lexus', 'Maserati', 'McLaren', 'Mercedes-Benz',
@@ -142,7 +142,11 @@ interface FilterSection {
   isOpen: boolean
 }
 
-export function AdvancedFilters() {
+interface AdvancedFiltersProps {
+  brands?: string[]
+}
+
+export function AdvancedFilters({ brands }: AdvancedFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
@@ -152,12 +156,16 @@ export function AdvancedFilters() {
     { title: 'Ano', key: 'ano', options: years, isOpen: true },
     { title: 'Carroceria', key: 'carroceria', options: bodyStyles, isOpen: false },
     { title: 'Combustível', key: 'combustivel', options: powertrains, isOpen: false },
+    { title: 'Blindagem', key: 'blindagem', options: ['Sim', 'Não'], isOpen: false },
   ])
 
   // Get active filters (excluding pagination params)
   const activeFilters = Array.from(searchParams.entries()).filter(
     ([key]) => !['pagina', 'ordenar'].includes(key)
   )
+
+  // Use dynamic brands from props, fallback to static list
+  const availableBrands = brands && brands.length > 0 ? brands : fallbackBrands
 
   const selectedBrand = searchParams.get('marca')
 
@@ -292,7 +300,7 @@ export function AdvancedFilters() {
             <BrandCombobox
               value={selectedBrand}
               onChange={handleBrandChange}
-              brands={allBrands}
+              brands={availableBrands}
             />
           </div>
 

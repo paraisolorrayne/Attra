@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { Calendar, MessageCircle, Info } from 'lucide-react'
+import { Calendar, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getWhatsAppUrl } from '@/lib/constants'
 import { Vehicle } from '@/types'
@@ -14,12 +13,10 @@ interface VehicleCardCTAsProps {
 }
 
 export function VehicleCardCTAs({ vehicle, variant = 'compact', className = '' }: VehicleCardCTAsProps) {
-  const [isHovered, setIsHovered] = useState(false)
-  
   const vehicleName = `${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`
-  
+
   const testDriveMessage = `Olá! Gostaria de agendar um test drive no ${vehicleName}.
-  
+
 Valor: ${formatPrice(vehicle.price)}
 
 Quando poderia fazer o agendamento?`
@@ -32,21 +29,7 @@ Podem me enviar mais detalhes sobre este veículo?`
 
   if (variant === 'icon-only') {
     return (
-      <div 
-        className={`flex gap-2 ${className}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <a
-          href={getWhatsAppUrl(testDriveMessage)}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="p-2 bg-primary/10 hover:bg-primary hover:text-white text-primary rounded-lg transition-all"
-          title="Agendar Test Drive"
-        >
-          <Calendar className="w-4 h-4" />
-        </a>
+      <div className={`flex gap-2 ${className}`}>
         <a
           href={getWhatsAppUrl(moreInfoMessage)}
           target="_blank"
@@ -63,27 +46,15 @@ Podem me enviar mais detalhes sobre este veículo?`
 
   if (variant === 'compact') {
     return (
-      <div className={`flex gap-2 ${className}`}>
+      <div className={`${className}`}>
         <Button
           asChild
-          size="sm"
-          variant="outline"
-          className="flex-1 text-xs"
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-        >
-          <a href={getWhatsAppUrl(testDriveMessage)} target="_blank" rel="noopener noreferrer">
-            <Calendar className="w-3.5 h-3.5 mr-1.5" />
-            Test Drive
-          </a>
-        </Button>
-        <Button
-          asChild
-          size="sm"
-          className="flex-1 text-xs"
+          size="md"
+          className="w-full"
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
           <a href={getWhatsAppUrl(moreInfoMessage)} target="_blank" rel="noopener noreferrer">
-            <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+            <MessageCircle className="w-4 h-4 mr-2" />
             Mais Info
           </a>
         </Button>

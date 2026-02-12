@@ -32,6 +32,7 @@ interface EstoquePageProps {
     carroceria?: string
     combustivel?: string
     ano?: string
+    blindagem?: string
   }>
 }
 
@@ -92,11 +93,12 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
   const carroceriaFilter = params.carroceria?.toLowerCase().trim()
   const combustivelFilter = params.combustivel?.toLowerCase().trim()
   const anoFilter = params.ano?.toLowerCase().trim()
+  const blindagemFilter = params.blindagem?.toLowerCase().trim()
   const hasPriceFilter = !!(params.precoMin || params.precoMax)
   const hasSortFilter = !!params.ordenar
 
   // Include all filter types that need client-side processing (including price and sorting)
-  const hasClientSideFilters = !!(searchQuery || brandFilter || carroceriaFilter || combustivelFilter || anoFilter || hasPriceFilter || hasSortFilter)
+  const hasClientSideFilters = !!(searchQuery || brandFilter || carroceriaFilter || combustivelFilter || anoFilter || blindagemFilter || hasPriceFilter || hasSortFilter)
 
   try {
     // If we have client-side filters, fetch ALL vehicles for proper filtering and suggestions
@@ -133,6 +135,7 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
         let matchesCarroceria = true
         let matchesCombustivel = true
         let matchesAno = true
+        let matchesBlindagem = true
 
         if (searchTerms.length > 0) {
           // Include body_type and category in search text for category matching (e.g., "conversível")
@@ -160,11 +163,19 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
           matchesAno = vehicle.year_model?.toString() === anoFilter
         }
 
+        if (blindagemFilter) {
+          const hasArmor = vehicle.options?.some(opt => {
+            const normalized = opt.toLowerCase()
+            return normalized.includes('blindad') || normalized.includes('blindagem')
+          }) || false
+          matchesBlindagem = blindagemFilter === 'sim' ? hasArmor : !hasArmor
+        }
+
         // Apply price filter client-side when filtering
         if (minPrice !== null && vehicle.price < minPrice) matchesPrice = false
         if (maxPrice !== null && vehicle.price > maxPrice) matchesPrice = false
 
-        return matchesSearch && matchesBrand && matchesPrice && matchesCarroceria && matchesCombustivel && matchesAno
+        return matchesSearch && matchesBrand && matchesPrice && matchesCarroceria && matchesCombustivel && matchesAno && matchesBlindagem
       })
 
       // If no exact matches, find partial matches (suggestions)
@@ -209,6 +220,9 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
     error = e
   }
 
+  // Extract unique brands from all vehicles for dynamic filter
+  const availableBrands = [...new Set(allVehicles.map(v => v.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+
   const breadcrumbItems = [{ label: 'Estoque', href: '/estoque' }]
 
   return (
@@ -234,7 +248,7 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
           <div className="flex flex-col lg:flex-row gap-8">
             <aside className="lg:w-72 shrink-0">
               <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-                <AdvancedFilters />
+                <AdvancedFilters brands={availableBrands} />
               </Suspense>
             </aside>
 

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Sparkles, SlidersHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react'
+import Link from 'next/link'
+import { Search, SlidersHorizontal, X, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const brands = ['Ferrari', 'Lamborghini', 'Porsche', 'McLaren', 'Audi', 'BMW', 'Mercedes-Benz', 'Cadillac', 'Land Rover']
@@ -18,7 +19,7 @@ const priceRanges = [
 
 // Popular search chips for quick access
 const searchChips = [
-  { label: 'Ferrari 488 vermelha', query: 'Ferrari 488 vermelha' },
+  { label: 'Ferrari amarela', query: 'Ferrari amarela' },
   { label: 'BMW M3 2024', query: 'BMW M3 2024' },
   { label: 'Porsche conversível', query: 'Porsche conversível' },
   { label: 'Lamborghini Huracan', query: 'Lamborghini Huracan' },
@@ -203,226 +204,241 @@ export function HeroSearchWidget() {
     }
   }
 
-  const selectClasses = "bg-background-card border border-border rounded-lg px-4 py-3 text-foreground text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all appearance-none cursor-pointer w-full"
-  const inputClasses = "bg-background-card border border-border rounded-lg px-4 py-3 text-foreground text-sm placeholder:text-foreground-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all w-full"
+  const selectClasses = "bg-background border border-border/50 hover:border-border focus:border-foreground/30 focus:ring-2 focus:ring-foreground/5 rounded-xl px-4 py-3 text-foreground text-sm placeholder:text-foreground-secondary/50 focus:outline-none transition-all appearance-none cursor-pointer w-full"
+  const inputClasses = "bg-background border border-border/50 hover:border-border focus:border-foreground/30 focus:ring-2 focus:ring-foreground/5 rounded-xl px-4 py-3 text-foreground text-sm placeholder:text-foreground-secondary/50 focus:outline-none transition-all w-full"
 
   return (
-    <div className="bg-background-card/95 backdrop-blur-xl rounded-2xl p-3 sm:p-5 max-w-4xl mx-auto shadow-2xl border border-border">
-      {/* Mode Toggle - Enhanced hierarchy, compact on mobile */}
-      <div className="flex items-center justify-center gap-1 mb-3 sm:mb-4">
-        <button
-          onClick={() => setSearchMode('free')}
-          className={cn(
-            'px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2',
-            searchMode === 'free'
-              ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
-              : 'bg-background-soft text-foreground-secondary hover:text-foreground hover:bg-background border border-border'
-          )}
-        >
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          Busca Livre
-        </button>
-        <button
-          onClick={() => setSearchMode('filters')}
-          className={cn(
-            'px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2',
-            searchMode === 'filters'
-              ? 'bg-primary text-white shadow-lg shadow-primary/30 scale-105'
-              : 'bg-background-soft text-foreground-secondary hover:text-foreground hover:bg-background border border-border'
-          )}
-        >
-          <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          Filtros
-        </button>
-      </div>
+    <div className="max-w-4xl mx-auto w-full">
+      {/* Premium Container - Luxury Dashboard Panel */}
+      <div className="bg-background-card/80 backdrop-blur-2xl rounded-2xl md:rounded-3xl p-4 md:p-10 shadow-xl shadow-black/5 border border-border/40">
 
-      {/* Free Search Mode - Enhanced & mobile-optimized */}
-      {searchMode === 'free' && (
-        <div className="space-y-2 sm:space-y-3">
-          {/* Search Input with Autocomplete */}
-          <div className="relative">
-            <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-primary z-10">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <input
-              ref={inputRef}
-              type="text"
-              value={freeSearch}
-              onChange={(e) => setFreeSearch(e.target.value)}
-              onFocus={() => setShowSuggestions(true)}
-              onKeyDown={handleKeyDown}
-              placeholder="Buscar marca, modelo..."
-              className="w-full bg-background border-2 border-primary/50 hover:border-primary focus:border-primary rounded-full pl-10 sm:pl-12 pr-20 sm:pr-32 py-3 sm:py-4 text-foreground placeholder:text-foreground-secondary focus:outline-none transition-all text-sm sm:text-base"
-            />
+        {/* Primary CTA - Ver Estoque Completo */}
+        <div className="text-center mb-4 md:mb-10">
+          <Link
+            href="/estoque?ordenar=preco-desc"
+            className="group inline-flex items-center justify-center gap-2 md:gap-3 bg-foreground/[0.92] hover:bg-foreground/[0.98] text-background font-normal text-xs md:text-base uppercase tracking-[0.08em] px-6 md:px-12 py-2.5 md:py-3.5 rounded-lg md:rounded-xl transition-all duration-300 ease-out shadow-sm shadow-black/5 hover:shadow-md hover:shadow-black/8 focus:outline-none focus:ring-1 focus:ring-foreground/20 focus:ring-offset-2 focus:ring-offset-background-card w-full md:w-auto"
+          >
+            Ver Estoque Completo
+            <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+          </Link>
+        </div>
 
-            {/* Clear button - hidden on very small screens */}
-            {freeSearch && (
-              <button
-                onClick={clearSearch}
-                className="absolute right-16 sm:right-28 top-1/2 -translate-y-1/2 p-1 sm:p-1.5 text-foreground-secondary hover:text-foreground transition-colors hidden xs:block"
-                aria-label="Limpar busca"
-              >
-                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
-            )}
+        {/* Transition Text - Elegant Divider (hidden on mobile) */}
+        <div className="hidden md:flex items-center gap-5 mb-10">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+          <span className="text-foreground-secondary text-sm tracking-wide whitespace-nowrap">
+            Ou explore nossa busca personalizada
+          </span>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+        </div>
 
-            {/* Search button - compact on mobile */}
-            <button
-              onClick={handleSearch}
-              className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 bg-primary hover:bg-primary-hover text-white rounded-full px-3 sm:px-6 py-2 sm:py-2.5 flex items-center gap-1 sm:gap-2 transition-all font-medium hover:shadow-lg hover:shadow-primary/30 text-xs sm:text-base"
-            >
-              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Buscar</span>
-            </button>
+        {/* Mobile: simple separator line */}
+        <div className="md:hidden mb-4">
+          <div className="h-px bg-border/30" />
+        </div>
 
-            {/* Autocomplete Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div
-                ref={suggestionsRef}
-                className="absolute top-full left-0 right-0 mt-2 bg-background-card backdrop-blur-xl border border-border rounded-xl shadow-2xl overflow-hidden z-50"
-              >
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={`${suggestion.type}-${suggestion.value}`}
-                    onClick={() => handleSelectSuggestion(suggestion)}
-                    className={cn(
-                      'w-full px-4 py-3 text-left flex items-center justify-between transition-colors',
-                      index === selectedSuggestionIndex
-                        ? 'bg-primary/20 text-foreground'
-                        : 'text-foreground-secondary hover:bg-background-soft hover:text-foreground'
-                    )}
-                  >
-                    <span className="font-medium">{suggestion.label}</span>
-                    <span className="text-xs text-foreground-secondary bg-background-soft px-2 py-0.5 rounded">
-                      {getSuggestionTypeLabel(suggestion.type)}
-                    </span>
-                  </button>
-                ))}
+        {/* Search Section */}
+        <div className="space-y-3 md:space-y-5">
+          {/* Desktop: Search + Buscar + Filtros in one line | Mobile: compact stack */}
+          <div className="flex flex-col md:flex-row gap-2 md:gap-3">
+            {/* Search Input with Autocomplete */}
+            <div className="relative flex-1">
+              <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-foreground-secondary/60 z-10">
+                <Search className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-            )}
+              <input
+                ref={inputRef}
+                type="text"
+                value={freeSearch}
+                onChange={(e) => setFreeSearch(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                onKeyDown={handleKeyDown}
+                placeholder="Buscar marca, modelo, ano..."
+                className="w-full bg-background border border-border/50 hover:border-border focus:border-foreground/30 focus:ring-2 focus:ring-foreground/5 rounded-lg md:rounded-xl pl-10 md:pl-12 pr-9 md:pr-10 py-2.5 md:py-3.5 text-foreground placeholder:text-foreground-secondary/50 focus:outline-none transition-all text-sm"
+              />
+
+              {/* Clear button */}
+              {freeSearch && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-2.5 md:right-3 top-1/2 -translate-y-1/2 p-1 md:p-1.5 text-foreground-secondary hover:text-foreground transition-colors"
+                  aria-label="Limpar busca"
+                >
+                  <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                </button>
+              )}
+
+              {/* Autocomplete Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div
+                  ref={suggestionsRef}
+                  className="absolute top-full left-0 right-0 mt-1.5 md:mt-2 bg-background-card backdrop-blur-xl border border-border/60 rounded-lg md:rounded-xl shadow-2xl overflow-hidden z-50"
+                >
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={`${suggestion.type}-${suggestion.value}`}
+                      onClick={() => handleSelectSuggestion(suggestion)}
+                      className={cn(
+                        'w-full px-3 md:px-4 py-2.5 md:py-3 text-left flex items-center justify-between transition-colors text-sm',
+                        index === selectedSuggestionIndex
+                          ? 'bg-foreground/10 text-foreground'
+                          : 'text-foreground-secondary hover:bg-background-soft hover:text-foreground'
+                      )}
+                    >
+                      <span className="font-medium">{suggestion.label}</span>
+                      <span className="text-xs text-foreground-secondary bg-background-soft px-2 py-0.5 rounded">
+                        {getSuggestionTypeLabel(suggestion.type)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile: Buscar + Filtros side by side | Desktop: separate buttons */}
+            <div className="flex gap-2 md:contents">
+              {/* Buscar Button */}
+              <button
+                onClick={handleSearch}
+                className="bg-foreground hover:bg-foreground/90 text-background rounded-lg md:rounded-xl px-4 md:px-6 py-2.5 md:py-3.5 flex-1 md:flex-none flex items-center justify-center gap-2 transition-all font-medium text-sm"
+              >
+                <Search className="w-4 h-4" />
+                Buscar
+              </button>
+
+              {/* Filtros Button */}
+              <button
+                onClick={() => setSearchMode(searchMode === 'filters' ? 'free' : 'filters')}
+                className={cn(
+                  'rounded-lg md:rounded-xl px-3 md:px-5 py-2.5 md:py-3.5 flex items-center justify-center gap-1.5 md:gap-2 transition-all font-medium text-sm border',
+                  searchMode === 'filters'
+                    ? 'bg-foreground/10 border-foreground/20 text-foreground'
+                    : 'bg-transparent border-border/50 text-foreground-secondary hover:text-foreground hover:border-border'
+                )}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="hidden md:inline">Filtros</span>
+                {searchMode === 'filters' ? <ChevronUp className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />}
+              </button>
+            </div>
           </div>
 
-          {/* Clickable Search Chips */}
-          <div className="flex flex-wrap justify-center gap-2">
+          {/* Suggestion Chips - Hidden on mobile, visible on desktop */}
+          <div className="hidden md:flex flex-wrap justify-center gap-2.5 pt-1">
             {searchChips.map((chip) => (
               <button
                 key={chip.query}
                 onClick={() => handleChipClick(chip.query)}
-                className="px-3 py-1.5 text-xs sm:text-sm bg-background-soft hover:bg-background border border-border hover:border-primary/50 rounded-full text-foreground-secondary hover:text-foreground transition-all"
+                className="group px-4 py-2 text-sm bg-transparent hover:bg-foreground/[0.03] active:bg-foreground/[0.06] border border-border/40 hover:border-foreground/25 rounded-full text-foreground-secondary hover:text-foreground transition-all duration-200 ease-out"
               >
-                {chip.label}
+                <span className="tracking-wide">{chip.label}</span>
               </button>
             ))}
           </div>
-        </div>
-      )}
 
-      {/* Filters Mode - Enhanced slide-down panel */}
-      {searchMode === 'filters' && (
-        <div className="space-y-4">
-          {/* Primary Filters - Always visible */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {/* Brand */}
-            <div className="relative">
-              <select
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                className={selectClasses}
+          {/* Filters Panel - Expandable with smooth transition */}
+          {searchMode === 'filters' && (
+            <div className="pt-4 md:pt-6 mt-0.5 md:mt-1 border-t border-border/30 space-y-3 md:space-y-5 animate-in fade-in slide-in-from-top-2 duration-200">
+              {/* Primary Filters */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                {/* Brand */}
+                <div className="relative">
+                  <select
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                    className={selectClasses}
+                  >
+                    <option value="" className="bg-background text-foreground">Marca</option>
+                    {brands.map((b) => (
+                      <option key={b} value={b} className="bg-background text-foreground">{b}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Model */}
+                <input
+                  type="text"
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Modelo"
+                  className={inputClasses}
+                />
+
+                {/* Price Range */}
+                <select
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className={selectClasses}
+                >
+                  {priceRanges.map((p) => (
+                    <option key={p.value} value={p.value} className="bg-background text-foreground">{p.label}</option>
+                  ))}
+                </select>
+
+                {/* Year */}
+                <select
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className={selectClasses}
+                >
+                  <option value="" className="bg-background text-foreground">Ano</option>
+                  {years.map((y) => (
+                    <option key={y} value={y} className="bg-background text-foreground">{y}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Advanced Filters Toggle - hidden on mobile */}
+              <button
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="hidden md:flex group items-center gap-2 text-sm text-foreground-secondary/70 hover:text-foreground transition-all duration-200 mx-auto py-1"
               >
-                <option value="" className="bg-background text-foreground">Marca</option>
-                {brands.map((b) => (
-                  <option key={b} value={b} className="bg-background text-foreground">{b}</option>
-                ))}
-              </select>
-            </div>
+                <span className="tracking-wide">Filtros avançados</span>
+                {showAdvanced ? (
+                  <ChevronUp className="w-4 h-4 transition-transform duration-200" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+                )}
+              </button>
 
-            {/* Model */}
-            <input
-              type="text"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Modelo"
-              className={inputClasses}
-            />
+              {/* Advanced Filters - Collapsible (desktop only) */}
+              {showAdvanced && (
+                <div className="hidden md:grid grid-cols-3 gap-3 pt-4 border-t border-border/20 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <select className={selectClasses}>
+                    <option value="" className="bg-background text-foreground">Combustível</option>
+                    <option value="gasolina" className="bg-background text-foreground">Gasolina</option>
+                    <option value="flex" className="bg-background text-foreground">Flex</option>
+                    <option value="eletrico" className="bg-background text-foreground">Elétrico</option>
+                    <option value="hibrido" className="bg-background text-foreground">Híbrido</option>
+                  </select>
+                  <select className={selectClasses}>
+                    <option value="" className="bg-background text-foreground">Câmbio</option>
+                    <option value="automatico" className="bg-background text-foreground">Automático</option>
+                    <option value="manual" className="bg-background text-foreground">Manual</option>
+                  </select>
+                  <select className={selectClasses}>
+                    <option value="" className="bg-background text-foreground">Carroceria</option>
+                    <option value="sedan" className="bg-background text-foreground">Sedan</option>
+                    <option value="suv" className="bg-background text-foreground">SUV</option>
+                    <option value="coupe" className="bg-background text-foreground">Cupê</option>
+                    <option value="conversivel" className="bg-background text-foreground">Conversível</option>
+                  </select>
+                </div>
+              )}
 
-            {/* Price Range */}
-            <select
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className={selectClasses}
-            >
-              {priceRanges.map((p) => (
-                <option key={p.value} value={p.value} className="bg-background text-foreground">{p.label}</option>
-              ))}
-            </select>
-
-            {/* Year */}
-            <select
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className={selectClasses}
-            >
-              <option value="" className="bg-background text-foreground">Ano</option>
-              {years.map((y) => (
-                <option key={y} value={y} className="bg-background text-foreground">{y}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Advanced Filters Toggle */}
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-sm text-foreground-secondary hover:text-foreground transition-colors mx-auto"
-          >
-            {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            Filtros avançados
-          </button>
-
-          {/* Advanced Filters - Collapsible */}
-          {showAdvanced && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-border">
-              <select className={selectClasses}>
-                <option value="" className="bg-background text-foreground">Combustível</option>
-                <option value="gasolina" className="bg-background text-foreground">Gasolina</option>
-                <option value="flex" className="bg-background text-foreground">Flex</option>
-                <option value="eletrico" className="bg-background text-foreground">Elétrico</option>
-                <option value="hibrido" className="bg-background text-foreground">Híbrido</option>
-              </select>
-              <select className={selectClasses}>
-                <option value="" className="bg-background text-foreground">Câmbio</option>
-                <option value="automatico" className="bg-background text-foreground">Automático</option>
-                <option value="manual" className="bg-background text-foreground">Manual</option>
-              </select>
-              <select className={selectClasses}>
-                <option value="" className="bg-background text-foreground">Carroceria</option>
-                <option value="sedan" className="bg-background text-foreground">Sedan</option>
-                <option value="suv" className="bg-background text-foreground">SUV</option>
-                <option value="coupe" className="bg-background text-foreground">Cupê</option>
-                <option value="conversivel" className="bg-background text-foreground">Conversível</option>
-              </select>
+              {/* Result counter - subtle premium indicator */}
+              {resultCount !== null && (
+                <div className="text-center pt-2 md:pt-4">
+                  <span className="text-foreground-secondary/70 text-xs md:text-sm tracking-wide">
+                    <span className="text-foreground font-medium tabular-nums">{resultCount}</span> veículos encontrados
+                  </span>
+                </div>
+              )}
             </div>
           )}
-
-          {/* Search Button with Result Count */}
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <button
-              onClick={handleSearch}
-              className="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white rounded-xl px-8 py-3.5 flex items-center justify-center gap-2 transition-all font-medium hover:shadow-lg hover:shadow-primary/30"
-            >
-              <Search className="w-5 h-5" />
-              Buscar veículos
-            </button>
-
-            {/* Real-time result counter */}
-            {resultCount !== null && (
-              <span className="text-foreground-secondary text-sm">
-                <span className="text-primary font-semibold">{resultCount}</span> veículos encontrados
-              </span>
-            )}
-          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

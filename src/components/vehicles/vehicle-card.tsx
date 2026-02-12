@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Vehicle } from '@/types'
 import { formatPrice, formatMileage } from '@/lib/utils'
+import { VehicleCardCTAs } from './vehicle-card-ctas'
 
 interface VehicleCardProps {
   vehicle: Vehicle
@@ -54,9 +55,9 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
   const badges = getVehicleBadges(vehicle)
 
   return (
-    <Link href={`/veiculo/${vehicle.slug}`}>
-      <Card className="group h-full border border-border bg-background-card transition-all duration-300 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1">
-        {/* Image container with consistent 4:3 aspect ratio */}
+    <Card className="group h-full border border-border bg-background-card transition-all duration-300 hover:shadow-lg hover:shadow-black/10 hover:-translate-y-1">
+      {/* Image container - clickable link */}
+      <Link href={`/veiculo/${vehicle.slug}`} className="block">
         <div className="relative aspect-[4/3] bg-background-soft overflow-hidden vehicle-image-container">
           {vehicle.photos?.[0] ? (
             <Image
@@ -81,8 +82,11 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
             </div>
           )}
         </div>
+      </Link>
 
-        <CardContent className="p-4">
+      <CardContent className="p-4">
+        {/* Clickable text content */}
+        <Link href={`/veiculo/${vehicle.slug}`} className="block">
           {/* Brand */}
           <p className="text-xs font-medium text-primary uppercase tracking-wider mb-1">
             {vehicle.brand}
@@ -115,12 +119,15 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
           </div>
 
           {/* Price */}
-          <p className="text-xl font-bold text-foreground">
+          <p className="text-xl font-bold text-foreground mb-3">
             {formatPrice(vehicle.price)}
           </p>
-        </CardContent>
-      </Card>
-    </Link>
+        </Link>
+
+        {/* WhatsApp CTA Buttons - outside Link to avoid nested <a> */}
+        <VehicleCardCTAs vehicle={vehicle} variant="compact" />
+      </CardContent>
+    </Card>
   )
 }
 
