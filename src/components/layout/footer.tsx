@@ -129,7 +129,7 @@ export function Footer() {
               <li>
                 <div className="flex items-start gap-2 text-foreground-secondary text-sm">
                   <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>Av. Rondon Pacheco, 1670<br />Uberlândia - MG, 38400-242</span>
+                  <span>Av. Rondon Pacheco, 1670<br />Vigilato Pereira, Uberlândia - MG, 38408-343</span>
                 </div>
               </li>
               <li>

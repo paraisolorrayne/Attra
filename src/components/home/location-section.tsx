@@ -11,7 +11,7 @@ const locations = [
     address: 'Av. Rondon Pacheco, 1670',
     city: 'Uberlândia',
     state: 'MG',
-    cep: '38400-242',
+    cep: '38408-343',
     phone: '(34) 3256-3200',
     hours: 'Seg-Sex: 8h às 18h | Sáb: 8h às 13h',
   },

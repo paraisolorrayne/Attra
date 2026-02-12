@@ -135,7 +135,7 @@ function ServicesSchema() {
       streetAddress: 'Av. Rondon Pacheco, 4600 - Tibery',
       addressLocality: 'Uberlândia',
       addressRegion: 'MG',
-      postalCode: '38405-142',
+      postalCode: '38408-343',
       addressCountry: 'BR'
     },
     telephone: '+55-34-3256-3100',

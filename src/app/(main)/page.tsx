@@ -33,13 +33,15 @@ export default async function Home() {
   }
 
   // Fetch featured vehicles for the supercars section
+  // Only show premium vehicles (R$ 500k+) ordered by highest price
   let featuredVehicles: Vehicle[] = []
   try {
     const result = await getVehicles({
       tipo: 'carros',
       registros_por_pagina: 6,
       ordenar: 'preco',
-      ordem: 'desc'
+      ordem: 'desc',
+      preco_de: 500000  // Filtro: apenas veículos acima de R$ 500 mil
     })
     featuredVehicles = result.vehicles
   } catch (error) {
@@ -89,7 +91,7 @@ export default async function Home() {
               streetAddress: 'Av. Rondon Pacheco, 1670',
               addressLocality: 'Uberlândia',
               addressRegion: 'MG',
-              postalCode: '38400-242',
+              postalCode: '38408-343',
               addressCountry: 'BR',
             },
             geo: {

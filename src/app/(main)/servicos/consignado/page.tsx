@@ -54,7 +54,7 @@ function ConsignadoServiceSchema() {
     provider: {
       '@type': 'AutoDealer',
       name: 'Attra Veículos',
-      address: { '@type': 'PostalAddress', streetAddress: 'Av. Rondon Pacheco, 4600 - Tibery', addressLocality: 'Uberlândia', addressRegion: 'MG', postalCode: '38405-142', addressCountry: 'BR' }
+      address: { '@type': 'PostalAddress', streetAddress: 'Av. Rondon Pacheco, 1670 - Vigilato Pereira', addressLocality: 'Uberlândia', addressRegion: 'MG', postalCode: '38408-343', addressCountry: 'BR' }
     },
     description: 'Venda seu veículo premium em consignação com exposição em showroom, avaliação profissional e zero burocracia.',
     areaServed: 'BR',
