@@ -48,7 +48,7 @@ export function VehicleSchema({ vehicle, url }: VehicleSchemaProps) {
       seller: {
         '@type': 'AutoDealer',
         name: 'Attra Veículos',
-        telephone: '+55-34-3256-3100',
+        telephone: '+55-34-3014-3232',
         url: 'https://attraveiculos.com.br',
       },
       url: vehicleUrl,

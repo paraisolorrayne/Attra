@@ -148,7 +148,7 @@ export async function sendWhatsAppWebhook(
 
     return {
       success: false,
-      message: 'Erro ao enviar mensagem. Por favor, tente novamente ou ligue para (34) 3256-3100.',
+      message: 'Erro ao enviar mensagem. Por favor, tente novamente ou ligue para (34) 3014-3232.',
     }
   }
 }

@@ -257,6 +257,33 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['task_status_history']['Row'], 'id' | 'changed_at'>
         Update: never
       }
+      // Marketing Campaigns Tables
+      marketing_campaigns: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          status: CampaignStatus
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['marketing_campaigns']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['marketing_campaigns']['Insert']>
+      }
+      campaign_vehicles: {
+        Row: {
+          id: string
+          campaign_id: string
+          vehicle_name: string
+          added_date: string | null
+          notes: string | null
+          display_order: number
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['campaign_vehicles']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['campaign_vehicles']['Insert']>
+      }
       // CRM Tables
       clientes: {
         Row: {
@@ -395,6 +422,7 @@ export type MarketingCategory = 'seo' | 'social_media' | 'content' | 'paid_ads' 
 export type StrategyStatus = 'active' | 'paused' | 'completed' | 'archived'
 export type TaskStatus = 'backlog' | 'in_progress' | 'review' | 'completed' | 'failed'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type CampaignStatus = 'publicada' | 'encerrada_ganho' | 'encerrada_desempenho'
 
 // CRM Enum Types
 export type OrigemCliente = 'site' | 'whatsapp' | 'indicacao' | 'crm_externo'
@@ -436,6 +464,18 @@ export type TaskComment = Database['public']['Tables']['task_comments']['Row']
 export type TaskCommentInsert = Database['public']['Tables']['task_comments']['Insert']
 export type TaskStatusHistory = Database['public']['Tables']['task_status_history']['Row']
 export type TaskStatusHistoryInsert = Database['public']['Tables']['task_status_history']['Insert']
+
+// Campaign Table Types
+export type MarketingCampaign = Database['public']['Tables']['marketing_campaigns']['Row']
+export type MarketingCampaignInsert = Database['public']['Tables']['marketing_campaigns']['Insert']
+export type MarketingCampaignUpdate = Database['public']['Tables']['marketing_campaigns']['Update']
+export type CampaignVehicle = Database['public']['Tables']['campaign_vehicles']['Row']
+export type CampaignVehicleInsert = Database['public']['Tables']['campaign_vehicles']['Insert']
+
+// Extended Campaign Types
+export interface CampaignWithVehicles extends MarketingCampaign {
+  vehicles: CampaignVehicle[]
+}
 
 // Extended Marketing Types
 export interface MarketingTaskWithDetails extends MarketingTask {

@@ -19,7 +19,7 @@ const defaultLocations = [
     addressLocality: 'Uberlândia',
     addressRegion: 'MG',
     postalCode: '38408-343',
-    telephone: '+55-34-3256-3100',
+    telephone: '+55-34-3014-3232',
     latitude: -18.9113,
     longitude: -48.2622,
     mapUrl: 'https://maps.google.com/?q=Attra+Veiculos+Tibery+Uberlandia',

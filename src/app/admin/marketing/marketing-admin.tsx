@@ -10,20 +10,23 @@ import {
   LogOut,
   Loader2,
   Download,
+  Megaphone,
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
 import { KanbanBoard } from './components/kanban-board'
 import { MetricsDashboard } from './components/metrics-dashboard'
 import { TaskModal } from './components/task-modal'
+import { CampaignsBoard } from './components/campaigns-board'
+import { CampaignModal } from './components/campaign-modal'
 import type { AdminUser } from '@/lib/admin-auth-supabase'
-import type { MarketingTask, MarketingStrategy, TaskStatus } from '@/types/database'
+import type { MarketingTask, MarketingStrategy, TaskStatus, CampaignWithVehicles, CampaignStatus } from '@/types/database'
 
 interface MarketingAdminProps {
   admin: AdminUser
 }
 
-type ViewMode = 'kanban' | 'dashboard'
+type ViewMode = 'campanhas' | 'kanban' | 'dashboard'
 
 export interface TaskWithDetails extends MarketingTask {
   strategy?: { id: string; name: string; category: string } | null
@@ -38,22 +41,26 @@ export interface AdminUserBasic {
 }
 
 export function MarketingAdmin({ admin }: MarketingAdminProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('kanban')
+  const [viewMode, setViewMode] = useState<ViewMode>('campanhas')
   const [tasks, setTasks] = useState<TaskWithDetails[]>([])
   const [strategies, setStrategies] = useState<MarketingStrategy[]>([])
   const [users, setUsers] = useState<AdminUserBasic[]>([])
+  const [campaigns, setCampaigns] = useState<CampaignWithVehicles[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null)
+  const [showCampaignModal, setShowCampaignModal] = useState(false)
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignWithVehicles | null>(null)
   const router = useRouter()
 
   const fetchData = useCallback(async () => {
     setIsLoading(true)
     try {
-      const [tasksRes, strategiesRes, usersRes] = await Promise.all([
+      const [tasksRes, strategiesRes, usersRes, campaignsRes] = await Promise.all([
         fetch('/api/admin/marketing/tasks'),
         fetch('/api/admin/marketing/strategies'),
         fetch('/api/admin/marketing/users'),
+        fetch('/api/admin/marketing/campaigns'),
       ])
 
       if (tasksRes.status === 401) {
@@ -61,15 +68,17 @@ export function MarketingAdmin({ admin }: MarketingAdminProps) {
         return
       }
 
-      const [tasksData, strategiesData, usersData] = await Promise.all([
+      const [tasksData, strategiesData, usersData, campaignsData] = await Promise.all([
         tasksRes.json(),
         strategiesRes.json(),
         usersRes.json(),
+        campaignsRes.json(),
       ])
 
       setTasks(tasksData.tasks || [])
       setStrategies(strategiesData.strategies || [])
       setUsers(usersData.users || [])
+      setCampaigns(campaignsData.campaigns || [])
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -118,6 +127,41 @@ export function MarketingAdmin({ admin }: MarketingAdminProps) {
       }
     } catch (error) {
       console.error('Error updating task status:', error)
+    }
+  }
+
+  // Campaign handlers
+  const handleCampaignClick = (campaign: CampaignWithVehicles) => {
+    setSelectedCampaign(campaign)
+    setShowCampaignModal(true)
+  }
+
+  const handleCreateCampaign = () => {
+    setSelectedCampaign(null)
+    setShowCampaignModal(true)
+  }
+
+  const handleCampaignSaved = () => {
+    setShowCampaignModal(false)
+    setSelectedCampaign(null)
+    fetchData()
+  }
+
+  const handleCampaignStatusChange = async (campaignId: string, newStatus: CampaignStatus) => {
+    try {
+      const res = await fetch(`/api/admin/marketing/campaigns/${campaignId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (res.ok) {
+        setCampaigns(prev => prev.map(c =>
+          c.id === campaignId ? { ...c, status: newStatus } : c
+        ))
+      }
+    } catch (error) {
+      console.error('Error updating campaign status:', error)
     }
   }
 
@@ -181,6 +225,18 @@ export function MarketingAdmin({ admin }: MarketingAdminProps) {
           {/* View Mode Toggle */}
           <div className="flex items-center gap-2 bg-background-card border border-border rounded-lg p-1">
             <button
+              onClick={() => setViewMode('campanhas')}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                viewMode === 'campanhas'
+                  ? "bg-primary text-white"
+                  : "text-foreground-secondary hover:text-foreground hover:bg-background-soft"
+              )}
+            >
+              <Megaphone className="w-4 h-4" />
+              Campanhas
+            </button>
+            <button
               onClick={() => setViewMode('kanban')}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors",
@@ -225,11 +281,11 @@ export function MarketingAdmin({ admin }: MarketingAdminProps) {
             </button>
             {isAdmin && (
               <button
-                onClick={handleCreateTask}
+                onClick={viewMode === 'campanhas' ? handleCreateCampaign : handleCreateTask}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Nova Tarefa
+                {viewMode === 'campanhas' ? 'Nova Campanha' : 'Nova Tarefa'}
               </button>
             )}
           </div>
@@ -240,6 +296,13 @@ export function MarketingAdmin({ admin }: MarketingAdminProps) {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
+        ) : viewMode === 'campanhas' ? (
+          <CampaignsBoard
+            campaigns={campaigns}
+            onCampaignClick={handleCampaignClick}
+            onStatusChange={handleCampaignStatusChange}
+            isAdmin={isAdmin}
+          />
         ) : viewMode === 'kanban' ? (
           <KanbanBoard
             tasks={tasks}
@@ -265,6 +328,19 @@ export function MarketingAdmin({ admin }: MarketingAdminProps) {
             setSelectedTask(null)
           }}
           onSaved={handleTaskSaved}
+        />
+      )}
+
+      {/* Campaign Modal */}
+      {showCampaignModal && (
+        <CampaignModal
+          campaign={selectedCampaign}
+          isAdmin={isAdmin}
+          onClose={() => {
+            setShowCampaignModal(false)
+            setSelectedCampaign(null)
+          }}
+          onSaved={handleCampaignSaved}
         />
       )}
     </div>

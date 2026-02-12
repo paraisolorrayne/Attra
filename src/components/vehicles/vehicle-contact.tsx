@@ -1,12 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { MessageCircle, Phone, Mail, FileText, Loader2 } from 'lucide-react'
+import { MessageCircle, Phone, Mail, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Vehicle } from '@/types'
-import { getVehicleWhatsAppMessage } from '@/lib/utils'
-import { sendWhatsAppWebhook } from '@/lib/webhook'
-import { useToast } from '@/components/ui/toast'
+import { formatPrice } from '@/lib/utils'
+import { getWhatsAppUrl, PHONE_NUMBER } from '@/lib/constants'
 
 interface VehicleContactProps {
   vehicle: Vehicle
@@ -14,61 +12,29 @@ interface VehicleContactProps {
 }
 
 export function VehicleContact({ vehicle, compact = false }: VehicleContactProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { showToast, hideToast } = useToast()
-
-  const handleWhatsAppClick = async () => {
-    if (isLoading) return
-
-    setIsLoading(true)
-    const loadingId = showToast('loading', 'Enviando mensagem...')
-
-    const result = await sendWhatsAppWebhook({
-      eventType: 'vehicle_inquiry',
-      sourcePage: `/veiculo/${vehicle.slug}`,
-      context: {
-        vehicleId: vehicle.id,
-        vehicleBrand: vehicle.brand,
-        vehicleModel: vehicle.model,
-        vehicleYear: vehicle.year_model,
-        vehiclePrice: vehicle.price,
-        vehicleSlug: vehicle.slug,
-        userMessage: getVehicleWhatsAppMessage(vehicle),
-      },
-    })
-
-    hideToast(loadingId)
-    setIsLoading(false)
-
-    if (result.success) {
-      showToast('success', result.message)
-    } else {
-      showToast('error', result.message)
-    }
-  }
-
   const isSold = vehicle.status === 'sold'
+
+  const whatsappMessage = isSold
+    ? `Olá! Vi que o ${vehicle.brand} ${vehicle.model} ${vehicle.year_model} já foi vendido. Gostaria de saber se há algum similar disponível.`
+    : `Olá! Tenho interesse no ${vehicle.brand} ${vehicle.model} ${vehicle.year_model}. Valor: ${formatPrice(vehicle.price)}. Gostaria de mais informações.`
+  const whatsappUrl = getWhatsAppUrl(whatsappMessage)
 
   // Compact mode for sidebar
   if (compact) {
     return (
       <div className="space-y-3">
-        <Button
-          onClick={handleWhatsAppClick}
-          disabled={isLoading}
-          className="w-full bg-primary hover:bg-primary-hover text-white"
-          size="lg"
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          ) : (
+        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <Button
+            className="w-full bg-primary hover:bg-primary-hover text-white"
+            size="lg"
+          >
             <MessageCircle className="w-5 h-5 mr-2" />
-          )}
-          {isLoading ? 'Enviando...' : 'Falar com consultor'}
-        </Button>
+            Falar com consultor
+          </Button>
+        </a>
         <div className="flex gap-2">
           <a
-            href="tel:+553432563100"
+            href={`tel:${PHONE_NUMBER}`}
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-background border border-border rounded-lg text-foreground hover:bg-background-soft transition-colors text-sm"
           >
             <Phone className="w-4 h-4" />
@@ -94,28 +60,19 @@ export function VehicleContact({ vehicle, compact = false }: VehicleContactProps
 
       <div className="space-y-3">
         {/* WhatsApp CTA */}
-        <Button
-          onClick={handleWhatsAppClick}
-          disabled={isLoading}
-          className="w-full bg-green-500 hover:bg-green-600 text-white"
-          size="lg"
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          ) : (
+        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <Button
+            className="w-full bg-green-500 hover:bg-green-600 text-white"
+            size="lg"
+          >
             <MessageCircle className="w-5 h-5 mr-2" />
-          )}
-          {isLoading
-            ? 'Enviando...'
-            : isSold
-              ? 'Buscar similar no WhatsApp'
-              : 'Falar no WhatsApp'
-          }
-        </Button>
+            {isSold ? 'Buscar similar no WhatsApp' : 'Falar no WhatsApp'}
+          </Button>
+        </a>
 
         {/* Phone */}
         <a
-          href="tel:+553432563100"
+          href={`tel:${PHONE_NUMBER}`}
           className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-background border border-border rounded-lg text-foreground hover:bg-background-soft transition-colors"
         >
           <Phone className="w-5 h-5" />

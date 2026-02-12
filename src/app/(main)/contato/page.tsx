@@ -28,7 +28,7 @@ function ContatoSchema() {
       postalCode: '38408-343',
       addressCountry: 'BR',
     },
-    telephone: '+55-34-3256-3100',
+    telephone: '+55-34-3014-3232',
     email: 'faleconosco@attraveiculos.com.br',
     url: 'https://attraveiculos.com.br',
     openingHoursSpecification: [
