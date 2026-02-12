@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -46,13 +46,13 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 	const { slug } = await params
 
 	if (!slug) {
-		notFound()
+		redirect('/estoque?veiculo_indisponivel=true')
 	}
 
 	const vehicle = await getVehicleBySlug(slug)
 
 	if (!vehicle) {
-		notFound()
+		redirect('/estoque?veiculo_indisponivel=true')
 	}
 
 	// Fetch engine sound from admin panel database (if configured)

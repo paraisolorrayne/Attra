@@ -12,6 +12,7 @@ import { FAQSection } from '@/components/home'
 import { FAQSchema } from '@/components/seo'
 import { estoqueFAQs } from '@/lib/faq-data'
 import { Search, Globe, Shield, Check } from 'lucide-react'
+import { VehicleUnavailableToast } from '@/components/vehicles/vehicle-unavailable-toast'
 
 export const metadata: Metadata = {
   title: 'Estoque Premium | Supercarros e Veículos de Luxo',
@@ -66,14 +67,16 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
   if (params.precoMin) filters.preco_de = parseInt(params.precoMin)
   if (params.precoMax) filters.preco_ate = parseInt(params.precoMax)
 
-  if (params.ordenar) {
-    switch (params.ordenar) {
-      case 'preco-asc': filters.ordenar = 'preco'; filters.ordem = 'asc'; break
-      case 'preco-desc': filters.ordenar = 'preco'; filters.ordem = 'desc'; break
-      case 'ano-desc': filters.ordenar = 'ano'; filters.ordem = 'desc'; break
-      case 'km-asc': filters.ordenar = 'km'; filters.ordem = 'asc'; break
-      default: filters.ordenar = 'publicacao'; filters.ordem = 'desc'
-    }
+  // Default sort: price descending (maior preço primeiro)
+  // Always apply sorting - default to preco-desc when no param
+  const sortParam = params.ordenar || 'preco-desc'
+  switch (sortParam) {
+    case 'preco-asc': filters.ordenar = 'preco'; filters.ordem = 'asc'; break
+    case 'ano-desc': filters.ordenar = 'ano'; filters.ordem = 'desc'; break
+    case 'km-asc': filters.ordenar = 'km'; filters.ordem = 'asc'; break
+    case 'publicacao': filters.ordenar = 'publicacao'; filters.ordem = 'desc'; break
+    case 'preco-desc':
+    default: filters.ordenar = 'preco'; filters.ordem = 'desc'; break
   }
 
   let vehicles: Vehicle[] = []
@@ -210,6 +213,11 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
 
   return (
     <>
+      {/* Toast notification for redirected users from unavailable vehicle pages */}
+      <Suspense fallback={null}>
+        <VehicleUnavailableToast />
+      </Suspense>
+
       <section className="pt-28 pb-12 bg-gradient-to-b from-background-soft to-background">
         <Container>
           <Breadcrumb items={breadcrumbItems} />
