@@ -138,7 +138,7 @@ function ServicesSchema() {
       postalCode: '38408-343',
       addressCountry: 'BR'
     },
-    telephone: '+55-34-3256-3100',
+    telephone: '+55-34-3014-3232',
     url: 'https://attraveiculos.com.br',
     hasOfferCatalog: {
       '@type': 'OfferCatalog',

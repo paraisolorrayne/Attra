@@ -115,7 +115,7 @@ export function Footer() {
                 <div className="flex items-start gap-2 text-foreground-secondary text-sm">
                   <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div className="flex flex-col">
-                    <a href="tel:+553432563100" className="hover:text-primary transition-colors">(34) 3256-3100</a>
+                    <a href="tel:+553430143232" className="hover:text-primary transition-colors">(34) 3014-3232</a>
                     <a href="tel:+553432260202" className="hover:text-primary transition-colors">(34) 3226-0202</a>
                   </div>
                 </div>

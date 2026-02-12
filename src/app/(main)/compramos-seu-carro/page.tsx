@@ -129,7 +129,7 @@ function CarBuyingServiceSchema() {
         postalCode: '38408-343',
         addressCountry: 'BR'
       },
-      telephone: '+55-34-3256-3100',
+      telephone: '+55-34-3014-3232',
       url: 'https://attraveiculos.com.br'
     },
     description: 'A Attra Veículos compra seu carro premium com avaliação profissional e processo transparente. Especialistas em veículos de luxo há 18 anos.',

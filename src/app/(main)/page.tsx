@@ -85,7 +85,7 @@ export default async function Home() {
             name: 'Attra Veículos',
             description: 'Referência em veículos nacionais, importados, seminovos e supercarros em Uberlândia.',
             url: 'https://attraveiculos.com.br',
-            telephone: '+55-34-3256-3100',
+            telephone: '+55-34-3014-3232',
             address: {
               '@type': 'PostalAddress',
               streetAddress: 'Av. Rondon Pacheco, 1670',
