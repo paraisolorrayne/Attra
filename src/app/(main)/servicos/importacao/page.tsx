@@ -54,7 +54,7 @@ function ImportServiceSchema() {
     provider: {
       '@type': 'AutoDealer',
       name: 'Attra Veículos',
-      address: { '@type': 'PostalAddress', streetAddress: 'Av. Rondon Pacheco, 4600 - Tibery', addressLocality: 'Uberlândia', addressRegion: 'MG', postalCode: '38405-142', addressCountry: 'BR' }
+      address: { '@type': 'PostalAddress', streetAddress: 'Av. Rondon Pacheco, 1670 - Vigilato Pereira', addressLocality: 'Uberlândia', addressRegion: 'MG', postalCode: '38408-343', addressCountry: 'BR' }
     },
     description: 'Importação sob medida de veículos de luxo e superesportivos da Europa, EUA e Oriente Médio com processo 100% legal.',
     areaServed: 'BR',

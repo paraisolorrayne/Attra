@@ -24,7 +24,7 @@ function SobreSchema() {
       streetAddress: 'Av. Rondon Pacheco',
       addressLocality: 'Uberlândia',
       addressRegion: 'MG',
-      postalCode: '38400-000',
+      postalCode: '38408-343',
       addressCountry: 'BR',
     },
     telephone: '+55-34-3256-3100',

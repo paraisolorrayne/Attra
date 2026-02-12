@@ -35,7 +35,7 @@ export function FAQSchema({ faqs, pageName }: FAQSchemaProps) {
 export const homeFAQs: FAQItem[] = [
   {
     question: 'Onde fica a Attra Veículos?',
-    answer: 'A Attra Veículos fica na Av. Rondon Pacheco, 1670 Uberlândia - MG, 38400-242. Atendemos clientes de todo o Brasil com entrega nacional.',
+    answer: 'A Attra Veículos fica na Av. Rondon Pacheco, 1670 - Vigilato Pereira, Uberlândia - MG, 38408-343. Atendemos clientes de todo o Brasil com entrega nacional.',
   },
   {
     question: 'Que tipos de veículos a Attra comercializa?',

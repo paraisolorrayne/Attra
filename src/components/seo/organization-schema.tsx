@@ -15,7 +15,7 @@ export function OrganizationSchema() {
         streetAddress: 'Av. Rondon Pacheco, 4600 - Tibery',
         addressLocality: 'Uberlândia',
         addressRegion: 'MG',
-        postalCode: '38405-142',
+        postalCode: '38408-343',
         addressCountry: 'BR',
       },
       {
@@ -23,7 +23,7 @@ export function OrganizationSchema() {
         streetAddress: 'Av. João Naves de Ávila, 1500 - Santa Mônica',
         addressLocality: 'Uberlândia',
         addressRegion: 'MG',
-        postalCode: '38408-100',
+        postalCode: '38408-343',
         addressCountry: 'BR',
       },
     ],
