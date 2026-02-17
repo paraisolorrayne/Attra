@@ -114,7 +114,7 @@ const achievements = [
   },
   {
     year: 2024,
-    title: 'Referência Nacional',
+    title: 'Consolidação de Estrutura Empresarial',
     description:
       'A gestão da empresa é conduzida de forma estruturada, com papéis bem definidos e hierarquia clara, garantindo decisões estratégicas eficientes e um crescimento sustentável. Essa postura profissional permitiu à Attra Veículos consolidar sua reputação no mercado, sendo a maior dealer premium do Triângulo Mineiro.',
   },
