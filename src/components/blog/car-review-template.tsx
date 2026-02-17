@@ -17,76 +17,98 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { formatDate, cn } from '@/lib/utils'
 import { ListenToContent } from './listen-to-content'
+import { BlogContentRenderer } from './blog-content-renderer'
 
 interface CarReviewTemplateProps {
   post: DualBlogPost
 }
 
 // ============================================================================
-// VEHICLE SPECS TABLE - Componente semântico para especificações técnicas
+// VEHICLE SPECS TABLE - Ficha técnica consolidada em 2 colunas
 // ============================================================================
-function VehicleSpecsTable({ specs, brand, model }: {
+function VehicleSpecsTable({ specs }: {
   specs?: CarReviewSpecs
-  brand?: string
-  model?: string
 }) {
   if (!specs) return null
 
-  // Filtrar apenas specs que têm valor (evita "Consultar")
-  const specItems = [
+  // Organizar specs em 2 colunas: Performance e Configuração
+  const performanceSpecs = [
     { label: 'Motor', value: specs.engine, icon: Fuel },
     { label: 'Potência', value: specs.power, icon: Zap },
     { label: 'Torque', value: specs.torque, icon: RotateCcw },
     { label: '0-100 km/h', value: specs.acceleration, icon: Gauge },
     { label: 'Velocidade Máxima', value: specs.top_speed, icon: Gauge },
+  ].filter(item => item.value && item.value !== 'Consultar')
+
+  const configSpecs = [
     { label: 'Transmissão', value: specs.transmission, icon: Settings },
-    { label: 'Peso', value: specs.weight, icon: Disc },
     { label: 'Tração', value: specs.drivetrain, icon: Car },
+    { label: 'Peso', value: specs.weight, icon: Disc },
     { label: 'Pneus', value: specs.tires, icon: Disc },
     { label: 'Freios', value: specs.brakes, icon: Disc },
   ].filter(item => item.value && item.value !== 'Consultar')
 
-  if (specItems.length === 0) return null
+  if (performanceSpecs.length === 0 && configSpecs.length === 0) return null
+
+  const renderSpecItem = (item: any) => (
+    <div key={item.label} className="flex items-start gap-4 pb-4 border-b border-border/30 last:border-b-0">
+      <div className="p-2.5 rounded-lg bg-primary/10 flex-shrink-0">
+        <item.icon className="w-5 h-5 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs uppercase tracking-wide text-foreground-secondary/70 mb-1">
+          {item.label}
+        </p>
+        <p className="text-lg font-bold text-foreground" itemProp={
+          item.label === 'Motor' ? 'vehicleEngine' :
+          item.label === 'Transmissão' ? 'vehicleTransmission' : undefined
+        }>
+          {item.value}
+        </p>
+      </div>
+    </div>
+  )
 
   return (
     <section
-      className="py-10 lg:py-14 border-b border-border"
+      className="py-14 lg:py-18 bg-background-soft border-b border-border"
       itemScope
       itemType="https://schema.org/Vehicle"
     >
       <Container>
-        <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-8">
-          Especificações Técnicas do {brand} {model}
+        <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-12">
+          Ficha Técnica
         </h2>
 
-        {/* Grid responsivo com dados estruturados */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          {specItems.map((item, index) => (
-            <div
-              key={index}
-              className="group p-5 bg-background-card rounded-xl border border-border
-                         hover:border-primary/40 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <item.icon className="w-5 h-5 text-primary" />
-                </div>
-                <span className="text-sm font-medium text-foreground-secondary uppercase tracking-wide">
-                  {item.label}
-                </span>
+        {/* Grid 2 colunas com melhor organização */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+          {/* Coluna 1: Performance */}
+          {performanceSpecs.length > 0 && (
+            <div>
+              <h3 className="text-sm uppercase tracking-widest font-bold text-primary mb-6">
+                Performance
+              </h3>
+              <div className="space-y-0">
+                {performanceSpecs.map(renderSpecItem)}
               </div>
-              <p className="text-xl font-bold text-foreground" itemProp={
-                item.label === 'Motor' ? 'vehicleEngine' :
-                item.label === 'Transmissão' ? 'vehicleTransmission' : undefined
-              }>
-                {item.value}
-              </p>
             </div>
-          ))}
+          )}
+
+          {/* Coluna 2: Configuração */}
+          {configSpecs.length > 0 && (
+            <div>
+              <h3 className="text-sm uppercase tracking-widest font-bold text-primary mb-6">
+                Configuração
+              </h3>
+              <div className="space-y-0">
+                {configSpecs.map(renderSpecItem)}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Nota sobre dados */}
-        <p className="mt-6 text-sm text-foreground-secondary/70 text-center">
+        <p className="mt-10 text-sm text-foreground-secondary/70 text-center">
           Especificações fornecidas pelo fabricante. Valores podem variar conforme versão e configuração.
         </p>
       </Container>
@@ -107,24 +129,33 @@ function GallerySection({
   model?: string
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
-
-  if (!images || images.length === 0) return null
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set())
 
   // Normalizar imagens para formato com legenda
-  const normalizedImages: CarReviewGalleryImage[] = images.map((img, i) =>
+  const allImages: CarReviewGalleryImage[] = (images || []).map((img, i) =>
     typeof img === 'string'
       ? { url: img, alt: `${brand} ${model} - Imagem ${i + 1}` }
       : img
   )
 
+  // Filtrar imagens que falharam ao carregar
+  const normalizedImages = allImages.filter((_, i) => !failedImages.has(i))
   const totalImages = normalizedImages.length
+
+  // Clamp activeIndex to valid range when images are filtered
+  const safeIndex = Math.min(activeIndex, Math.max(totalImages - 1, 0))
 
   const goToPrev = () => setActiveIndex(i => i === 0 ? totalImages - 1 : i - 1)
   const goToNext = () => setActiveIndex(i => i === totalImages - 1 ? 0 : i + 1)
 
-  // Keyboard navigation
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleImageError = (originalIndex: number) => {
+    setFailedImages(prev => new Set([...prev, originalIndex]))
+    if (safeIndex >= totalImages - 1) setActiveIndex(0)
+  }
+
+  // Keyboard navigation — hooks MUST be called before any early return
   useEffect(() => {
+    if (totalImages === 0) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') setActiveIndex(i => i === 0 ? totalImages - 1 : i - 1)
       if (e.key === 'ArrowRight') setActiveIndex(i => i === totalImages - 1 ? 0 : i + 1)
@@ -133,70 +164,113 @@ function GallerySection({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [totalImages])
 
+  // Early return AFTER all hooks
+  if (!images || images.length === 0 || normalizedImages.length === 0) return null
+
   return (
-    <section className="py-10 lg:py-14 bg-background-soft">
+    <section className="py-14 lg:py-18 bg-background-soft border-b border-border">
       <Container>
-        <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-8">
+        <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-10">
           Galeria de Fotos
         </h2>
 
-        {/* Imagem principal com navegação */}
-        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-4 group">
+        {/* Imagem principal com navegação - Carrossel limpo */}
+        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-6 group bg-background">
           <Image
-            src={normalizedImages[activeIndex].url}
-            alt={normalizedImages[activeIndex].alt}
+            src={normalizedImages[safeIndex].url}
+            alt={normalizedImages[safeIndex].alt}
             fill
             className="object-cover"
-            priority={activeIndex === 0}
+            priority={safeIndex === 0}
+            onError={() => {
+              // Find the original index of this image in allImages
+              const origIdx = allImages.findIndex(img => img.url === normalizedImages[safeIndex].url)
+              if (origIdx >= 0) handleImageError(origIdx)
+            }}
           />
 
-          {/* Navegação */}
+          {/* Navegação - Botões melhorados */}
           {normalizedImages.length > 1 && (
             <>
               <button
                 onClick={goToPrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50
-                           text-white hover:bg-black/70 transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60
+                           text-white hover:bg-black/80 transition-all duration-200 z-10"
                 aria-label="Imagem anterior"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50
-                           text-white hover:bg-black/70 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60
+                           text-white hover:bg-black/80 transition-all duration-200 z-10"
                 aria-label="Próxima imagem"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </>
           )}
 
-          {/* Legenda */}
-          {normalizedImages[activeIndex].caption && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-              <p className="text-white text-sm lg:text-base">
-                {normalizedImages[activeIndex].caption}
+          {/* Indicadores de posição (dots) */}
+          {normalizedImages.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+              {normalizedImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveIndex(index)}
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all duration-300",
+                    activeIndex === index
+                      ? "bg-white w-8"
+                      : "bg-white/50 hover:bg-white/70"
+                  )}
+                  aria-label={`Ir para imagem ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Legenda - Melhor posicionamento */}
+          {normalizedImages[safeIndex].caption && (
+            <div className="absolute top-4 left-4 right-4 p-3 bg-black/60 backdrop-blur-sm rounded-lg">
+              <p className="text-white text-sm lg:text-base font-medium">
+                {normalizedImages[safeIndex].caption}
               </p>
+            </div>
+          )}
+
+          {/* Contador de imagens */}
+          {normalizedImages.length > 1 && (
+            <div className="absolute top-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+              {activeIndex + 1} / {totalImages}
             </div>
           )}
         </div>
 
-        {/* Miniaturas */}
+        {/* Miniaturas - Melhor layout responsivo */}
         {normalizedImages.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {normalizedImages.map((img, index) => (
               <button
                 key={index}
                 onClick={() => setActiveIndex(index)}
                 className={cn(
-                  "relative flex-shrink-0 w-20 h-14 lg:w-28 lg:h-20 rounded-lg overflow-hidden transition-all",
+                  "relative flex-shrink-0 w-24 h-16 lg:w-32 lg:h-24 rounded-lg overflow-hidden transition-all border-2",
                   activeIndex === index
-                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                    : "opacity-60 hover:opacity-100"
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-border opacity-70 hover:opacity-100"
                 )}
               >
-                <Image src={img.url} alt={img.alt} fill className="object-cover" />
+                <Image
+                  src={img.url}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  onError={() => {
+                    const origIdx = allImages.findIndex(i => i.url === img.url)
+                    if (origIdx >= 0) handleImageError(origIdx)
+                  }}
+                />
               </button>
             ))}
           </div>
@@ -415,31 +489,39 @@ function CTASection({ brand, model, isPrimary = false }: {
   return (
     <div className={cn(
       "text-center",
-      isPrimary ? "py-10 lg:py-14 bg-background-soft" : "mt-12"
+      isPrimary ? "py-16 lg:py-20 bg-gradient-to-b from-background-soft to-background border-t border-border" : "mt-14 pt-10 border-t border-border"
     )}>
       <Container size={isPrimary ? "lg" : undefined}>
-        <p className="text-lg text-foreground-secondary mb-6">
-          Interessado no {brand} {model} ou em modelos similares?
+        {/* Heading */}
+        <h2 className="text-2xl lg:text-3xl font-bold text-foreground mb-3">
+          Interessado neste veículo?
+        </h2>
+        <p className="text-lg text-foreground-secondary mb-10 max-w-2xl mx-auto">
+          Entre em contato com nossos especialistas para mais informações sobre o {brand} {model} ou explore modelos similares em nosso estoque.
         </p>
 
+        {/* CTA Buttons - Padronizados */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg" className="min-h-[52px] text-base">
+          {/* Primary CTA - WhatsApp */}
+          <Button asChild size="lg" className="min-h-[52px] text-base font-semibold">
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-5 h-5 mr-2" />
               Falar com Especialista
             </a>
           </Button>
 
-          <Button asChild variant="outline" size="lg" className="min-h-[52px] text-base">
+          {/* Secondary CTA - Ver Estoque */}
+          <Button asChild variant="outline" size="lg" className="min-h-[52px] text-base font-semibold">
             <Link href={`/estoque?marca=${brand?.toLowerCase()}`}>
               <Car className="w-5 h-5 mr-2" />
               Ver Estoque {brand}
             </Link>
           </Button>
 
-          <Button asChild variant="ghost" size="lg" className="min-h-[52px] text-base">
+          {/* Tertiary CTA - Solicitar */}
+          <Button asChild variant="ghost" size="lg" className="min-h-[52px] text-base font-semibold">
             <Link href="/solicitar-veiculo">
-              Solicitar Veículo Específico
+              Solicitar Veículo
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
@@ -528,6 +610,7 @@ function ArticleFooter({ brand }: { brand?: string }) {
 // MAIN TEMPLATE
 // ============================================================================
 export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
+  const [heroImageError, setHeroImageError] = useState(false)
   const { car_review } = post
 
   const breadcrumbItems = [
@@ -558,60 +641,70 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
           {/* Breadcrumb */}
           <Breadcrumb items={breadcrumbItems} afterHero />
 
-          {/* Brand Badge + Subtítulo */}
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          {/* Brand Badge + Subtítulo - Melhor espaçamento */}
+          <div className="mb-6 flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center px-4 py-1.5 bg-primary text-white rounded-full text-sm font-bold uppercase tracking-wide">
               {car_review?.brand}
             </span>
             {vehicleSubtitle && (
-              <span className="text-foreground-secondary font-medium">
+              <span className="text-foreground-secondary font-medium text-sm">
                 {vehicleSubtitle}
               </span>
             )}
           </div>
 
-          {/* Título H1 - Principal */}
+          {/* Título H1 - Principal com melhor hierarquia */}
           <h1
-            className="mt-6 text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground max-w-5xl leading-[1.1] tracking-tight"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground max-w-5xl leading-tight tracking-tight mb-6"
             itemProp="name"
           >
             {post.title}
           </h1>
 
-          {/* Excerpt/Lead */}
-          <p className="mt-6 text-lg lg:text-xl text-foreground-secondary max-w-3xl leading-relaxed">
+          {/* Excerpt/Lead - Parágrafo introdutório */}
+          <p className="text-lg lg:text-xl text-foreground-secondary max-w-3xl leading-relaxed mb-10 pb-10 border-b border-border/50">
             {post.excerpt}
           </p>
 
-          {/* Meta informações */}
-          <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-foreground-secondary">
+          {/* Meta informações - Melhor organização visual */}
+          <div className="flex flex-col sm:flex-row gap-8 mb-10 text-sm">
             {post.author && (
-              <div className="flex items-center gap-2" itemProp="author" itemScope itemType="https://schema.org/Person">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <div className="flex items-center gap-3" itemProp="author" itemScope itemType="https://schema.org/Person">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <User className="w-5 h-5 text-primary" />
                 </div>
                 <div>
+                  <p className="text-xs uppercase tracking-wide text-foreground-secondary/70">Autor</p>
                   <span className="font-semibold text-foreground block" itemProp="name">
                     {post.author.name}
                   </span>
-                  <span className="text-xs">Attra Veículos</span>
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              <time dateTime={post.published_date} itemProp="datePublished">
-                {formatDate(post.published_date)}
-              </time>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-foreground-secondary/70">Publicado</p>
+                <time dateTime={post.published_date} itemProp="datePublished" className="font-semibold text-foreground">
+                  {formatDate(post.published_date)}
+                </time>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              <span>{post.reading_time} de leitura</span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-foreground-secondary/70">Leitura</p>
+                <span className="font-semibold text-foreground">{post.reading_time}</span>
+              </div>
             </div>
           </div>
 
           {/* Listen to Content Button */}
-          <div className="mt-8">
+          <div>
             <ListenToContent
               content={post.content}
               title={post.title}
@@ -623,7 +716,7 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
       {/* ================================================================== */}
       {/* HERO IMAGE - Imagem principal com legenda rica */}
       {/* ================================================================== */}
-      {post.featured_image && (
+      {post.featured_image && !post.featured_image.includes('default-cover') && !heroImageError && (
         <section className="relative w-full aspect-[21/9] max-h-[600px] overflow-hidden">
           <Image
             src={post.featured_image}
@@ -632,6 +725,7 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
             className="object-cover"
             priority
             itemProp="image"
+            onError={() => setHeroImageError(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
 
@@ -653,8 +747,6 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
       {/* ================================================================== */}
       <VehicleSpecsTable
         specs={car_review?.specs}
-        brand={car_review?.brand}
-        model={car_review?.model}
       />
 
       {/* ================================================================== */}
@@ -678,19 +770,9 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
         <Container size="lg">
           <div className="max-w-3xl mx-auto">
             {/* Conteúdo HTML com tipografia otimizada para leitura longa */}
-            <div
-              className="prose prose-lg lg:prose-xl prose-neutral dark:prose-invert
-                         prose-headings:font-bold prose-headings:text-foreground prose-headings:tracking-tight
-                         prose-h2:text-2xl prose-h2:lg:text-3xl prose-h2:mt-12 prose-h2:mb-6
-                         prose-h3:text-xl prose-h3:lg:text-2xl prose-h3:mt-8 prose-h3:mb-4
-                         prose-p:text-foreground-secondary prose-p:leading-[1.8] prose-p:mb-6
-                         prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                         prose-strong:text-foreground prose-strong:font-semibold
-                         prose-ul:my-6 prose-li:my-2 prose-li:text-foreground-secondary
-                         prose-blockquote:border-l-primary prose-blockquote:bg-background-soft
-                         prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg
-                         prose-blockquote:not-italic prose-blockquote:text-foreground-secondary"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+            <BlogContentRenderer
+              content={post.content}
+              className="blog-prose"
               itemProp="reviewBody"
             />
 

@@ -14,6 +14,35 @@ import { estoqueFAQs } from '@/lib/faq-data'
 import { Search, Globe, Shield, Check } from 'lucide-react'
 import { VehicleUnavailableToast } from '@/components/vehicles/vehicle-unavailable-toast'
 
+// Brand similarity groups for vehicle suggestions
+// When a brand has no stock, vehicles from brands in the same group(s) are suggested
+const BRAND_SIMILARITY_GROUPS: string[][] = [
+  // Superesportivos / Ultra Luxo
+  ['ferrari', 'lamborghini', 'mclaren', 'porsche', 'aston martin', 'maserati'],
+  // Gran Turismo / Luxury Performance
+  ['bentley', 'rolls-royce', 'aston martin', 'maserati', 'mercedes-benz'],
+  // Premium Europeu
+  ['bmw', 'mercedes-benz', 'audi', 'jaguar', 'volvo', 'lexus'],
+  // SUV Premium
+  ['land rover', 'range rover', 'porsche', 'bmw', 'volvo', 'jeep'],
+  // Premium Americano / Muscle
+  ['cadillac', 'chevrolet', 'ford', 'dodge'],
+  // Seminovos Volume
+  ['toyota', 'honda', 'volkswagen', 'hyundai', 'nissan', 'kia', 'fiat', 'citroen', 'mitsubishi'],
+]
+
+function getSimilarBrands(brand: string): string[] {
+  const normalized = brand.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const similar = new Set<string>()
+  for (const group of BRAND_SIMILARITY_GROUPS) {
+    if (group.some(b => b.includes(normalized) || normalized.includes(b))) {
+      group.forEach(b => similar.add(b))
+    }
+  }
+  similar.delete(normalized)
+  return Array.from(similar)
+}
+
 export const metadata: Metadata = {
   title: 'Estoque Premium | Supercarros e Veículos de Luxo',
   description: 'Seleção exclusiva de supercarros e veículos premium.',
@@ -178,16 +207,38 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
         return matchesSearch && matchesBrand && matchesPrice && matchesCarroceria && matchesCombustivel && matchesAno && matchesBlindagem
       })
 
-      // If no exact matches, find partial matches (suggestions)
-      if (vehicles.length === 0 && searchTerms.length > 0) {
-        suggestedVehicles = allVehicles.filter(vehicle => {
-          // Include body_type and category in suggestion matching (with normalization)
-          const vehicleText = normalizeText(
-            `${vehicle.brand} ${vehicle.model} ${vehicle.year_model} ${vehicle.color || ''} ${vehicle.fuel_type || ''} ${vehicle.version || ''} ${vehicle.body_type || ''} ${vehicle.category || ''}`
-          )
-          // Match if ANY of the search terms are found (OR logic for suggestions)
-          return searchTerms.some(term => vehicleText.includes(term))
-        }).slice(0, 6) // Limit to 6 suggestions
+      // If no exact matches, find suggestions
+      if (vehicles.length === 0) {
+        // Text search: partial match with OR logic
+        if (searchTerms.length > 0) {
+          suggestedVehicles = allVehicles.filter(vehicle => {
+            const vehicleText = normalizeText(
+              `${vehicle.brand} ${vehicle.model} ${vehicle.year_model} ${vehicle.color || ''} ${vehicle.fuel_type || ''} ${vehicle.version || ''} ${vehicle.body_type || ''} ${vehicle.category || ''}`
+            )
+            return searchTerms.some(term => vehicleText.includes(term))
+          }).slice(0, 6)
+        }
+
+        // Brand filter: suggest vehicles from similar/competitor brands
+        if (suggestedVehicles.length === 0 && brandFilter) {
+          const similarBrands = getSimilarBrands(brandFilter)
+          if (similarBrands.length > 0) {
+            suggestedVehicles = allVehicles
+              .filter(vehicle => {
+                const vBrand = normalizeText(vehicle.brand || '')
+                return similarBrands.some(sb => vBrand.includes(sb) || sb.includes(vBrand))
+              })
+              .sort((a, b) => b.price - a.price)
+              .slice(0, 6)
+          }
+        }
+
+        // Fallback: if still no suggestions, show the most premium vehicles available
+        if (suggestedVehicles.length === 0 && allVehicles.length > 0) {
+          suggestedVehicles = [...allVehicles]
+            .sort((a, b) => b.price - a.price)
+            .slice(0, 6)
+        }
       }
 
       // Apply client-side sorting after filtering
@@ -220,9 +271,6 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
     error = e
   }
 
-  // Extract unique brands from all vehicles for dynamic filter
-  const availableBrands = [...new Set(allVehicles.map(v => v.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'))
-
   const breadcrumbItems = [{ label: 'Estoque', href: '/estoque' }]
 
   return (
@@ -248,7 +296,7 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
           <div className="flex flex-col lg:flex-row gap-8">
             <aside className="lg:w-72 shrink-0">
               <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-                <AdvancedFilters brands={availableBrands} />
+                <AdvancedFilters />
               </Suspense>
             </aside>
 

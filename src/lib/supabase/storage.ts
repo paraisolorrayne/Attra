@@ -166,3 +166,126 @@ export function isLegacyLocalUrl(url: string): boolean {
   return url.startsWith('/uploads/sounds/')
 }
 
+// =============================================
+// BLOG IMAGE UPLOAD
+// =============================================
+
+export const BLOG_IMAGES_BUCKET = 'blog-images'
+
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+]
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5MB
+
+function validateImageFile(file: File): { valid: boolean; error?: string } {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return {
+      valid: false,
+      error: 'Tipo de arquivo inválido. Apenas JPEG, PNG, WebP e AVIF são permitidos.',
+    }
+  }
+
+  if (file.size > MAX_IMAGE_SIZE) {
+    return {
+      valid: false,
+      error: 'Arquivo muito grande. Tamanho máximo é 5MB.',
+    }
+  }
+
+  return { valid: true }
+}
+
+function generateImageFilename(originalName: string): string {
+  const ext = originalName.split('.').pop()?.toLowerCase() || 'jpg'
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substring(2, 8)
+  return `blog-${timestamp}-${random}.${ext}`
+}
+
+/**
+ * Upload a blog image to Supabase Storage
+ */
+export async function uploadBlogImage(file: File): Promise<UploadResult> {
+  try {
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      return { success: false, error: validation.error }
+    }
+
+    const supabase = createAdminClient()
+    const filename = generateImageFilename(file.name)
+    const filePath = `posts/${filename}`
+
+    const arrayBuffer = await file.arrayBuffer()
+    const uint8Array = new Uint8Array(arrayBuffer)
+
+    const { data, error } = await supabase.storage
+      .from(BLOG_IMAGES_BUCKET)
+      .upload(filePath, uint8Array, {
+        contentType: file.type,
+        cacheControl: '31536000', // 1 year cache for images
+        upsert: false,
+      })
+
+    if (error) {
+      console.error('Supabase blog image upload error:', error)
+      return { success: false, error: error.message }
+    }
+
+    const { data: urlData } = supabase.storage
+      .from(BLOG_IMAGES_BUCKET)
+      .getPublicUrl(filePath)
+
+    return {
+      success: true,
+      url: urlData.publicUrl,
+      path: data.path,
+    }
+  } catch (error) {
+    console.error('Error uploading blog image:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
+/**
+ * Delete a blog image from Supabase Storage
+ */
+export async function deleteBlogImage(fileUrl: string): Promise<DeleteResult> {
+  try {
+    const supabase = createAdminClient()
+
+    const urlParts = fileUrl.split(`/storage/v1/object/public/${BLOG_IMAGES_BUCKET}/`)
+    if (urlParts.length !== 2) {
+      console.warn('Not a Supabase blog image URL, skipping deletion:', fileUrl)
+      return { success: true }
+    }
+
+    const filePath = urlParts[1]
+
+    const { error } = await supabase.storage
+      .from(BLOG_IMAGES_BUCKET)
+      .remove([filePath])
+
+    if (error) {
+      console.error('Supabase blog image delete error:', error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting blog image:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+

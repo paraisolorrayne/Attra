@@ -1,101 +1,64 @@
 import { Metadata } from 'next'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { Shield, Lock, Eye, FileText, UserCheck, Bell, Trash2, Mail } from 'lucide-react'
+import { Shield, Lock, Eye, FileText, UserCheck, MessageCircle, Share2, Mail } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidade',
-  description: 'Política de Privacidade da Attra Veículos. Saiba como coletamos, usamos e protegemos seus dados pessoais em conformidade com a LGPD.',
+  title: 'Política de Privacidade | Attra Veículos',
+  description: 'Na Attra Veículos, privacidade e segurança são prioridades. Saiba como coletamos, usamos e protegemos seus dados pessoais ao navegar em nosso site ou interagir via WhatsApp.',
 }
 
 const sections = [
   {
-    icon: FileText,
-    title: '1. Introdução',
-    content: `A Attra Veículos, inscrita no CNPJ sob nº XX.XXX.XXX/0001-XX, com sede em Uberlândia - MG, está comprometida com a proteção da privacidade e dos dados pessoais de seus clientes, visitantes e usuários de seu site.
-
-Esta Política de Privacidade foi elaborada em conformidade com a Lei Geral de Proteção de Dados Pessoais (LGPD - Lei nº 13.709/2018) e tem como objetivo informar de forma clara e transparente como tratamos suas informações pessoais.`
-  },
-  {
     icon: Eye,
-    title: '2. Dados Coletados',
-    content: `Podemos coletar os seguintes tipos de dados pessoais:
+    title: '1. Coleta de Informações',
+    content: `Coletamos dados necessários para oferecer uma experiência personalizada e segura:
 
-• **Dados de identificação**: Nome completo, CPF, RG, data de nascimento
-• **Dados de contato**: E-mail, telefone, endereço
-• **Dados de navegação**: Endereço IP, cookies, páginas visitadas, tempo de permanência
-• **Dados financeiros**: Informações necessárias para análise de crédito (quando aplicável)
-• **Dados do veículo**: Informações sobre veículos de interesse ou à venda
-
-A coleta ocorre quando você preenche formulários em nosso site, entra em contato conosco via WhatsApp, telefone ou e-mail, ou visita nosso showroom.`
+• **No Site:** Nome, e-mail, telefone e interesse em modelos específicos através de nossos formulários de contato.
+• **Via WhatsApp:** Além dos dados de contato, podemos registrar o histórico de conversas, preferências de veículos e documentos necessários para simulações de financiamento ou faturamento.
+• **Cookies:** Utilizamos cookies para melhorar a navegação e entender quais modelos despertam mais interesse em nosso estoque.`
   },
   {
-    icon: Lock,
-    title: '3. Finalidade do Tratamento',
-    content: `Utilizamos seus dados pessoais para as seguintes finalidades:
+    icon: FileText,
+    title: '2. Uso dos Dados',
+    content: `Seus dados são utilizados exclusivamente para:
 
-• Atendimento de solicitações e dúvidas sobre veículos
-• Envio de propostas comerciais e simulações de financiamento
-• Comunicação sobre ofertas, promoções e novidades (com seu consentimento)
-• Análise de crédito junto a instituições financeiras parceiras
-• Processamento de consignação e venda de veículos
-• Cumprimento de obrigações legais e regulatórias
-• Melhoria contínua de nossos serviços e experiência do usuário`
+• Responder suas solicitações de orçamento e disponibilidade de estoque.
+• Enviar informações sobre novos veículos que correspondam ao seu perfil de busca.
+• Processar etapas de compra, venda ou consignação de veículos.
+• Garantir a segurança jurídica das transações automotivas.`
   },
   {
-    icon: Shield,
-    title: '4. Compartilhamento de Dados',
-    content: `Seus dados podem ser compartilhados com:
+    icon: MessageCircle,
+    title: '3. Atendimento via WhatsApp',
+    content: `Ao iniciar uma conversa conosco via WhatsApp, você concorda que:
 
-• **Instituições financeiras**: Para análise e aprovação de crédito
-• **Despachantes e órgãos de trânsito**: Para transferência de veículos
-• **Seguradoras**: Quando solicitado pelo cliente
-• **Prestadores de serviços**: Empresas de tecnologia que nos auxiliam (hospedagem, e-mail marketing, analytics)
+• As informações compartilhadas serão utilizadas para agilizar seu atendimento.
+• Podemos enviar atualizações sobre o veículo de seu interesse, salvo se você solicitar a interrupção do contato.
+• **Segurança:** Nunca solicitaremos senhas ou códigos de confirmação via chat. Documentos sensíveis devem ser enviados apenas para nossos números oficiais.`
+  },
+  {
+    icon: Share2,
+    title: '4. Compartilhamento com Terceiros',
+    content: `A Attra Veículos não vende seus dados. Compartilhamos informações apenas com parceiros essenciais para a conclusão do seu negócio, tais como:
 
-Não vendemos ou comercializamos seus dados pessoais para terceiros.`
+• Instituições financeiras (para aprovação de crédito).
+• Órgãos de trânsito (para transferência de propriedade).
+• Empresas de vistorias cautelares.`
   },
   {
     icon: UserCheck,
-    title: '5. Seus Direitos (LGPD)',
-    content: `De acordo com a LGPD, você tem os seguintes direitos:
+    title: '5. Seus Direitos',
+    content: `De acordo com a **LGPD (Lei Geral de Proteção de Dados)**, você tem o direito de:
 
-• **Confirmação e acesso**: Saber se tratamos seus dados e acessá-los
-• **Correção**: Solicitar a correção de dados incompletos ou desatualizados
-• **Anonimização ou bloqueio**: Solicitar a anonimização de dados desnecessários
-• **Portabilidade**: Receber seus dados em formato estruturado
-• **Eliminação**: Solicitar a exclusão de dados tratados com seu consentimento
-• **Revogação**: Revogar consentimentos previamente fornecidos
-• **Oposição**: Opor-se ao tratamento quando em desacordo com a lei`
+• Confirmar a existência do tratamento de seus dados.
+• Solicitar a correção de dados incompletos ou desatualizados.
+• Solicitar a exclusão de seus dados de nossa base de marketing a qualquer momento.`
   },
   {
-    icon: Bell,
-    title: '6. Cookies e Tecnologias',
-    content: `Utilizamos cookies e tecnologias similares para:
-
-• Melhorar a experiência de navegação
-• Lembrar suas preferências
-• Analisar como você usa nosso site (Google Analytics)
-• Personalizar conteúdo e anúncios
-
-Você pode gerenciar ou desativar cookies nas configurações do seu navegador. Isso pode afetar algumas funcionalidades do site.`
-  },
-  {
-    icon: Trash2,
-    title: '7. Retenção de Dados',
-    content: `Mantemos seus dados pessoais pelo tempo necessário para cumprir as finalidades descritas nesta política, respeitando os prazos legais aplicáveis.
-
-Dados de clientes que realizaram transações são mantidos pelo período exigido pela legislação fiscal e consumerista. Dados de marketing são mantidos enquanto você não solicitar a exclusão.`
-  },
-  {
-    icon: Mail,
-    title: '8. Contato e DPO',
-    content: `Para exercer seus direitos ou esclarecer dúvidas sobre esta política, entre em contato:
-
-• **E-mail**: privacidade@attraveiculos.com.br
-• **Telefone**: (34) 3236-4747
-• **Endereço**: Av. Rondon Pacheco, Uberlândia - MG
-
-Esta política pode ser atualizada periodicamente. Recomendamos sua leitura regular.
+    icon: Lock,
+    title: '6. Alterações nesta Política',
+    content: `Reservamo-nos o direito de atualizar esta política periodicamente para refletir mudanças em nosso estoque ou em regulamentações legais. Recomendamos a leitura regular desta página.
 
 **Última atualização**: Fevereiro de 2026`
   },
@@ -113,8 +76,8 @@ export default function PoliticaPrivacidadePage() {
               <span className="text-sm font-medium text-primary">LGPD Compliant</span>
             </div>
             <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">Política de Privacidade</h1>
-            <p className="text-lg text-foreground-secondary">
-              Saiba como a Attra Veículos coleta, usa e protege seus dados pessoais.
+            <p className="text-lg text-foreground-secondary max-w-2xl mx-auto">
+              Na <strong className="text-foreground">Attra Veículos</strong>, privacidade e segurança são prioridades. Esta política descreve como coletamos, usamos e protegemos seus dados pessoais ao navegar em nosso site ou ao interagir com nossos consultores via WhatsApp.
             </p>
           </div>
         </Container>
@@ -138,6 +101,24 @@ export default function PoliticaPrivacidadePage() {
                 </div>
               </div>
             ))}
+
+            {/* Contact section */}
+            <div className="bg-background-card border border-border rounded-2xl p-6 lg:p-8">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-primary/10 rounded-xl shrink-0">
+                  <Mail className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-foreground mb-4">Contato</h2>
+                  <p className="text-foreground-secondary leading-relaxed">
+                    Para dúvidas sobre seus dados, entre em contato através do e-mail:{' '}
+                    <a href="mailto:contato@attraveiculos.com.br" className="text-primary hover:underline font-medium">
+                      contato@attraveiculos.com.br
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </Container>
       </section>

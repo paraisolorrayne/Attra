@@ -22,3 +22,6 @@ export * from './ai-vehicle-description'
 
 // CTA components
 export * from './vehicle-card-ctas'
+
+// Manual Attra glossary tooltip
+export * from './glossary-tooltip'

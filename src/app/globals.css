@@ -871,3 +871,480 @@ html {
   /* Prevent any stretching */
   max-width: 100%;
 }
+
+/* ===== BLOG POST CONTENT TYPOGRAPHY ===== */
+/* Enhanced prose styling for blog post readability and visual hierarchy */
+
+/* Main prose container */
+.blog-prose {
+  /* Base typography */
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.8;
+  color: var(--foreground-secondary);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Headings - Strong visual hierarchy with clear differentiation */
+.blog-prose h1,
+.blog-prose h2,
+.blog-prose h3,
+.blog-prose h4,
+.blog-prose h5,
+.blog-prose h6 {
+  color: var(--foreground);
+  font-weight: 700;
+  line-height: 1.3;
+  scroll-margin-top: 80px; /* Account for sticky header */
+}
+
+/* H1 - Título principal (raramente usado no conteúdo importado) */
+.blog-prose h1 {
+  font-size: 2.5rem;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+/* H2 - Seções principais */
+.blog-prose h2 {
+  font-size: 2rem;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border);
+}
+
+/* H3 - Subseções */
+.blog-prose h3 {
+  font-size: 1.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+}
+
+/* H4 - Subtítulos menores (specs, features) */
+.blog-prose h4 {
+  font-size: 1.125rem;
+  margin-top: 2rem;
+  margin-bottom: 0.875rem;
+  font-weight: 600;
+}
+
+/* H5 - Raramente usado */
+.blog-prose h5 {
+  font-size: 1.0625rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+/* H6 - Raramente usado */
+.blog-prose h6 {
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--foreground-secondary);
+  font-weight: 600;
+}
+
+/* Paragraphs - Optimal readability with generous spacing */
+.blog-prose p {
+  margin-bottom: 1.75rem;
+  color: var(--foreground-secondary);
+  line-height: 1.85;
+}
+
+/* First paragraph gets special treatment - lead paragraph */
+.blog-prose p:first-of-type {
+  font-size: 1.125rem;
+  line-height: 1.9;
+  color: var(--foreground);
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+/* Strong text - Emphasis (use sparingly) */
+.blog-prose strong,
+.blog-prose b {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+/* Limit strong text to avoid excessive emphasis */
+.blog-prose p strong,
+.blog-prose p b {
+  /* Only emphasize key points, not entire sentences */
+  font-weight: 600;
+}
+
+/* Emphasis text */
+.blog-prose em,
+.blog-prose i {
+  font-style: italic;
+  color: var(--foreground);
+}
+
+/* Links - Interactive and visible */
+.blog-prose a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.blog-prose a:hover {
+  border-bottom-color: var(--primary);
+  text-decoration: underline;
+}
+
+.blog-prose a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Lists - Better spacing and visual hierarchy */
+.blog-prose ul,
+.blog-prose ol {
+  margin-bottom: 2rem;
+  margin-left: 2rem;
+}
+
+.blog-prose li {
+  margin-bottom: 1rem;
+  color: var(--foreground-secondary);
+  line-height: 1.85;
+}
+
+.blog-prose ul li {
+  list-style-type: disc;
+}
+
+.blog-prose ol li {
+  list-style-type: decimal;
+}
+
+/* Nested lists */
+.blog-prose ul ul,
+.blog-prose ol ol,
+.blog-prose ul ol,
+.blog-prose ol ul {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  margin-left: 1.5rem;
+}
+
+/* Blockquotes - Visual distinction with better spacing */
+.blog-prose blockquote {
+  margin: 2.5rem 0;
+  padding: 1.75rem 1.75rem 1.75rem 1.25rem;
+  border-left: 5px solid var(--primary);
+  background-color: var(--background-soft);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: var(--foreground);
+}
+
+.blog-prose blockquote p {
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+  line-height: 1.85;
+}
+
+.blog-prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Instagram embeds - Centered and controlled width */
+.blog-prose blockquote[class*="instagram"] {
+  border-left: none;
+  background-color: transparent;
+  padding: 0;
+  margin: 3rem auto;
+  max-width: 540px;
+  display: flex;
+  justify-content: center;
+}
+
+.blog-prose blockquote[class*="instagram"] p {
+  display: none;
+}
+
+/* Instagram embed wrapper */
+.blog-prose .instagram-embed {
+  max-width: 540px;
+  margin: 3rem auto;
+  display: flex;
+  justify-content: center;
+}
+
+/* Instagram embed iframe */
+.blog-prose iframe[src*="instagram"] {
+  max-width: 100%;
+  margin: 2.5rem auto;
+  display: block;
+  border-radius: 1rem;
+}
+
+/* Instagram Embed Component - Responsive wrapper */
+.instagram-media {
+  background: var(--background-card) !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .instagram-media {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Code - Inline and block */
+.blog-prose code {
+  background-color: var(--background-soft);
+  color: var(--primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.blog-prose pre {
+  background-color: var(--background-soft);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.blog-prose pre code {
+  background-color: transparent;
+  color: var(--foreground);
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+}
+
+/* Images - Responsive and styled with better spacing */
+.blog-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin: 2.5rem 0;
+  border: 1px solid var(--border);
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.blog-prose img:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Image captions */
+.blog-prose figcaption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--foreground-secondary);
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+/* Horizontal rules - Visual breaks */
+.blog-prose hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+/* Tables - Readable and styled */
+.blog-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.blog-prose thead {
+  background-color: var(--background-soft);
+}
+
+.blog-prose th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  color: var(--foreground);
+  border-bottom: 2px solid var(--border);
+}
+
+.blog-prose td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground-secondary);
+}
+
+.blog-prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.blog-prose tbody tr:hover {
+  background-color: var(--background-soft);
+}
+
+/* Definition lists */
+.blog-prose dt {
+  font-weight: 700;
+  color: var(--foreground);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.blog-prose dd {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--foreground-secondary);
+}
+
+/* Abbreviations */
+.blog-prose abbr {
+  cursor: help;
+  border-bottom: 1px dotted var(--border);
+  text-decoration: none;
+}
+
+/* Marks/highlights */
+.blog-prose mark {
+  background-color: rgba(154, 28, 28, 0.15);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  color: inherit;
+}
+
+/* Subscript and superscript */
+.blog-prose sub,
+.blog-prose sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.blog-prose sup {
+  top: -0.5em;
+}
+
+.blog-prose sub {
+  bottom: -0.25em;
+}
+
+/* Small text */
+.blog-prose small {
+  font-size: 0.875rem;
+  color: var(--foreground-secondary);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .blog-prose {
+    font-size: 1rem;
+    line-height: 1.8;
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .blog-prose h1 {
+    font-size: 1.875rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .blog-prose h2 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .blog-prose h3 {
+    font-size: 1.25rem;
+    margin-top: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .blog-prose h4 {
+    font-size: 1.0625rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .blog-prose p {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+  }
+
+  .blog-prose p:first-of-type {
+    font-size: 1.0625rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .blog-prose ul,
+  .blog-prose ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .blog-prose li {
+    margin-bottom: 0.875rem;
+  }
+
+  .blog-prose img {
+    margin: 2rem 0;
+    border-radius: 0.75rem;
+  }
+
+  .blog-prose blockquote {
+    margin: 2rem 0;
+    padding: 1.5rem 1.5rem 1.5rem 1rem;
+    border-left: 4px solid var(--primary);
+  }
+
+  .blog-prose ul,
+  .blog-prose ol {
+    margin-left: 1.5rem;
+  }
+
+  .blog-prose blockquote {
+    margin: 1.5rem 0;
+    padding: 1rem 1rem 1rem 0.75rem;
+  }
+
+  .blog-prose img {
+    margin: 1.5rem 0;
+  }
+
+  .blog-prose table {
+    font-size: 0.875rem;
+  }
+
+  .blog-prose th,
+  .blog-prose td {
+    padding: 0.75rem;
+  }
+
+  /* Instagram embeds - Mobile responsiveness */
+  .blog-prose blockquote[class*="instagram"],
+  .blog-prose .instagram-embed {
+    margin: 2rem auto;
+    max-width: 100%;
+  }
+
+  .blog-prose iframe[src*="instagram"] {
+    margin: 1.5rem auto;
+  }
+}

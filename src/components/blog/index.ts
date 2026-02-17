@@ -4,4 +4,7 @@ export * from './blog-tabs'
 export * from './educativo-template'
 export * from './car-review-template'
 export * from './listen-to-content'
+export * from './instagram-embed'
+export * from './instagram-embed-provider'
+export * from './blog-content-renderer'
 

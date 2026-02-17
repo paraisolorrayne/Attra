@@ -88,14 +88,49 @@ const testimonials = [
 ]
 
 const achievements = [
-  { year: 2008, title: 'Fundação', description: 'A Attra Veículos nasceu com o propósito de oferecer uma experiência diferenciada na compra e venda de veículos, unindo transparência, credibilidade e atendimento personalizado. Fundada como uma empresa familiar, a Attra foi construída sobre valores sólidos, com foco em profissionalização, respeito aos processos e compromisso com o cliente.'},
-  { year: 2015, title: 'Primeiro Ferrari', description: 'Comercialização do primeiro superesportivo italiano' },
-  { year: 2018, title: 'Novo Showroom', description: 'Inauguração do showroom de 5.000m² climatizado' },
-  { year: 2023, title: '500+ Supercarros', description: 'Marco de 500 supercarros vendidos para todo Brasil' },
-  { year: 2024, title: 'Referência Nacional', description: 'A gestão da empresa é conduzida de forma estruturada, com papéis bem definidos e hierarquia clara, garantindo decisões estratégicas eficientes e um crescimento sustentável. Essa postura profissional permitiu à Attra Veículos consolidar sua reputação no mercado sendo a maior dealer premium do Triângulo Mineiro.' },
-  { year: 2025, title: 'Expansão e constante evolução', description: 'A Attra Veículos segue em constante evolução, com expansão do showroom com mais de 1000m2,  mantendo sua essência familiar, mas com uma visão moderna de negócio, sempre focada em excelência, confiança e relacionamento de longo prazo com seus clientes.' },
-
-]
+  {
+    year: 2008,
+    title: 'Fundação',
+    description:
+      'A Attra Veículos nasceu com o propósito de oferecer uma experiência diferenciada na compra e venda de veículos, unindo transparência, credibilidade e atendimento personalizado. Fundada como uma empresa familiar, a Attra foi construída sobre valores sólidos, com foco em profissionalização, respeito aos processos e compromisso com o cliente.',
+  },
+  {
+    year: 2015,
+    title: 'Primeiro Ferrari',
+    description:
+      'Comercialização do primeiro superesportivo italiano.',
+  },
+  {
+    year: 2018,
+    title: 'Novo Showroom',
+    description:
+      'Inauguração do showroom de 5.000m² climatizado.',
+  },
+  {
+    year: 2023,
+    title: '500+ Supercarros',
+    description:
+      'Marco de 500 supercarros vendidos para todo Brasil.',
+  },
+  {
+    year: 2024,
+    title: 'Referência Nacional',
+    description:
+      'A gestão da empresa é conduzida de forma estruturada, com papéis bem definidos e hierarquia clara, garantindo decisões estratégicas eficientes e um crescimento sustentável. Essa postura profissional permitiu à Attra Veículos consolidar sua reputação no mercado, sendo a maior dealer premium do Triângulo Mineiro.',
+  },
+  {
+    year: 2025,
+    title: 'Expansão de Alcance Nacional',
+    description:
+      'Ano marcado por expansão de alcance nacional, com a Attra cada vez mais presente no radar dos principais compradores e entusiastas de supercarros em todo o Brasil.',
+  },
+  {
+    year: 2026,
+    title: 'Nova Expansão e Estrutura',
+    description:
+      'Segunda grande expansão da estrutura física, com um novo espaço dedicado à experiência do cliente e à curadoria de supercarros, reforçando a presença da Attra como referência premium em nível nacional.',
+  },
+];
 
 export default function JornadaPage() {
   const breadcrumbItems = [{ label: 'Jornada Attra', href: '/jornada' }]

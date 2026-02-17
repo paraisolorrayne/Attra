@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { getVehicles } from '@/lib/autoconf-api'
 import { getBlogPosts } from '@/lib/blog-api'
+import { manualAttraTerms } from '@/lib/manual-attra-data'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://attraveiculos.com.br'
 
@@ -132,6 +133,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching blog posts for sitemap:', error)
   }
 
-  return [...staticPages, ...vehiclePages, ...blogPages]
+  // Manual Attra: Engenharia e Performance pages
+  const manualAttraPages: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/manual-attra`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    ...manualAttraTerms.map((term) => ({
+      url: `${SITE_URL}/manual-attra/${term.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+  ]
+
+  return [...staticPages, ...vehiclePages, ...blogPages, ...manualAttraPages]
 }
 

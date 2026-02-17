@@ -5,12 +5,16 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { X, SlidersHorizontal, ChevronDown, Search, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-// Fallback brand list - used when no dynamic brands are provided
-const fallbackBrands = [
-  'Audi', 'Aston Martin', 'BMW', 'Bentley', 'Bugatti', 'Cadillac',
-  'Chevrolet', 'Ferrari', 'Ford', 'Honda', 'Jaguar', 'Lamborghini',
-  'Land Rover', 'Lexus', 'Maserati', 'McLaren', 'Mercedes-Benz',
-  'Porsche', 'Rolls-Royce', 'Toyota', 'Volkswagen', 'Volvo'
+// Fixed premium brand list ordered by commercial priority
+const PREMIUM_BRANDS = [
+  // Grupo 1 - Superesportivos / Ultra Luxo
+  'Ferrari', 'Lamborghini', 'McLaren', 'Porsche', 'Aston Martin', 'Bentley', 'Rolls-Royce', 'Maserati',
+  // Grupo 2 - Premium Europeu
+  'BMW', 'Mercedes-Benz', 'Audi', 'Land Rover', 'Range Rover', 'Jaguar', 'Volvo',
+  // Grupo 3 - Premium Americano / Esportivos
+  'Cadillac', 'Chevrolet', 'Ford', 'Dodge',
+  // Grupo 4 - Seminovos Premium / Populares
+  'Toyota', 'Lexus', 'Honda', 'Jeep', 'Volkswagen', 'Hyundai', 'Mitsubishi', 'Nissan', 'Kia', 'Fiat', 'Citroën',
 ]
 
 const bodyStyles = ['Cupê', 'Sedan', 'SUV', 'Conversível', 'Hatch', 'Wagon']
@@ -142,11 +146,7 @@ interface FilterSection {
   isOpen: boolean
 }
 
-interface AdvancedFiltersProps {
-  brands?: string[]
-}
-
-export function AdvancedFilters({ brands }: AdvancedFiltersProps) {
+export function AdvancedFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(false)
@@ -163,9 +163,6 @@ export function AdvancedFilters({ brands }: AdvancedFiltersProps) {
   const activeFilters = Array.from(searchParams.entries()).filter(
     ([key]) => !['pagina', 'ordenar'].includes(key)
   )
-
-  // Use dynamic brands from props, fallback to static list
-  const availableBrands = brands && brands.length > 0 ? brands : fallbackBrands
 
   const selectedBrand = searchParams.get('marca')
 
@@ -300,7 +297,7 @@ export function AdvancedFilters({ brands }: AdvancedFiltersProps) {
             <BrandCombobox
               value={selectedBrand}
               onChange={handleBrandChange}
-              brands={availableBrands}
+              brands={PREMIUM_BRANDS}
             />
           </div>
 

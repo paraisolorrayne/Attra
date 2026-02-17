@@ -4,9 +4,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
-import { Phone, Mail, MapPin, Clock, Instagram, Facebook, Youtube } from 'lucide-react'
+import { Phone, Smartphone, Mail, MapPin, Clock, Instagram, Facebook, Youtube } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { cn } from '@/lib/utils'
+import { PHONE_NUMBER, PHONE_DISPLAY, PHONE_NUMBER_2, PHONE_DISPLAY_2, CELLPHONE_NUMBER, CELLPHONE_DISPLAY } from '@/lib/constants'
 
 const quickLinks = [
   { name: 'Estoque', href: '/estoque' },
@@ -16,6 +17,7 @@ const quickLinks = [
   { name: 'Solicitar Veículo', href: '/solicitar-veiculo' },
   { name: 'Blog', href: '/blog' },
   { name: 'Contato', href: '/contato' },
+  { name: 'Manual Attra: Engenharia e Performance', href: '/manual-attra' },
 ]
 
 const brands = ['Porsche', 'BMW', 'Mercedes-Benz', 'Audi', 'Land Rover', 'Cadillac', 'Lamborghini', 'Ferrari']
@@ -115,9 +117,15 @@ export function Footer() {
                 <div className="flex items-start gap-2 text-foreground-secondary text-sm">
                   <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div className="flex flex-col">
-                    <a href="tel:+553430143232" className="hover:text-primary transition-colors">(34) 3014-3232</a>
-                    <a href="tel:+553432260202" className="hover:text-primary transition-colors">(34) 3226-0202</a>
+                    <a href={`tel:${PHONE_NUMBER}`} className="hover:text-primary transition-colors">{PHONE_DISPLAY}</a>
+                    <a href={`tel:${PHONE_NUMBER_2}`} className="hover:text-primary transition-colors">{PHONE_DISPLAY_2}</a>
                   </div>
+                </div>
+              </li>
+              <li>
+                <div className="flex items-start gap-2 text-foreground-secondary text-sm">
+                  <Smartphone className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <a href={`tel:${CELLPHONE_NUMBER}`} className="hover:text-primary transition-colors">{CELLPHONE_DISPLAY}</a>
                 </div>
               </li>
               <li>
@@ -149,8 +157,8 @@ export function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-foreground-secondary">
             <p>© {currentYear} Attra Veículos. Todos os direitos reservados.</p>
             <div className="flex gap-4">
-              <Link href="/privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link>
-              <Link href="/termos" className="hover:text-primary transition-colors">Termos de Uso</Link>
+              <Link href="/politica-privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link>
+              <Link href="/termos-uso" className="hover:text-primary transition-colors">Termos de Uso</Link>
             </div>
           </div>
         </Container>

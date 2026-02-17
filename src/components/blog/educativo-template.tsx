@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Calendar, Clock, User, ArrowRight, Tag } from 'lucide-react'
@@ -9,12 +10,14 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/utils'
 import { ListenToContent } from './listen-to-content'
+import { BlogContentRenderer } from './blog-content-renderer'
 
 interface EducativoTemplateProps {
   post: DualBlogPost
 }
 
 export function EducativoTemplate({ post }: EducativoTemplateProps) {
+  const [heroImageError, setHeroImageError] = useState(false)
   const breadcrumbItems = [
     { label: 'Blog', href: '/blog' },
     { label: post.educativo?.category || 'Artigo', href: `/blog?categoria=${post.educativo?.category?.toLowerCase()}` },
@@ -28,58 +31,71 @@ export function EducativoTemplate({ post }: EducativoTemplateProps) {
         <Container>
           <Breadcrumb items={breadcrumbItems} afterHero />
           
-          {/* Category Badge */}
+          {/* Category Badge - Discreto */}
           {post.educativo?.category && (
-            <div className="mt-6 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+            <div className="mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
                 <Tag className="w-3.5 h-3.5" />
                 {post.educativo.category}
               </span>
             </div>
           )}
-          
-          {/* Title */}
-          <h1 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground max-w-4xl leading-tight">
+
+          {/* Title - Melhor hierarquia */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground max-w-4xl leading-tight mb-6">
             {post.title}
           </h1>
-          
-          {/* Excerpt */}
-          <p className="mt-4 text-lg text-foreground-secondary max-w-3xl">
+
+          {/* Excerpt - Lead paragraph com separador */}
+          <p className="text-lg lg:text-xl text-foreground-secondary max-w-3xl leading-relaxed mb-10 pb-10 border-b border-border/50">
             {post.excerpt}
           </p>
-          
-          {/* Meta Info */}
-          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-foreground-secondary">
+
+          {/* Meta Info - Melhor organização visual */}
+          <div className="flex flex-col sm:flex-row gap-8 mb-10 text-sm">
             {post.author && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {post.author.avatar ? (
                   <Image
                     src={post.author.avatar}
                     alt={post.author.name}
-                    width={32}
-                    height={32}
+                    width={40}
+                    height={40}
                     className="rounded-full"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-primary" />
                   </div>
                 )}
-                <span className="font-medium text-foreground">{post.author.name}</span>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-foreground-secondary/70">Autor</p>
+                  <span className="font-semibold text-foreground">{post.author.name}</span>
+                </div>
               </div>
             )}
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              <time dateTime={post.published_date}>{formatDate(post.published_date)}</time>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-foreground-secondary/70">Publicado</p>
+                <time dateTime={post.published_date} className="font-semibold text-foreground">{formatDate(post.published_date)}</time>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              <span>{post.reading_time} de leitura</span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-foreground-secondary/70">Leitura</p>
+                <span className="font-semibold text-foreground">{post.reading_time}</span>
+              </div>
             </div>
           </div>
 
           {/* Listen to Content Button */}
-          <div className="mt-6">
+          <div>
             <ListenToContent
               content={post.content}
               title={post.title}
@@ -89,7 +105,7 @@ export function EducativoTemplate({ post }: EducativoTemplateProps) {
       </section>
 
       {/* Featured Image */}
-      {post.featured_image && (
+      {post.featured_image && !post.featured_image.includes('default-cover') && !heroImageError && (
         <section className="relative w-full aspect-[21/9] max-h-[500px] overflow-hidden">
           <Image
             src={post.featured_image}
@@ -97,6 +113,7 @@ export function EducativoTemplate({ post }: EducativoTemplateProps) {
             fill
             className="object-cover"
             priority
+            onError={() => setHeroImageError(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
         </section>
@@ -107,14 +124,9 @@ export function EducativoTemplate({ post }: EducativoTemplateProps) {
         <Container>
           <div className="max-w-3xl mx-auto">
             {/* Article Content */}
-            <div 
-              className="prose prose-lg prose-neutral dark:prose-invert 
-                         prose-headings:font-semibold prose-headings:text-foreground
-                         prose-p:text-foreground-secondary prose-p:leading-relaxed
-                         prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                         prose-li:text-foreground-secondary
-                         prose-strong:text-foreground"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+            <BlogContentRenderer
+              content={post.content}
+              className="blog-prose"
             />
 
             {/* Insights Box */}

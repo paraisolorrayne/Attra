@@ -11,6 +11,10 @@ export const PHONE_DISPLAY = '(34) 3014-3232'
 export const PHONE_NUMBER_2 = '+553432260202'
 export const PHONE_DISPLAY_2 = '(34) 3226-0202'
 
+// Celular
+export const CELLPHONE_NUMBER = '+5534999444747'
+export const CELLPHONE_DISPLAY = '(34) 99944-4747'
+
 // Endereço
 export const ADDRESS = {
   street: 'Av. Rondon Pacheco',

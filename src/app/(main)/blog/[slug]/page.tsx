@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getBlogPost } from '@/lib/blog-api'
 import { EducativoTemplate, CarReviewTemplate } from '@/components/blog'
+import { InstagramEmbedProvider } from '@/components/blog/instagram-embed-provider'
 
 interface PageProps {
 	params: Promise<{ slug: string }>
@@ -46,9 +47,13 @@ export default async function BlogPostPage({ params }: PageProps) {
 	}
 
 	// Render template based on post type
-	if (post.post_type === 'car_review') {
-		return <CarReviewTemplate post={post} />
-	}
+	const template = post.post_type === 'car_review'
+		? <CarReviewTemplate post={post} />
+		: <EducativoTemplate post={post} />
 
-	return <EducativoTemplate post={post} />
+	return (
+		<InstagramEmbedProvider>
+			{template}
+		</InstagramEmbedProvider>
+	)
 }

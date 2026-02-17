@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Calendar, ArrowRight } from 'lucide-react'
@@ -9,20 +12,30 @@ interface BlogCardProps {
 }
 
 export function BlogCard({ post }: BlogCardProps) {
+  const [imageError, setImageError] = useState(false)
+  const showImage = post.cover_image && !post.cover_image.includes('default-cover') && !imageError
+
   return (
     <article className="bg-background-card border border-border rounded-xl overflow-hidden group hover:border-primary transition-colors">
       {/* Cover Image */}
       <Link href={`/blog/${post.slug}`} className="block relative aspect-[16/10] overflow-hidden">
-        {post.cover_image ? (
+        {showImage ? (
           <Image
-            src={post.cover_image}
+            src={post.cover_image!}
             alt={post.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImageError(true)}
           />
         ) : (
-          <div className="absolute inset-0 bg-background-soft flex items-center justify-center">
-            <span className="text-foreground-secondary">Sem imagem</span>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-center justify-center">
+            <Image
+              src="/images/logo-white.png"
+              alt="Attra Veículos"
+              width={160}
+              height={48}
+              className="opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+            />
           </div>
         )}
         {/* Category badge */}

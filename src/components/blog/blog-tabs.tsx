@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Calendar, Clock, ArrowRight, Tag, Gauge, BookOpen, Car } from 'lucide-react'
@@ -19,27 +19,37 @@ interface BlogPostCardProps {
   post: DualBlogPost
 }
 
+function hasValidImage(image: string | null | undefined): boolean {
+  return !!image && !image.includes('default-cover')
+}
+
 function BlogPostCard({ post }: BlogPostCardProps) {
   const isReview = post.post_type === 'car_review'
-  
+  const [imageError, setImageError] = useState(false)
+
+  const showImage = hasValidImage(post.featured_image) && !imageError
+
   return (
     <article className="group bg-background-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
       {/* Image */}
       <Link href={`/blog/${post.slug}`} className="block relative aspect-[16/10] overflow-hidden">
-        {post.featured_image ? (
+        {showImage ? (
           <Image
-            src={post.featured_image}
+            src={post.featured_image!}
             alt={post.featured_image_alt || post.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-            {isReview ? (
-              <Car className="w-12 h-12 text-primary/40" />
-            ) : (
-              <BookOpen className="w-12 h-12 text-primary/40" />
-            )}
+          <div className="w-full h-full bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-center justify-center">
+            <Image
+              src="/images/logo-white.png"
+              alt="Attra Veículos"
+              width={160}
+              height={48}
+              className="opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+            />
           </div>
         )}
         

@@ -5,7 +5,7 @@ import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ContactForm } from '@/components/forms/contact-form'
-import { WHATSAPP_NUMBER, getWhatsAppUrl, PHONE_NUMBER, PHONE_DISPLAY, PHONE_NUMBER_2, PHONE_DISPLAY_2 } from '@/lib/constants'
+import { WHATSAPP_NUMBER, getWhatsAppUrl, PHONE_NUMBER, PHONE_DISPLAY, PHONE_NUMBER_2, PHONE_DISPLAY_2, CELLPHONE_NUMBER, CELLPHONE_DISPLAY } from '@/lib/constants'
 
 export const metadata: Metadata = {
   title: 'Contato | Attra Veículos Uberlândia - Atendimento Nacional',
@@ -48,6 +48,7 @@ const locations = [
     address: 'Av. Rondon Pacheco',
     city: 'Uberlândia - MG',
     phone: PHONE_DISPLAY,
+    cellphone: CELLPHONE_DISPLAY,
     whatsapp: WHATSAPP_NUMBER,
     hours: 'Seg a Sex: 8h às 18h | Sáb: 8h às 13h',
     mapUrl: 'https://maps.app.goo.gl/wBpftykDQRQJmB1z8',
@@ -69,8 +70,10 @@ const contactChannels = [
     label: 'Telefone',
     value: PHONE_DISPLAY,
     secondValue: PHONE_DISPLAY_2,
+    thirdValue: CELLPHONE_DISPLAY,
     href: `tel:${PHONE_NUMBER}`,
     secondHref: `tel:${PHONE_NUMBER_2}`,
+    thirdHref: `tel:${CELLPHONE_NUMBER}`,
     description: 'Atendimento comercial',
     primary: false,
   },
@@ -152,6 +155,9 @@ export default function ContatoPage() {
                     <a href={item.href} target={item.label === 'WhatsApp' ? '_blank' : undefined} className="font-medium hover:underline">{item.value}</a>
                     {item.secondValue && item.secondHref && (
                       <a href={item.secondHref} className="font-medium hover:underline text-sm mt-0.5">{item.secondValue}</a>
+                    )}
+                    {item.thirdValue && item.thirdHref && (
+                      <a href={item.thirdHref} className="font-medium hover:underline text-sm mt-0.5">{item.thirdValue}</a>
                     )}
                   </div>
                 ) : (

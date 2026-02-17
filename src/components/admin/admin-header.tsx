@@ -14,7 +14,8 @@ import {
   X,
   Home,
   Settings,
-  Megaphone
+  Megaphone,
+  FileText
 } from 'lucide-react'
 import type { AdminUser } from '@/lib/admin-auth-supabase'
 
@@ -56,6 +57,12 @@ export function AdminHeader({ admin }: AdminHeaderProps) {
       label: 'Sons de Motor',
       href: '/admin/engine-sounds',
       icon: <Volume2 className="w-4 h-4" />,
+      allowedRoles: ['admin', 'gerente'],
+    },
+    {
+      label: 'Blog',
+      href: '/admin/blog',
+      icon: <FileText className="w-4 h-4" />,
       allowedRoles: ['admin', 'gerente'],
     },
     {
