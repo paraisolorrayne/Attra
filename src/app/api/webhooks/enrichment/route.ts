@@ -15,9 +15,14 @@ const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook secret
+    // Verify webhook secret (mandatory in production)
     const authHeader = request.headers.get('authorization')
-    if (WEBHOOK_SECRET && authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
+    if (!WEBHOOK_SECRET) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Enrichment] N8N_WEBHOOK_SECRET not configured in production')
+        return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+      }
+    } else if (authHeader !== `Bearer ${WEBHOOK_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

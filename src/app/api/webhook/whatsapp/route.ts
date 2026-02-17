@@ -50,6 +50,20 @@ const eventTypeToInteresse: Record<string, InteresseTipo> = {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify webhook secret for authentication
+    const authHeader = request.headers.get('authorization') || request.headers.get('x-webhook-secret')
+    const webhookSecret = process.env.WEBHOOK_SECRET
+
+    if (!webhookSecret) {
+      // In production, webhook secret must be configured
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[WhatsApp Webhook] WEBHOOK_SECRET not configured in production')
+        return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+      }
+    } else if (authHeader !== `Bearer ${webhookSecret}` && authHeader !== webhookSecret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const data = whatsappEventSchema.parse(body)
 

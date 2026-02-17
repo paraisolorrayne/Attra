@@ -58,11 +58,9 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     const webhookSecret = process.env.WEBHOOK_SECRET
 
-    // If webhook secret is set, require authorization
+    // Enforce authorization when webhook secret is configured
     if (webhookSecret && authHeader !== `Bearer ${webhookSecret}`) {
-      // Allow requests without auth for now (internal API calls)
-      // Uncomment below to enforce auth:
-      // return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Rate limiting for notification requests
@@ -151,15 +149,11 @@ export async function POST(request: NextRequest) {
  * Health check endpoint for the notifications service
  */
 export async function GET() {
+  // Health check only - no config details exposed
   return NextResponse.json({
     status: 'ok',
     service: 'notifications',
     timestamp: new Date().toISOString(),
-    config: {
-      resendConfigured: !!process.env.RESEND_API_KEY,
-      notificationEmail: process.env.NOTIFICATION_EMAIL || 'faleconosco@attraveiculos.com.br',
-      whatsappWebhookConfigured: !!(process.env.WHATSAPP_NOTIFICATION_WEBHOOK_URL || process.env.NEXT_PUBLIC_LEADSTER_SDR_WEBHOOK_URL),
-    },
   })
 }
 
