@@ -5,46 +5,72 @@
 -- =====================================================
 
 -- =====================================================
--- 1. Enable RLS on 6 tables missing it (from 001_initial_schema.sql)
+-- 1. Enable RLS on tables from 001_initial_schema.sql (if they exist)
+-- These tables may not exist if the initial migration was never applied.
+-- Each block is wrapped in DO/EXCEPTION to skip gracefully.
 -- =====================================================
-ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.vehicles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.blog_categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.contact_submissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.webhook_events ENABLE ROW LEVEL SECURITY;
 
--- Locations: public read, service_role write
-CREATE POLICY "Public can read locations" ON public.locations
-  FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "Service role manages locations" ON public.locations
-  FOR ALL USING (auth.role() = 'service_role');
+-- Locations
+DO $$ BEGIN
+  ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Public can read locations" ON public.locations
+    FOR SELECT TO anon, authenticated USING (true);
+  CREATE POLICY "Service role manages locations" ON public.locations
+    FOR ALL USING (auth.role() = 'service_role');
+EXCEPTION WHEN undefined_table THEN
+  RAISE NOTICE 'Table public.locations does not exist, skipping';
+END $$;
 
--- Vehicles: public read (available only), service_role write
-CREATE POLICY "Public can read available vehicles" ON public.vehicles
-  FOR SELECT TO anon, authenticated USING (status = 'available' OR status = 'highlight');
-CREATE POLICY "Service role manages vehicles" ON public.vehicles
-  FOR ALL USING (auth.role() = 'service_role');
+-- Vehicles
+DO $$ BEGIN
+  ALTER TABLE public.vehicles ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Public can read available vehicles" ON public.vehicles
+    FOR SELECT TO anon, authenticated USING (status = 'available' OR status = 'highlight');
+  CREATE POLICY "Service role manages vehicles" ON public.vehicles
+    FOR ALL USING (auth.role() = 'service_role');
+EXCEPTION WHEN undefined_table THEN
+  RAISE NOTICE 'Table public.vehicles does not exist, skipping';
+END $$;
 
--- Blog categories: public read, service_role write
-CREATE POLICY "Public can read blog categories" ON public.blog_categories
-  FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "Service role manages blog categories" ON public.blog_categories
-  FOR ALL USING (auth.role() = 'service_role');
+-- Blog categories
+DO $$ BEGIN
+  ALTER TABLE public.blog_categories ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Public can read blog categories" ON public.blog_categories
+    FOR SELECT TO anon, authenticated USING (true);
+  CREATE POLICY "Service role manages blog categories" ON public.blog_categories
+    FOR ALL USING (auth.role() = 'service_role');
+EXCEPTION WHEN undefined_table THEN
+  RAISE NOTICE 'Table public.blog_categories does not exist, skipping';
+END $$;
 
--- Blog posts: public read published only, service_role write
-CREATE POLICY "Public can read published blog posts" ON public.blog_posts
-  FOR SELECT TO anon, authenticated USING (is_published = true);
-CREATE POLICY "Service role manages blog posts" ON public.blog_posts
-  FOR ALL USING (auth.role() = 'service_role');
+-- Blog posts
+DO $$ BEGIN
+  ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Public can read published blog posts" ON public.blog_posts
+    FOR SELECT TO anon, authenticated USING (is_published = true);
+  CREATE POLICY "Service role manages blog posts" ON public.blog_posts
+    FOR ALL USING (auth.role() = 'service_role');
+EXCEPTION WHEN undefined_table THEN
+  RAISE NOTICE 'Table public.blog_posts does not exist, skipping';
+END $$;
 
--- Contact submissions: no public read, service_role only
-CREATE POLICY "Service role manages contact submissions" ON public.contact_submissions
-  FOR ALL USING (auth.role() = 'service_role');
+-- Contact submissions
+DO $$ BEGIN
+  ALTER TABLE public.contact_submissions ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Service role manages contact submissions" ON public.contact_submissions
+    FOR ALL USING (auth.role() = 'service_role');
+EXCEPTION WHEN undefined_table THEN
+  RAISE NOTICE 'Table public.contact_submissions does not exist, skipping';
+END $$;
 
--- Webhook events: no public access, service_role only
-CREATE POLICY "Service role manages webhook events" ON public.webhook_events
-  FOR ALL USING (auth.role() = 'service_role');
+-- Webhook events
+DO $$ BEGIN
+  ALTER TABLE public.webhook_events ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Service role manages webhook events" ON public.webhook_events
+    FOR ALL USING (auth.role() = 'service_role');
+EXCEPTION WHEN undefined_table THEN
+  RAISE NOTICE 'Table public.webhook_events does not exist, skipping';
+END $$;
 
 -- =====================================================
 -- 2. Fix overly permissive visitor tracking policies
