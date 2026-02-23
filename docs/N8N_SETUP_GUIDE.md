@@ -41,11 +41,13 @@ Vá em **Settings → Credentials** e crie:
 - **Header Name**: `Authorization`
 - **Header Value**: `Bearer seu_secret_gerado`
 
-### 3. Clearbit API (opcional)
+### 3. Apollo.io API (opcional)
 - **Type**: Header Auth
-- **Name**: `Clearbit API`
-- **Header Name**: `Authorization`
-- **Header Value**: `Bearer sk_sua_chave_clearbit`
+- **Name**: `Apollo.io API`
+- **Header Name**: `x-api-key`
+- **Header Value**: `sua_chave_apollo`
+- **Como obter**: Crie conta gratuita em [app.apollo.io](https://app.apollo.io) → Settings → Integrations → API Keys
+- **Free tier**: 100 enrichments/mês
 
 ### 4. BigDataCorp API (opcional)
 - **Type**: Header Auth
@@ -70,7 +72,7 @@ Após importar, clique em cada node e associe as credenciais:
 | Node | Credencial |
 |------|------------|
 | Webhook Trigger | Attra Webhook Auth |
-| Clearbit Enrichment | Clearbit API |
+| Apollo.io Enrichment | Apollo.io API |
 | BigDataCorp Lookup | BigDataCorp API |
 | Send to Attra API | Attra API Auth |
 | Send Error to Attra | Attra API Auth |
@@ -88,9 +90,9 @@ Após importar, clique em cada node e associe as credenciais:
 
 ```
 [Webhook] → [Set Variables] → [Switch]
-                                 ├── [Clearbit] → [Normalize] → [Send to Attra]
-                                 ├── [BigData]  → [Normalize] → [Send to Attra]
-                                 └── [No Data]  →              → [Send to Attra]
+                                 ├── [Apollo.io] → [Normalize] → [Send to Attra]
+                                 ├── [BigData]   → [Normalize] → [Send to Attra]
+                                 └── [No Data]   →              → [Send to Attra]
                                        ↓ (erros)
                                [Error Handlers] → [Send Error to Attra]
                                                         ↓
@@ -121,7 +123,7 @@ Após importar, clique em cada node e associe as credenciais:
 {
   "profile_id": "uuid-do-perfil",
   "fingerprint_id": "uuid-do-fingerprint",
-  "source": "clearbit",
+  "source": "apollo",
   "success": true,
   "data": {
     "company": {
@@ -164,7 +166,7 @@ curl -X POST https://seu-n8n.com/webhook/enrichment \
 | Problema | Solução |
 |----------|---------|
 | 401 Unauthorized | Verifique se o secret está correto em ambos os lados |
-| Clearbit não retorna dados | Verifique se a chave API está ativa |
+| Apollo.io não retorna dados | Verifique se a API key está ativa em [app.apollo.io](https://app.apollo.io) → Settings → API Keys |
 | Dados não aparecem no Supabase | Verifique logs em `/api/webhooks/enrichment` |
 | Workflow não executa | Verifique se está **Active** |
 

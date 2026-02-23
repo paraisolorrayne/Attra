@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'crypto'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,7 +12,7 @@ const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET
 
 /**
  * Webhook endpoint for N8N to send enriched data back
- * Called after N8N processes data from Clearbit, Snov.io, BigDataCorp, etc.
+ * Called after N8N processes data from Apollo.io, Snov.io, BigDataCorp, etc.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -30,9 +31,11 @@ export async function POST(request: NextRequest) {
     const {
       profile_id,
       fingerprint_id,
-      source, // clearbit, snov, bigdata, etc.
+      source, // apollo, clearbit_reveal, snov, bigdata, etc.
       success,
       data, // Enriched data from the provider
+      confidence_score, // 0-1 probabilistic confidence (for behavioral enrichment)
+      enrichment_type, // 'identity' (email/phone) or 'behavioral' (IP/signals)
     } = body
 
     if (!profile_id) {
@@ -63,6 +66,11 @@ export async function POST(request: NextRequest) {
       enriched_at: new Date().toISOString(),
     }
 
+    // Set confidence_score if provided (from behavioral enrichment)
+    if (typeof confidence_score === 'number' && confidence_score >= 0 && confidence_score <= 1) {
+      updates.confidence_score = confidence_score
+    }
+
     // Map normalized fields to profile columns
     if (enrichmentData.company_name) updates.company_name = enrichmentData.company_name
     if (enrichmentData.company_domain) updates.company_domain = enrichmentData.company_domain
@@ -73,6 +81,15 @@ export async function POST(request: NextRequest) {
     if (enrichmentData.full_name && !updates.full_name) updates.full_name = enrichmentData.full_name
     if (enrichmentData.first_name && !updates.first_name) updates.first_name = enrichmentData.first_name
     if (enrichmentData.last_name && !updates.last_name) updates.last_name = enrichmentData.last_name
+
+    // For behavioral enrichment: also store email/phone if returned by data broker
+    if (enrichment_type === 'behavioral') {
+      if (enrichmentData.email) updates.email = enrichmentData.email
+      if (enrichmentData.phone) updates.phone = enrichmentData.phone
+    }
+
+    // LGPD: Store hashed CPF if returned by data broker (e.g. BigDataCorp)
+    if (enrichmentData.cpf_hash) updates.cpf_hash = enrichmentData.cpf_hash
 
     // Update profile
     const { error: updateError } = await supabase
@@ -87,12 +104,19 @@ export async function POST(request: NextRequest) {
 
     // Calculate and update lead score
     const { data: scoreResult } = await supabase.rpc('calculate_lead_score', { p_profile_id: profile_id })
-    
+
     if (scoreResult !== null) {
       await supabase
         .from('visitor_profiles')
         .update({ lead_score: scoreResult })
         .eq('id', profile_id)
+    }
+
+    // Check sales qualification for high-confidence behavioral enrichments
+    let salesQualified = false
+    if (enrichment_type === 'behavioral' && confidence_score > 0.80) {
+      const { data: qualified } = await supabase.rpc('check_sales_qualification', { p_profile_id: profile_id })
+      salesQualified = qualified === true
     }
 
     // Log successful enrichment
@@ -104,10 +128,12 @@ export async function POST(request: NextRequest) {
       source,
     })
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Profile enriched successfully',
       lead_score: scoreResult,
+      sales_qualified: salesQualified,
+      enrichment_type: enrichment_type || 'identity',
     })
 
   } catch (error) {
@@ -123,16 +149,15 @@ function normalizeEnrichmentData(source: string, data: Record<string, unknown>):
   const normalized: Record<string, string | null> = {}
 
   switch (source) {
-    case 'clearbit':
-      // Clearbit format
+    case 'apollo':
+      // Apollo.io People Enrichment format (normalized by N8N)
       normalized.company_name = (data.company as Record<string, unknown>)?.name as string || null
       normalized.company_domain = (data.company as Record<string, unknown>)?.domain as string || null
-      normalized.company_industry = (data.company as Record<string, unknown>)?.category?.industry as string || null
-      normalized.company_size = (data.company as Record<string, unknown>)?.metrics?.employeesRange as string || null
+      normalized.company_industry = (data.company as Record<string, unknown>)?.industry as string || null
+      normalized.company_size = (data.company as Record<string, unknown>)?.employeesRange as string || null
       normalized.job_title = (data.person as Record<string, unknown>)?.employment?.title as string || null
-      normalized.linkedin_url = (data.person as Record<string, unknown>)?.linkedin?.handle 
-        ? `https://linkedin.com/in/${(data.person as Record<string, unknown>)?.linkedin?.handle}` 
-        : null
+      // Apollo.io returns full LinkedIn URL (e.g. https://linkedin.com/in/handle)
+      normalized.linkedin_url = (data.person as Record<string, unknown>)?.linkedin?.handle as string || null
       normalized.full_name = (data.person as Record<string, unknown>)?.name?.fullName as string || null
       normalized.first_name = (data.person as Record<string, unknown>)?.name?.givenName as string || null
       normalized.last_name = (data.person as Record<string, unknown>)?.name?.familyName as string || null
@@ -146,11 +171,25 @@ function normalizeEnrichmentData(source: string, data: Record<string, unknown>):
       normalized.full_name = data.name as string || null
       break
 
+    case 'clearbit_reveal':
+      // Clearbit Reveal (IP-based company identification)
+      normalized.company_name = (data.company as Record<string, unknown>)?.name as string || null
+      normalized.company_domain = (data.company as Record<string, unknown>)?.domain as string || null
+      normalized.company_industry = (data.company as Record<string, unknown>)?.category?.industry as string || null
+      normalized.company_size = (data.company as Record<string, unknown>)?.metrics?.employeesRange as string || null
+      // Reveal doesn't return person data, only company
+      break
+
     case 'bigdata':
       // BigDataCorp (Brazilian) format
       normalized.company_name = data.razao_social as string || data.nome_fantasia as string || null
       normalized.full_name = data.nome as string || null
-      // Add more BigDataCorp specific mappings as needed
+      normalized.email = data.email as string || null
+      normalized.phone = data.telefone as string || data.celular as string || null
+      // LGPD: Hash CPF before storing (never store plain text)
+      if (data.cpf) {
+        normalized.cpf_hash = hashCPFFromBroker(data.cpf as string)
+      }
       break
 
     default:
@@ -164,3 +203,12 @@ function normalizeEnrichmentData(source: string, data: Record<string, unknown>):
   return normalized
 }
 
+/**
+ * Hash CPF using SHA-256 for LGPD compliance.
+ * Used when data brokers return CPF in enrichment responses.
+ * Never store plain text CPF.
+ */
+function hashCPFFromBroker(cpf: string): string {
+  const cleanCPF = cpf.replace(/\D/g, '') // Remove non-digits
+  return createHash('sha256').update(cleanCPF).digest('hex')
+}

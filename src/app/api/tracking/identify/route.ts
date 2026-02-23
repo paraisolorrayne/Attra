@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'crypto'
 import { checkRateLimit, getClientIP, RATE_LIMIT_PRESETS } from '@/lib/rate-limit'
 
 const supabase = createClient(
@@ -30,6 +31,8 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       name,
+      cpf,              // Optional: CPF will be hashed before storage (LGPD)
+      consent_given,    // Optional: explicit consent from form checkbox
     } = body
 
     if (!fingerprint_db_id) {
@@ -64,15 +67,18 @@ export async function POST(request: NextRequest) {
 
     let profileId: string
 
+    // Hash CPF if provided (LGPD: never store plain text CPF)
+    const cpfHash = cpf ? hashCPF(cpf) : null
+
     if (existingProfile) {
       // Update existing profile
       profileId = existingProfile.id
-      
+
       const updates: Record<string, unknown> = {
         status: 'identified',
         updated_at: new Date().toISOString(),
       }
-      
+
       if (email && !existingProfile.email) {
         updates.email = email.toLowerCase()
       }
@@ -84,6 +90,22 @@ export async function POST(request: NextRequest) {
         const nameParts = name.split(' ')
         updates.first_name = nameParts[0]
         updates.last_name = nameParts.slice(1).join(' ') || null
+      }
+      if (cpfHash && !existingProfile.cpf_hash) {
+        updates.cpf_hash = cpfHash
+      }
+
+      // LGPD: Record explicit consent if given
+      if (consent_given) {
+        updates.consent_given = true
+        updates.consent_given_at = new Date().toISOString()
+        updates.consent_marketing = true
+        updates.consent_date = new Date().toISOString()
+      }
+
+      // Set legitimate interest basis for form submissions
+      if (!existingProfile.legitimate_interest_basis) {
+        updates.legitimate_interest_basis = source === 'form' ? 'explicit_consent' : 'url_param_interaction'
       }
 
       await supabase
@@ -109,10 +131,17 @@ export async function POST(request: NextRequest) {
         .insert({
           email: email?.toLowerCase() || null,
           phone: phone?.replace(/\D/g, '') || null,
+          cpf_hash: cpfHash,
           full_name: name || null,
           first_name: nameParts[0] || null,
           last_name: nameParts.slice(1).join(' ') || null,
           status: 'identified',
+          // LGPD fields
+          consent_given: consent_given || false,
+          consent_given_at: consent_given ? new Date().toISOString() : null,
+          consent_marketing: consent_given || false,
+          consent_date: consent_given ? new Date().toISOString() : null,
+          legitimate_interest_basis: source === 'form' ? 'explicit_consent' : 'url_param_interaction',
         })
         .select('id')
         .single()
@@ -179,5 +208,14 @@ export async function POST(request: NextRequest) {
     console.error('[Tracking] Identify error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+/**
+ * Hash CPF using SHA-256 for LGPD compliance.
+ * Never store plain text CPF.
+ */
+function hashCPF(cpf: string): string {
+  const cleanCPF = cpf.replace(/\D/g, '') // Remove non-digits
+  return createHash('sha256').update(cleanCPF).digest('hex')
 }
 

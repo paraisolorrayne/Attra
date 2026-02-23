@@ -1,4 +1,11 @@
 import { WhatsAppWebhookPayload, WebhookResponse, GeoLocation } from '@/types'
+import {
+  collectBehavioralSignals,
+  getFingerprintDbId,
+  getSessionDbId,
+  collectClickIds,
+  collectUTMParams,
+} from '@/lib/visitor-tracking'
 
 // N8N Webhook URL (environment variable with fallback)
 const WEBHOOK_URL = process.env.NEXT_PUBLIC_LEADSTER_SDR_WEBHOOK_URL ||
@@ -341,3 +348,58 @@ export async function sendChatMessage(
   }
 }
 
+
+
+/**
+ * Sends abandoned lead data to the server-side API route using sendBeacon.
+ * This ensures the request completes even during page unload (exit intent / tab close).
+ *
+ * The server route validates identifiable data, logs the event, and forwards to N8N.
+ *
+ * @param reason - 'exit_intent' | 'beforeunload'
+ * @param geolocation - Cached geolocation data
+ */
+export function sendAbandonedLeadWebhook(
+  reason: 'exit_intent' | 'beforeunload',
+  geolocation?: GeoLocation | null,
+): boolean {
+  if (typeof window === 'undefined') return false
+
+  const fingerprintDbId = getFingerprintDbId()
+  const sessionDbId = getSessionDbId()
+
+  if (!fingerprintDbId) {
+    console.log('[Abandoned] No fingerprint_db_id, skipping')
+    return false
+  }
+
+  const payload = JSON.stringify({
+    fingerprint_db_id: fingerprintDbId,
+    session_db_id: sessionDbId,
+    reason,
+    behavioral_signals: collectBehavioralSignals(),
+    geolocation: geolocation || null,
+    utm_params: collectUTMParams(),
+    click_ids: collectClickIds(),
+  })
+
+  // Use sendBeacon for reliable delivery during page unload
+  // Falls back to fetch with keepalive if sendBeacon is unavailable
+  if (navigator.sendBeacon) {
+    const blob = new Blob([payload], { type: 'application/json' })
+    const sent = navigator.sendBeacon('/api/tracking/abandoned', blob)
+    console.log('[Abandoned] sendBeacon result:', sent, 'reason:', reason)
+    return sent
+  }
+
+  // Fallback: fetch with keepalive (still reliable during unload)
+  fetch('/api/tracking/abandoned', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: payload,
+    keepalive: true,
+  }).catch(err => console.error('[Abandoned] Fetch fallback error:', err))
+
+  console.log('[Abandoned] Sent via fetch keepalive, reason:', reason)
+  return true
+}

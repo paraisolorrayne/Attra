@@ -150,19 +150,13 @@
     },
     {
       "parameters": {
-        "method": "GET",
-        "url": "https://person.clearbit.com/v2/combined/find",
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/people/match",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "email",
-              "value": "={{ $json.email }}"
-            }
-          ]
-        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"email\": \"{{ $json.email }}\",\n  \"reveal_personal_emails\": true,\n  \"reveal_phone_number\": true\n}",
         "options": {
           "response": {
             "response": {
@@ -172,15 +166,15 @@
           }
         }
       },
-      "id": "clearbit-lookup",
-      "name": "Clearbit Enrichment",
+      "id": "apollo-lookup",
+      "name": "Apollo.io Enrichment",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [940, 220],
       "credentials": {
         "httpHeaderAuth": {
           "id": "2",
-          "name": "Clearbit API"
+          "name": "Apollo.io API"
         }
       },
       "onError": "continueErrorOutput"
@@ -225,75 +219,75 @@
             {
               "id": "source",
               "name": "enrichment_source",
-              "value": "clearbit",
+              "value": "apollo",
               "type": "string"
             },
             {
               "id": "success",
               "name": "success",
-              "value": "={{ !$json.error }}",
+              "value": "={{ !!$json.person }}",
               "type": "boolean"
             },
             {
               "id": "company_name",
               "name": "data.company.name",
-              "value": "={{ $json.company?.name || null }}",
+              "value": "={{ $json.person?.organization?.name || null }}",
               "type": "string"
             },
             {
               "id": "company_domain",
               "name": "data.company.domain",
-              "value": "={{ $json.company?.domain || null }}",
+              "value": "={{ $json.person?.organization?.website_url || null }}",
               "type": "string"
             },
             {
               "id": "company_industry",
               "name": "data.company.industry",
-              "value": "={{ $json.company?.category?.industry || null }}",
+              "value": "={{ $json.person?.organization?.industry || null }}",
               "type": "string"
             },
             {
               "id": "company_size",
               "name": "data.company.employeesRange",
-              "value": "={{ $json.company?.metrics?.employeesRange || null }}",
+              "value": "={{ $json.person?.organization?.estimated_num_employees ? String($json.person.organization.estimated_num_employees) : null }}",
               "type": "string"
             },
             {
               "id": "person_name",
               "name": "data.person.name.fullName",
-              "value": "={{ $json.person?.name?.fullName || null }}",
+              "value": "={{ $json.person?.name || null }}",
               "type": "string"
             },
             {
               "id": "person_first",
               "name": "data.person.name.givenName",
-              "value": "={{ $json.person?.name?.givenName || null }}",
+              "value": "={{ $json.person?.first_name || null }}",
               "type": "string"
             },
             {
               "id": "person_last",
               "name": "data.person.name.familyName",
-              "value": "={{ $json.person?.name?.familyName || null }}",
+              "value": "={{ $json.person?.last_name || null }}",
               "type": "string"
             },
             {
               "id": "job_title",
               "name": "data.person.employment.title",
-              "value": "={{ $json.person?.employment?.title || null }}",
+              "value": "={{ $json.person?.title || null }}",
               "type": "string"
             },
             {
               "id": "linkedin",
               "name": "data.person.linkedin.handle",
-              "value": "={{ $json.person?.linkedin?.handle || null }}",
+              "value": "={{ $json.person?.linkedin_url || null }}",
               "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "normalize-clearbit",
-      "name": "Normalize Clearbit Data",
+      "id": "normalize-apollo",
+      "name": "Normalize Apollo Data",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [1180, 220]
@@ -393,7 +387,7 @@
             {
               "id": "source",
               "name": "enrichment_source",
-              "value": "clearbit",
+              "value": "apollo",
               "type": "string"
             },
             {
@@ -405,15 +399,15 @@
             {
               "id": "error",
               "name": "data.error",
-              "value": "={{ $json.message || 'Clearbit API error' }}",
+              "value": "={{ $json.message || 'Apollo.io API error' }}",
               "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "handle-clearbit-error",
-      "name": "Handle Clearbit Error",
+      "id": "handle-apollo-error",
+      "name": "Handle Apollo Error",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [1180, 100]
@@ -545,7 +539,7 @@
       "main": [
         [
           {
-            "node": "Clearbit Enrichment",
+            "node": "Apollo.io Enrichment",
             "type": "main",
             "index": 0
           }
@@ -566,18 +560,18 @@
         ]
       ]
     },
-    "Clearbit Enrichment": {
+    "Apollo.io Enrichment": {
       "main": [
         [
           {
-            "node": "Normalize Clearbit Data",
+            "node": "Normalize Apollo Data",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Handle Clearbit Error",
+            "node": "Handle Apollo Error",
             "type": "main",
             "index": 0
           }
@@ -602,7 +596,7 @@
         ]
       ]
     },
-    "Normalize Clearbit Data": {
+    "Normalize Apollo Data": {
       "main": [
         [
           {
@@ -635,7 +629,7 @@
         ]
       ]
     },
-    "Handle Clearbit Error": {
+    "Handle Apollo Error": {
       "main": [
         [
           {

@@ -6,6 +6,7 @@ import {
   createVisitorFingerprint,
   collectDeviceData,
   collectUTMParams,
+  collectClickIds,
   collectIdentityFromURL,
   getPageType,
   getSessionId,
@@ -15,7 +16,11 @@ import {
   setFingerprintDbId,
   getSessionDbId,
   setSessionDbId,
+  recordPageVisit,
+  updateLastPageDwell,
+  getAndIncrementVisitCount,
   type InteractionType,
+  type ClickIds,
 } from '@/lib/visitor-tracking'
 import {
   pushSessionStartEvent,
@@ -24,6 +29,7 @@ import {
   type VisitorContext,
 } from '@/hooks/use-analytics'
 import { identifyClarityUser, setClarityTag } from '@/components/analytics/microsoft-clarity'
+import { sendAbandonedLeadWebhook } from '@/lib/webhook'
 
 // Geolocation data type
 interface GeolocationData {
@@ -38,6 +44,7 @@ interface VisitorTrackingContextType {
   geolocation: GeolocationData | null
   deviceData: ReturnType<typeof collectDeviceData> | null
   utmParams: Record<string, string | null> | null
+  clickIds: ClickIds | null
   getVisitorContext: () => VisitorContext
   trackInteraction: (type: InteractionType, metadata?: Record<string, unknown>) => void
   identifyVisitor: (data: { email?: string; phone?: string; name?: string }) => void
@@ -49,6 +56,7 @@ const VisitorTrackingContext = createContext<VisitorTrackingContextType>({
   geolocation: null,
   deviceData: null,
   utmParams: null,
+  clickIds: null,
   getVisitorContext: () => ({}),
   trackInteraction: () => {},
   identifyVisitor: () => {},
@@ -71,10 +79,17 @@ export function VisitorTrackingProvider({ children }: Props) {
   const pageStartTimeRef = useRef<number>(Date.now())
   const initialized = useRef(false)
 
+  // Abandoned lead detection refs
+  const hasFilledFormRef = useRef(false)
+  const hasClickedWhatsAppRef = useRef(false)
+  const abandonedLeadSentRef = useRef(false)
+  const geolocationRef = useRef<GeolocationData | null>(null)
+
   // State for enriched data (exposed via context)
   const [geolocation, setGeolocation] = useState<GeolocationData | null>(null)
   const [deviceData, setDeviceData] = useState<ReturnType<typeof collectDeviceData> | null>(null)
   const [utmParams, setUtmParams] = useState<Record<string, string | null> | null>(null)
+  const [clickIds, setClickIds] = useState<ClickIds | null>(null)
   const referrerRef = useRef<string | null>(null)
   const landingPageRef = useRef<string | null>(null)
 
@@ -101,13 +116,19 @@ export function VisitorTrackingProvider({ children }: Props) {
       sessionDbIdRef.current = getSessionDbId()
       console.log('[VisitorTracking] Initial fingerprintDbId from localStorage:', fingerprintDbIdRef.current)
 
-      // Collect device data and UTM params
+      // Collect device data, UTM params, and click IDs
       const collectedDeviceData = collectDeviceData()
       const collectedUtmParams = collectUTMParams()
+      const collectedClickIds = collectClickIds()
       setDeviceData(collectedDeviceData)
       setUtmParams(collectedUtmParams)
+      setClickIds(collectedClickIds)
       referrerRef.current = document.referrer || null
       landingPageRef.current = window.location.pathname
+
+      // Track visit count (persists across sessions for behavioral scoring)
+      const visitCount = getAndIncrementVisitCount()
+      console.log('[VisitorTracking] Visit count:', visitCount)
 
       // Fetch geolocation
       let geoData: GeolocationData | null = null
@@ -116,12 +137,13 @@ export function VisitorTrackingProvider({ children }: Props) {
         if (geoResponse.ok) {
           geoData = await geoResponse.json()
           setGeolocation(geoData)
+          geolocationRef.current = geoData
         }
       } catch (e) {
         console.error('[VisitorTracking] Geolocation fetch error:', e)
       }
 
-      // Initialize session with API
+      // Initialize session with API (includes click IDs for attribution)
       try {
         const response = await fetch('/api/tracking/session', {
           method: 'POST',
@@ -131,6 +153,7 @@ export function VisitorTrackingProvider({ children }: Props) {
             session_id: sessionId,
             device_data: collectedDeviceData,
             utm_params: collectedUtmParams,
+            click_ids: collectedClickIds,
             referrer_url: document.referrer || null,
           }),
         })
@@ -240,8 +263,10 @@ export function VisitorTrackingProvider({ children }: Props) {
       ? Math.round((Date.now() - pageStartTimeRef.current) / 1000)
       : 0
 
-    // Update previous page time if we have a previous path
+    // Update previous page dwell time in behavioral signals
     if (lastPathRef.current && timeOnPrevPage > 0) {
+      updateLastPageDwell(timeOnPrevPage * 1000)
+
       fetch('/api/tracking/page-time', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -255,6 +280,9 @@ export function VisitorTrackingProvider({ children }: Props) {
 
     // Track new page view
     const pageType = getPageType(pathname)
+
+    // Record page visit in behavioral signal history
+    recordPageVisit(pathname, pageType)
 
     fetch('/api/tracking/pageview', {
       method: 'POST',
@@ -306,6 +334,14 @@ export function VisitorTrackingProvider({ children }: Props) {
   // Also pushes to dataLayer for analytics sync
   const trackInteraction = useCallback((type: InteractionType, metadata?: Record<string, unknown>) => {
     if (!fingerprintDbIdRef.current || !sessionDbIdRef.current) return
+
+    // Mark conversions to suppress abandoned lead webhook
+    if (type === 'form_submit' || type === 'form_click') {
+      hasFilledFormRef.current = true
+    }
+    if (type === 'whatsapp_click' || type === 'phone_click') {
+      hasClickedWhatsAppRef.current = true
+    }
 
     // Send to internal tracking API
     fetch('/api/tracking/interaction', {
@@ -362,6 +398,9 @@ export function VisitorTrackingProvider({ children }: Props) {
       hasPhone: !!data.phone,
       hasName: !!data.name,
     })
+
+    // Mark as converted (form identification = conversion)
+    hasFilledFormRef.current = true
 
     if (!fingerprintDbIdRef.current) {
       console.warn('[VisitorTracking] Cannot identify: fingerprintDbId is null. Session may not be initialized yet.')
@@ -426,6 +465,69 @@ export function VisitorTrackingProvider({ children }: Props) {
     }
   }, [geolocation])
 
+  // =====================================================
+  // ABANDONED LEAD DETECTION
+  // Exit intent (mouseleave) + beforeunload
+  // =====================================================
+  useEffect(() => {
+    // Check sessionStorage flag on mount (prevents re-fires within same session)
+    if (typeof window !== 'undefined' && sessionStorage.getItem('abandoned_lead_sent') === 'true') {
+      abandonedLeadSentRef.current = true
+    }
+
+    /**
+     * Checks conditions and sends the abandoned lead webhook if applicable:
+     * 1. Not already sent this session
+     * 2. Visitor has NOT filled a form
+     * 3. Visitor has NOT clicked WhatsApp/phone
+     * 4. Visitor has a fingerprint (tracking initialized)
+     */
+    const checkAndSendAbandonedLead = (reason: 'exit_intent' | 'beforeunload') => {
+      // Already sent this session
+      if (abandonedLeadSentRef.current) return
+
+      // Visitor converted — no need to capture as abandoned
+      if (hasFilledFormRef.current || hasClickedWhatsAppRef.current) {
+        console.log('[Abandoned] Visitor converted, skipping. form:', hasFilledFormRef.current, 'whatsapp:', hasClickedWhatsAppRef.current)
+        return
+      }
+
+      // Must have tracking data
+      if (!fingerprintDbIdRef.current) {
+        console.log('[Abandoned] No fingerprint, skipping')
+        return
+      }
+
+      // Send the beacon
+      const sent = sendAbandonedLeadWebhook(reason, geolocationRef.current)
+      if (sent) {
+        abandonedLeadSentRef.current = true
+        sessionStorage.setItem('abandoned_lead_sent', 'true')
+        console.log('[Abandoned] Webhook sent successfully, reason:', reason)
+      }
+    }
+
+    // Desktop exit intent: mouse leaves viewport from the top
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0) {
+        checkAndSendAbandonedLead('exit_intent')
+      }
+    }
+
+    // Universal fallback: page is about to unload (tab close, navigation away)
+    const handleBeforeUnload = () => {
+      checkAndSendAbandonedLead('beforeunload')
+    }
+
+    document.addEventListener('mouseleave', handleMouseLeave)
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      document.removeEventListener('mouseleave', handleMouseLeave)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [])
+
   return (
     <VisitorTrackingContext.Provider
       value={{
@@ -434,6 +536,7 @@ export function VisitorTrackingProvider({ children }: Props) {
         geolocation,
         deviceData,
         utmParams,
+        clickIds,
         getVisitorContext,
         trackInteraction,
         identifyVisitor,

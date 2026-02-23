@@ -91,6 +91,56 @@ export function collectDeviceData() {
   }
 }
 
+// Cookie helper functions
+function setCookie(name: string, value: string, days: number): void {
+  if (typeof document === 'undefined') return
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
+  return match ? decodeURIComponent(match[2]) : null
+}
+
+// Click ID types for platform attribution
+export interface ClickIds {
+  gclid: string | null   // Google Click ID
+  fbclid: string | null  // Facebook/Meta Click ID
+  ttclid: string | null  // TikTok Click ID
+}
+
+const CLICK_ID_COOKIE_DAYS = 90
+
+// Collect and persist click IDs from URL (stored in cookies for 90 days)
+export function collectClickIds(): ClickIds {
+  if (typeof window === 'undefined') return { gclid: null, fbclid: null, ttclid: null }
+
+  const params = new URLSearchParams(window.location.search)
+
+  const clickIdParams: Array<{ param: string; cookie: string; key: keyof ClickIds }> = [
+    { param: 'gclid', cookie: 'attra_gclid', key: 'gclid' },
+    { param: 'fbclid', cookie: 'attra_fbclid', key: 'fbclid' },
+    { param: 'ttclid', cookie: 'attra_ttclid', key: 'ttclid' },
+  ]
+
+  const result: ClickIds = { gclid: null, fbclid: null, ttclid: null }
+
+  for (const { param, cookie, key } of clickIdParams) {
+    // Prefer fresh value from URL, fallback to stored cookie
+    const fromUrl = params.get(param)
+    if (fromUrl) {
+      setCookie(cookie, fromUrl, CLICK_ID_COOKIE_DAYS)
+      result[key] = fromUrl
+    } else {
+      result[key] = getCookie(cookie)
+    }
+  }
+
+  return result
+}
+
 // Collect UTM parameters from URL
 export function collectUTMParams(): Record<string, string | null> {
   if (typeof window === 'undefined') return {}
@@ -104,6 +154,16 @@ export function collectUTMParams(): Record<string, string | null> {
     utm_content: params.get('utm_content'),
     utm_term: params.get('utm_term'),
   }
+}
+
+// Generate SHA-256 hash of a string (for LGPD-compliant PII hashing)
+export async function hashSHA256(value: string): Promise<string> {
+  if (typeof window === 'undefined' || !window.crypto?.subtle) return ''
+  const encoder = new TextEncoder()
+  const data = encoder.encode(value.trim().toLowerCase())
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 // Check for identity params in URL (email, phone, etc.)
@@ -280,4 +340,97 @@ export interface InteractionData {
   page_path: string
   vehicle_id?: string
   metadata?: Record<string, unknown>
+}
+
+
+// =====================================================
+// BEHAVIORAL SIGNALS COLLECTION (for Enrichment Method 1)
+// =====================================================
+
+const PAGE_HISTORY_KEY = 'attra_page_history'
+const VISIT_COUNT_KEY = 'attra_visit_count'
+const TOTAL_DWELL_KEY = 'attra_total_dwell'
+
+export interface PageHistoryEntry {
+  path: string
+  type: string
+  timestamp: number
+  dwellMs: number
+}
+
+export interface BehavioralSignals {
+  pageHistory: PageHistoryEntry[]
+  totalDwellTimeMs: number
+  visitCount: number
+  productPagesViewed: number
+  currentSessionPages: number
+}
+
+// Track a page visit in local session history
+export function recordPageVisit(path: string, pageType: string): void {
+  if (typeof window === 'undefined') return
+
+  const history = getPageHistory()
+  history.push({
+    path,
+    type: pageType,
+    timestamp: Date.now(),
+    dwellMs: 0, // Updated when leaving the page
+  })
+
+  // Keep last 50 pages per session
+  const trimmed = history.slice(-50)
+  sessionStorage.setItem(PAGE_HISTORY_KEY, JSON.stringify(trimmed))
+}
+
+// Update dwell time on the last page visited
+export function updateLastPageDwell(dwellMs: number): void {
+  if (typeof window === 'undefined') return
+
+  const history = getPageHistory()
+  if (history.length > 0) {
+    history[history.length - 1].dwellMs = dwellMs
+    sessionStorage.setItem(PAGE_HISTORY_KEY, JSON.stringify(history))
+  }
+
+  // Accumulate total dwell time
+  const totalDwell = parseInt(localStorage.getItem(TOTAL_DWELL_KEY) || '0', 10)
+  localStorage.setItem(TOTAL_DWELL_KEY, String(totalDwell + dwellMs))
+}
+
+// Get page visit history for current session
+export function getPageHistory(): PageHistoryEntry[] {
+  if (typeof window === 'undefined') return []
+  try {
+    return JSON.parse(sessionStorage.getItem(PAGE_HISTORY_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+// Get and increment visit count (persists across sessions)
+export function getAndIncrementVisitCount(): number {
+  if (typeof window === 'undefined') return 0
+  const count = parseInt(localStorage.getItem(VISIT_COUNT_KEY) || '0', 10) + 1
+  localStorage.setItem(VISIT_COUNT_KEY, String(count))
+  return count
+}
+
+// Collect all behavioral signals for enrichment
+export function collectBehavioralSignals(): BehavioralSignals {
+  const history = getPageHistory()
+  const totalDwell = typeof window !== 'undefined'
+    ? parseInt(localStorage.getItem(TOTAL_DWELL_KEY) || '0', 10)
+    : 0
+  const visitCount = typeof window !== 'undefined'
+    ? parseInt(localStorage.getItem(VISIT_COUNT_KEY) || '0', 10)
+    : 0
+
+  return {
+    pageHistory: history,
+    totalDwellTimeMs: totalDwell,
+    visitCount,
+    productPagesViewed: history.filter(p => p.type === 'vehicle').length,
+    currentSessionPages: history.length,
+  }
 }

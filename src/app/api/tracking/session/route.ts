@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
       session_id,
       device_data,
       utm_params,
+      click_ids,
       referrer_url,
     } = body
 
@@ -104,6 +105,9 @@ export async function POST(request: NextRequest) {
           utm_campaign: utm_params?.utm_campaign || null,
           utm_content: utm_params?.utm_content || null,
           utm_term: utm_params?.utm_term || null,
+          gclid: click_ids?.gclid || null,
+          fbclid: click_ids?.fbclid || null,
+          ttclid: click_ids?.ttclid || null,
           ip_address: ip,
         })
         .select('id')
@@ -129,6 +133,9 @@ export async function POST(request: NextRequest) {
         utm_campaign: utm_params?.utm_campaign || null,
         utm_content: utm_params?.utm_content || null,
         utm_term: utm_params?.utm_term || null,
+        gclid: click_ids?.gclid || null,
+        fbclid: click_ids?.fbclid || null,
+        ttclid: click_ids?.ttclid || null,
         ip_address: ip,
       })
       .select('id')
