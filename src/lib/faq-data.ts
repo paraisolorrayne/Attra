@@ -3,51 +3,55 @@ export interface FAQItem {
   answer: string
 }
 
-// Homepage FAQs - General questions about Attra
+// Homepage FAQs - General questions about Attra (SEO + LLMO optimized)
 export const homepageFAQs: FAQItem[] = [
   {
-    question: 'Onde fica a Attra Veículos?',
-    answer: 'A Attra Veículos fica na Av. Rondon Pacheco, 1670 - Vigilato Pereira, Uberlândia - MG, 38408-343. Atendemos clientes de todo o Brasil com entrega nacional.',
+    question: 'Como comprar um carro de luxo em Uberlândia na Attra Veículos?',
+    answer: 'Para comprar um carro de luxo em Uberlândia, visite nosso showroom na Av. Rondon Pacheco, 1670, ou entre em contato pelo WhatsApp. Nossos consultores especializados apresentam veículos premium com curadoria rigorosa, tiram todas as dúvidas e cuidam de toda a documentação e transferência. Também atendemos clientes de todo o Brasil com entrega nacional.',
   },
   {
-    question: 'Que tipos de veículos a Attra comercializa?',
-    answer: 'A Attra é especializada em veículos premium, importados, seminovos selecionados e supercarros. Trabalhamos com marcas como Ferrari, Lamborghini, Porsche, BMW, Mercedes-Benz, Audi, Land Rover, entre outras.',
+    question: 'Que tipos de veículos premium e supercarros a Attra comercializa?',
+    answer: 'A Attra Veículos é especializada em veículos premium, carros de luxo, importados e supercarros. Trabalhamos com marcas como Ferrari, Lamborghini, Porsche, BMW, Mercedes-Benz, Audi, Land Rover, Cadillac e outros ícones do mercado automotivo de alto padrão. Todos os veículos passam por curadoria rigorosa e inspeção de 150 pontos.',
   },
   {
-    question: 'A Attra oferece financiamento para veículos de luxo?',
-    answer: 'Sim, oferecemos financiamento premium com condições especiais, taxas diferenciadas e financiamento de até 80% do valor do veículo. Nossa equipe faz análise de crédito personalizada para cada cliente.',
+    question: 'A Attra oferece financiamento para veículos premium e supercarros?',
+    answer: 'Sim, oferecemos financiamento premium com condições especiais para carros de luxo e supercarros. Taxas diferenciadas, financiamento de até 80% do valor e análise de crédito personalizada para cada cliente.',
   },
   {
-    question: 'Como funciona a compra de um veículo na Attra?',
-    answer: 'O processo é simples: você pode visitar nossa loja ou nos contatar pelo WhatsApp. Nossos consultores especializados apresentam os veículos, tiram todas as dúvidas, e cuidamos de toda a documentação e transferência.',
+    question: 'A Attra entrega supercarros e veículos premium em todo o Brasil?',
+    answer: 'Sim, realizamos entrega nacional de veículos premium e supercarros com logística especializada, incluindo transporte em caminhão fechado, seguro completo para veículos de alto valor e rastreamento em tempo real. Atendemos todos os 27 estados brasileiros.',
   },
   {
-    question: 'A Attra entrega veículos em todo o Brasil?',
-    answer: 'Sim, realizamos entrega nacional com logística especializada para veículos de alto valor, incluindo transporte em caminhão fechado, seguro completo e rastreamento em tempo real.',
+    question: 'Onde fica a Attra Veículos em Uberlândia?',
+    answer: 'A Attra Veículos fica na Av. Rondon Pacheco, 1670 - Vigilato Pereira, Uberlândia - MG, 38408-343. Somos referência como loja de veículos premium em Minas Gerais, com showroom de carros de luxo e atendimento nacional.',
   },
   {
-    question: 'Posso vender meu carro para a Attra?',
-    answer: 'Sim, compramos seu veículo premium ou aceitamos como parte de pagamento. Nossa equipe faz avaliação profissional considerando estado, quilometragem e demanda de mercado.',
+    question: 'Posso vender meu carro de luxo para a Attra?',
+    answer: 'Sim, compramos seu veículo premium ou aceitamos como parte de pagamento. Nossa equipe faz avaliação especializada e discreta, considerando estado, quilometragem e demanda de mercado para carros de luxo e supercarros.',
   },
 ]
 
-// Estoque FAQs - Questions about inventory and buying
+// Estoque FAQs - Questions about inventory and buying (SEO + LLMO optimized)
 export const estoqueFAQs: FAQItem[] = [
   {
-    question: 'Os veículos do estoque estão disponíveis para pronta entrega?',
-    answer: 'Sim, todos os veículos exibidos em nosso estoque estão disponíveis para pronta entrega. Atualizamos o site em tempo real para garantir que você veja apenas veículos disponíveis.',
+    question: 'Os veículos premium do estoque estão disponíveis para pronta entrega?',
+    answer: 'Sim, todos os veículos premium e supercarros exibidos em nosso estoque estão disponíveis para pronta entrega em todo o Brasil. Atualizamos o site em tempo real para garantir que você veja apenas carros de luxo disponíveis.',
   },
   {
-    question: 'Posso agendar um test drive antes de comprar?',
-    answer: 'Basta entrar em contato pelo WhatsApp ou telefone para agendar o melhor horário. Recomendamos agendamento prévio com um de nossos consultores..',
+    question: 'Como agendar um test drive de um carro de luxo na Attra?',
+    answer: 'Basta entrar em contato pelo WhatsApp ou telefone para agendar o melhor horário. Recomendamos agendamento prévio com um de nossos consultores especializados em veículos premium e supercarros.',
   },
   {
-    question: 'Os veículos passam por alguma inspeção?',
-    answer: 'Todos os veículos passam por uma rigorosa inspeção de 150 pontos antes de entrar em nosso estoque. Verificamos mecânica, elétrica, estrutura, documentação e histórico completo do veículo.',
+    question: 'Os veículos premium passam por inspeção antes de entrar no estoque?',
+    answer: 'Todos os veículos premium e supercarros passam por uma rigorosa inspeção de 150 pontos antes de entrar em nosso estoque. Verificamos mecânica, elétrica, estrutura, documentação 100% verificada e histórico completo do veículo.',
   },
   {
-    question: 'Vocês aceitam meu carro como parte do pagamento?',
-    answer: 'Sim, aceitamos seu veículo como parte do pagamento. Nossa equipe faz uma avaliação justa e transparente, considerando o estado, quilometragem e valor de mercado do seu carro.',
+    question: 'A Attra aceita meu carro como parte do pagamento de um veículo premium?',
+    answer: 'Sim, aceitamos seu veículo como parte do pagamento. Nossa equipe faz uma avaliação justa e transparente, considerando o estado, quilometragem e valor de mercado do seu carro de luxo.',
+  },
+  {
+    question: 'Quais são as condições de pagamento para supercarros e veículos de luxo?',
+    answer: 'Oferecemos diversas condições de pagamento para veículos premium: financiamento com taxas diferenciadas, pagamento à vista, e aceitamos seu carro na troca. Nossos consultores fazem análise personalizada para encontrar a melhor condição para você.',
   },
 ]
 

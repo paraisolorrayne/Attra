@@ -11,7 +11,8 @@ import { VehicleRequestForm } from '@/components/forms/vehicle-request-form'
 import { FAQSection } from '@/components/home'
 import { FAQSchema } from '@/components/seo'
 import { estoqueFAQs } from '@/lib/faq-data'
-import { Search, Globe, Shield, Check } from 'lucide-react'
+import { Search, Globe, Shield, Check, ArrowRight, CalendarCheck } from 'lucide-react'
+import Link from 'next/link'
 import { VehicleUnavailableToast } from '@/components/vehicles/vehicle-unavailable-toast'
 
 // Brand similarity groups for vehicle suggestions
@@ -44,8 +45,8 @@ function getSimilarBrands(brand: string): string[] {
 }
 
 export const metadata: Metadata = {
-  title: 'Estoque Premium | Supercarros e Veículos de Luxo',
-  description: 'Seleção exclusiva de supercarros e veículos premium.',
+  title: 'Estoque Premium | Supercarros e Veículos de Luxo em Uberlândia | Attra Veículos',
+  description: 'Explore nosso estoque de carros premium em Uberlândia. Supercarros, importados e veículos de luxo com curadoria rigorosa e entrega em todo o Brasil. Porsche, Ferrari, BMW, Mercedes-Benz, Lamborghini e mais.',
 }
 
 interface EstoquePageProps {
@@ -285,8 +286,43 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
           <Breadcrumb items={breadcrumbItems} />
           <div className="mt-8">
             <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              Estoque <span className="text-metallic">Premium</span>
+              Veículos Premium Disponíveis para Pronta Entrega
             </h1>
+            <div className="max-w-3xl space-y-3 text-foreground-secondary leading-relaxed">
+              <p>
+                Explore nosso estoque de carros premium em Uberlândia, com seleção de supercarros, importados e veículos de luxo prontos para entrega em todo o Brasil.
+              </p>
+              <p className="text-sm">
+                Você encontra aqui opções de Porsche, BMW, Mercedes‑Benz, Audi, Land Rover, Ferrari, Lamborghini, Cadillac e outros ícones do mercado automotivo de alto padrão. Todos os veículos passam por inspeção rigorosa e curadoria Attra, garantindo procedência, documentação verificada e experiência de compra de nível internacional.
+              </p>
+              <p className="text-sm">
+                <Link href="/jornada" className="text-primary hover:text-primary-hover transition-colors font-medium">
+                  Saiba mais sobre nosso processo de curadoria rigorosa de veículos premium na Jornada Attra →
+                </Link>
+              </p>
+            </div>
+
+            {/* Quick Filter Shortcuts */}
+            <div className="flex flex-wrap gap-2 mt-6">
+              <Link
+                href="/estoque?q=superesportivo&ordenar=preco-desc"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-full transition-colors border border-primary/20"
+              >
+                Ver superesportivos e supercarros <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                href="/estoque?carroceria=suv&ordenar=preco-desc"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-full transition-colors border border-primary/20"
+              >
+                Ver SUVs de luxo para família <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                href="/estoque?carroceria=sedan&ordenar=preco-desc"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-full transition-colors border border-primary/20"
+              >
+                Ver sedãs executivos premium <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         </Container>
       </section>
@@ -394,11 +430,34 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
         </Container>
       </section>
 
+      {/* Concierge CTA */}
+      <section className="py-16 bg-gradient-to-br from-primary via-primary to-primary-hover">
+        <Container>
+          <div className="max-w-2xl mx-auto text-center">
+            <CalendarCheck className="w-12 h-12 text-white/90 mx-auto mb-4" />
+            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
+              Agendar Atendimento Exclusivo
+            </h2>
+            <p className="text-white/80 mb-6 max-w-lg mx-auto">
+              Escolha o melhor horário para falar com um consultor especializado Attra sobre veículos premium e supercarros
+            </p>
+            <a
+              href="https://wa.me/553432563200?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20atendimento%20exclusivo%20com%20um%20consultor%20Attra."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white text-primary font-semibold px-8 py-3.5 rounded-xl hover:bg-white/90 transition-colors shadow-lg"
+            >
+              Agendar meu horário <ArrowRight className="w-5 h-5" />
+            </a>
+          </div>
+        </Container>
+      </section>
+
       {/* FAQ Section */}
       <FAQSection
         faqs={estoqueFAQs}
-        title="Dúvidas sobre nosso Estoque"
-        subtitle="Perguntas frequentes sobre compra de veículos na Attra"
+        title="Dúvidas sobre Veículos Premium e Supercarros"
+        subtitle="Perguntas frequentes sobre compra de carros de luxo na Attra Veículos"
       />
       <FAQSchema faqs={estoqueFAQs} />
     </>

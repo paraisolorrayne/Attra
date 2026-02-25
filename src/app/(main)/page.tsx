@@ -8,6 +8,7 @@ import {
   FAQSection,
   AboutSectionExpanded,
 } from '@/components/home'
+import { ConciergeCtaSection } from '@/components/home/concierge-cta-section'
 import { FAQSchema } from '@/components/seo'
 import { homepageFAQs } from '@/lib/faq-data'
 import { getVehicles, getHomeSlides, HeroSlideData } from '@/lib/autoconf-api'
@@ -59,6 +60,9 @@ export default async function Home() {
       {/* Attra experience showcase */}
       <ExperienceSection />
 
+      {/* Concierge CTA - Agendar Atendimento Exclusivo */}
+      <ConciergeCtaSection />
+
       {/* Expanded About Section - SEO optimized with 400+ words */}
       <AboutSectionExpanded />
 
@@ -83,7 +87,7 @@ export default async function Home() {
             '@context': 'https://schema.org',
             '@type': 'AutoDealer',
             name: 'Attra Veículos',
-            description: 'Referência em veículos nacionais, importados, seminovos e supercarros em Uberlândia.',
+            description: 'Referência em veículos premium, carros de luxo, importados e supercarros em Uberlândia. Loja de veículos premium em Minas Gerais com curadoria rigorosa e entrega nacional.',
             url: 'https://attraveiculos.com.br',
             telephone: '+55-34-3014-3232',
             address: {

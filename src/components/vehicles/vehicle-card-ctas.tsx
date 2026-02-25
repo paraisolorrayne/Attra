@@ -21,11 +21,11 @@ Valor: ${formatPrice(vehicle.price)}
 
 Quando poderia fazer o agendamento?`
 
-  const moreInfoMessage = `Olá! Vi o ${vehicleName} no site e gostaria de mais informações.
+  const moreInfoMessage = `Olá! Vi o ${vehicleName} no site e gostaria de falar com um consultor sobre este veículo.
 
 Valor: ${formatPrice(vehicle.price)}
 
-Podem me enviar mais detalhes sobre este veículo?`
+Podem me enviar mais detalhes?`
 
   if (variant === 'icon-only') {
     return (
@@ -36,7 +36,7 @@ Podem me enviar mais detalhes sobre este veículo?`
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className="p-2 bg-primary/10 hover:bg-primary hover:text-white text-primary rounded-lg transition-all"
-          title="Solicitar Mais Info"
+          title="Conversar com consultor no WhatsApp"
         >
           <MessageCircle className="w-4 h-4" />
         </a>
@@ -55,7 +55,7 @@ Podem me enviar mais detalhes sobre este veículo?`
         >
           <a href={getWhatsAppUrl(moreInfoMessage)} target="_blank" rel="noopener noreferrer">
             <MessageCircle className="w-4 h-4 mr-2" />
-            Mais Info
+            Falar com Consultor
           </a>
         </Button>
       </div>
@@ -83,7 +83,7 @@ Podem me enviar mais detalhes sobre este veículo?`
       >
         <a href={getWhatsAppUrl(moreInfoMessage)} target="_blank" rel="noopener noreferrer">
           <MessageCircle className="w-4 h-4 mr-2" />
-          Solicitar Mais Info
+          Conversar com Consultor no WhatsApp
         </a>
       </Button>
     </div>

@@ -14,13 +14,10 @@ const stats = [
   { value: '5.0', label: 'Avaliação Google', icon: Users },
 ]
 
-const differentials = [
-  'Curadoria rigorosa de veículos premium',
-  'Inspeção técnica de 150 pontos',
-  'Documentação 100% verificada',
-  'Entrega nacional com seguro especializado',
-  'Financiamento com taxas diferenciadas',
-  'Atendimento consultivo personalizado',
+const pillars = [
+  'Negócio familiar com quase 20 anos de história',
+  'Referência em veículos premium e carros de luxo em Uberlândia e no Brasil',
+  'Atendimento transparente, respeitoso e consultivo',
 ]
 
 export function AboutSectionExpanded() {
@@ -46,48 +43,47 @@ export function AboutSectionExpanded() {
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mt-3 mb-6">
               Referência em Veículos Premium em Uberlândia e no Brasil
             </h2>
-            
-            <div className="space-y-4 text-foreground-secondary leading-relaxed">
-              <p>
-                A história da <strong className="text-foreground">Attra Veículos</strong> é, acima de tudo, uma história de família.
-                Fundada em 2008, a nossa trajetória começou sob a visão e o trabalho de Irineu, que estabeleceu em Uberlândia os alicerces
-                de uma empresa pautada pela integridade e pela paixão automotiva. Hoje, a família segue os passos do pai, honrando
-                seu nome e trazendo a confiança de um negócio familiar para o mercado automotivo de alto luxo.
-              </p>
-              <strong className="text-foreground">Tradição que Gera Confiança</strong>
-              <p>
-                Ao longo de quase 20 anos, transformamos o nome Attra em sinônimo de segurança. Entendemos que a compra de um veículo
-                premium não é apenas uma transação, mas a realização de um projeto. Por isso, aplicamos os valores aprendidos em casa:
-                transparência, respeito e compromisso em cada negociação. A confiança é o nosso maior patrimônio.
-              </p>
-              <p>
-                Nossa reputação é validada por quem mais importa: nossos clientes. Mantemos médias de avaliação entre 4.7 e 4.9 no
-                Google Maps, onde somos frequentemente elogiados pela transparência nas negociações, atendimento atencioso e a qualidade
-                impecável dos veículos entregues.
-              </p>
-              <p>
-                Nossa filosofia é simples: cada veículo em nosso estoque deve atender aos mais rigorosos padrões. Para garantir a sua
-                tranquilidade, desenvolvemos um processo de curadoria que inclui:
-              </p>
-            </div>
 
-            {/* Differentials List */}
-            <div className="mt-8 grid sm:grid-cols-2 gap-3">
-              {differentials.map((item) => (
-                <div key={item} className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-foreground">{item}</span>
+            {/* 1 parágrafo principal – história + confiança */}
+            <p className="text-foreground-secondary leading-relaxed mb-6">
+              Fundada em 2008 por Irineu, a <strong className="text-foreground">Attra Veículos</strong> nasceu como
+              um negócio familiar em Uberlândia, construído sobre integridade e paixão automotiva. Ao longo de
+              quase duas décadas, a família transformou a Attra em sinônimo de confiança na{' '}
+              <strong className="text-foreground">compra de carros de luxo em todo o Brasil</strong> — com
+              atendimento nacional a partir de Uberlândia, avaliações entre 4.7 e 4.9 no Google Maps e centenas
+              de clientes que validam nossa reputação.
+            </p>
+
+            {/* 3 bullets – pilares */}
+            <div className="space-y-3 mb-8">
+              {pillars.map((item) => (
+                <div key={item} className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-primary shrink-0" />
+                  <span className="text-foreground font-medium">{item}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8">
-              <Button asChild size="lg">
-                <Link href="/sobre" className="flex items-center gap-2">
-                  Conheça Nossa História <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-            </div>
+            {/* Teaser curadoria + link /jornada */}
+            <p className="text-foreground-secondary leading-relaxed mb-8">
+              Cada veículo passa por <strong className="text-foreground">curadoria rigorosa, inspeção técnica
+              completa e verificação de documentação</strong>, garantindo a segurança que clientes de veículos
+              premium e supercarros exigem.{' '}
+              <Link
+                href="/jornada"
+                className="text-primary hover:text-primary-hover font-medium transition-colors inline-flex items-center gap-1"
+              >
+                Veja em detalhes como funciona nossa curadoria na Jornada Attra
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </p>
+
+            {/* CTA */}
+            <Button asChild size="lg">
+              <Link href="/sobre" className="flex items-center gap-2">
+                Conheça Nossa História <ArrowRight className="w-5 h-5" />
+              </Link>
+            </Button>
           </div>
 
           {/* Right - Stats & Image */}

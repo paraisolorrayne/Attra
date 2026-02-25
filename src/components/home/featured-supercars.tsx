@@ -74,10 +74,10 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
             <span className="text-primary font-medium tracking-wide uppercase text-sm">Destaques</span>
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Últimos veículos em destaque
+            Supercarros e Veículos Premium em Destaque
           </h2>
           <p className="text-foreground-secondary text-lg max-w-2xl">
-            Veículos selecionados para quem exige a perfeição em cada detalhe
+            Estoque de supercarros e carros de luxo com curadoria rigorosa, prontos para entrega nacional
           </p>
         </div>
 
@@ -140,7 +140,7 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
         <div className={`mt-12 text-center opacity-0 ${isVisible ? 'animate-fade-in-up stagger-5' : ''}`}>
           <Button asChild variant="outline" size="lg">
             <Link href="/estoque" className="flex items-center gap-2">
-              Ver todo o estoque <ArrowRight className="w-5 h-5" />
+              Veja todo o nosso estoque premium de carros de luxo <ArrowRight className="w-5 h-5" />
             </Link>
           </Button>
         </div>

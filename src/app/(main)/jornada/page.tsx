@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { MapPin, Building2, Award, Clock, Star, Users, Truck, Search, FileCheck, CheckCircle, Phone, MessageCircle, ArrowRight, Shield, Handshake } from 'lucide-react'
+import { MapPin, Building2, Award, Clock, Star, Users, Truck, Search, FileCheck, CheckCircle, Phone, MessageCircle, ArrowRight, Shield, Handshake, Eye, FileText, CreditCard, HeadphonesIcon } from 'lucide-react'
 import { getWhatsAppUrl } from '@/lib/constants'
 
 export const metadata: Metadata = {
@@ -213,8 +213,72 @@ export default function JornadaPage() {
         </Container>
       </section>
 
-      {/* Journey Steps - A Jornada Completa */}
+      {/* Diferenciais Attra – conteúdo detalhado da curadoria */}
       <section className="py-20 lg:py-28 bg-background">
+        <Container>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
+              <Shield className="w-4 h-4 text-primary" />
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider">Diferenciais</span>
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              Por Que Escolher a Attra para Veículos Premium
+            </h2>
+            <p className="text-foreground-secondary text-lg max-w-3xl mx-auto">
+              Cada detalhe do nosso processo foi desenhado para garantir segurança, transparência e uma experiência à altura de quem busca o extraordinário.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Eye,
+                title: 'Curadoria Rigorosa',
+                description: 'Selecionamos apenas veículos premium e supercarros que atendem aos mais altos padrões de qualidade, procedência e estado de conservação.',
+              },
+              {
+                icon: CheckCircle,
+                title: 'Inspeção Técnica de 150 Pontos',
+                description: 'Cada carro de luxo é submetido a uma inspeção completa de 150 itens — mecânica, elétrica, estrutura, pintura e acabamento — antes de entrar no estoque.',
+              },
+              {
+                icon: FileText,
+                title: 'Documentação 100% Verificada',
+                description: 'Verificamos histórico completo, procedência, regularidade fiscal e documental de cada veículo de alto valor, garantindo total segurança jurídica.',
+              },
+              {
+                icon: Truck,
+                title: 'Entrega Nacional com Seguro',
+                description: 'Logística especializada com caminhão fechado, seguro premium e rastreamento em tempo real. Entregamos supercarros em qualquer cidade do Brasil.',
+              },
+              {
+                icon: CreditCard,
+                title: 'Financiamento Diferenciado',
+                description: 'Condições especiais para veículos premium: taxas diferenciadas, financiamento de até 80% do valor e análise de crédito personalizada.',
+              },
+              {
+                icon: HeadphonesIcon,
+                title: 'Atendimento Concierge',
+                description: 'Consultoria personalizada do primeiro contato à entrega das chaves. Atendimento exclusivo, discreto e dedicado a cada cliente.',
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="bg-background-card border border-border rounded-2xl p-6 hover:border-primary/40 transition-all group"
+              >
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <item.icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
+                <p className="text-foreground-secondary text-sm leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* Journey Steps - A Jornada Completa */}
+      <section className="py-20 lg:py-28 bg-background-soft">
         <Container>
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">

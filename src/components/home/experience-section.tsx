@@ -49,10 +49,10 @@ export function ExperienceSection() {
         <div className={`text-center mb-16 opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <span className="text-primary font-medium tracking-wide uppercase text-sm">Além do Carro</span>
           <h2 className="text-4xl lg:text-5xl font-bold text-foreground mt-4 mb-4">
-            A Experiência Attra
+            A Experiência Attra em Veículos Premium
           </h2>
           <p className="text-foreground-secondary text-lg max-w-2xl mx-auto">
-            Do primeiro contato à entrega das chaves, cada detalhe é pensado para quem exige o extraordinário
+            Do primeiro contato à entrega das chaves, cada detalhe é pensado para quem exige o extraordinário na compra de carros de luxo e supercarros
           </p>
         </div>
 
@@ -91,9 +91,12 @@ export function ExperienceSection() {
         <div className={`mt-12 text-center opacity-0 ${isVisible ? 'animate-fade-in-up stagger-5' : ''}`}>
           <Button asChild size="lg">
             <Link href="/jornada" className="flex items-center gap-2">
-              Conheça a jornada completa <ArrowRight className="w-5 h-5" />
+              Ver a Jornada Attra em Detalhes <ArrowRight className="w-5 h-5" />
             </Link>
           </Button>
+          <p className="mt-3 text-foreground-secondary text-sm max-w-xl mx-auto">
+            Entenda passo a passo como funciona nossa experiência premium, da escolha à entrega em todo o Brasil
+          </p>
         </div>
       </Container>
     </section>

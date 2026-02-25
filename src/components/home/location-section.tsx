@@ -26,7 +26,7 @@ export function LocationSection() {
             Nossas Lojas
           </h2>
           <p className="text-foreground-secondary max-w-2xl mx-auto">
-            Visite nossos showrooms e conheça de perto os melhores veículos do mercado
+            Showroom de carros de luxo em Uberlândia, com atendimento nacional para veículos premium e supercarros
           </p>
         </div>
 

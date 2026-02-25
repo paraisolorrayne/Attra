@@ -212,22 +212,25 @@ export function HeroSearchWidget() {
       {/* Premium Container - Luxury Dashboard Panel */}
       <div className="bg-background-card/80 backdrop-blur-2xl rounded-2xl md:rounded-3xl p-4 md:p-10 shadow-xl shadow-black/5 border border-border/40">
 
-        {/* Primary CTA - Ver Estoque Completo */}
+        {/* Primary CTA - Explorar estoque premium */}
         <div className="text-center mb-4 md:mb-10">
           <Link
             href="/estoque?ordenar=preco-desc"
             className="group inline-flex items-center justify-center gap-2 md:gap-3 bg-foreground/[0.92] hover:bg-foreground/[0.98] text-background font-normal text-xs md:text-base uppercase tracking-[0.08em] px-6 md:px-12 py-2.5 md:py-3.5 rounded-lg md:rounded-xl transition-all duration-300 ease-out shadow-sm shadow-black/5 hover:shadow-md hover:shadow-black/8 focus:outline-none focus:ring-1 focus:ring-foreground/20 focus:ring-offset-2 focus:ring-offset-background-card w-full md:w-auto"
           >
-            Ver Estoque Completo
+            Explorar Estoque Premium Agora
             <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
           </Link>
+          <p className="mt-2 text-foreground-secondary/70 text-xs md:text-sm tracking-wide">
+            Supercarros, importados e veículos de luxo com curadoria Attra
+          </p>
         </div>
 
         {/* Transition Text - Elegant Divider (hidden on mobile) */}
         <div className="hidden md:flex items-center gap-5 mb-10">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
           <span className="text-foreground-secondary text-sm tracking-wide whitespace-nowrap">
-            Ou explore nossa busca personalizada
+            Busca personalizada premium — descreva o carro ideal e nossa equipe encontra para você
           </span>
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
         </div>
