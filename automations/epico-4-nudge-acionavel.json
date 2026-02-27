@@ -1,0 +1,139 @@
+{
+  "name": "OTTO - Épico 4: Nudge Acionável (Assistente, não Fiscal)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 💡 Épico 4: Nudge Acionável\n\n**Filosofia**: Fazer o vendedor depender do sistema porque ele FACILITA a vida.\n\n**O que NÃO fazer**: \"Você está há 2 dias sem falar com o Marcos\"\n**O que FAZER**: \"Parceiro, o Marcos deve ter esfriado com a taxa do banco. Clica no botão que eu te mando uma mensagem pronta.\"\n\n**Botões**: [Gerar Mensagem] | [Já falei com ele]\nEsforço do vendedor → ZERO. Ele vicia na ferramenta.",
+        "height": 280, "width": 420, "color": 3
+      },
+      "id": "note-docs",
+      "name": "📋 Documentação",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [40, 40]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "otto_nudge_amarelo",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-nudge",
+      "name": "Webhook: Zona Amarela Ativada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 340],
+      "webhookId": "otto-nudge-amarelo",
+      "credentials": {
+        "httpHeaderAuth": { "id": "CREDENTIAL_ID_OTTO", "name": "OTTO Webhook Auth" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT ec.tipo_evento, ec.evidencia_ia, ec.criado_em, ec.estagio_anterior, ec.estagio_novo FROM eventos_comerciais ec WHERE ec.lead_id = '{{ $json.lead_id }}' ORDER BY ec.criado_em DESC LIMIT 3;",
+        "options": {}
+      },
+      "id": "buscar-contexto",
+      "name": "Buscar Últimos Eventos",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [500, 340],
+      "credentials": {
+        "postgres": { "id": "CREDENTIAL_ID_SUPABASE_PG", "name": "Supabase PostgreSQL" }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "content": "Você é o OTTO, assistente comercial da Attra Veículos (concessionária premium).\n\nVocê precisa gerar uma mensagem de NUDGE empática para o vendedor. NÃO seja um fiscal.\nSeja um parceiro que facilita a vida dele.\n\nContexto do lead:\n- Nome: {{ $json.nome_cliente }}\n- Veículo de interesse: {{ $json.veiculo_interesse }}\n- Estágio: {{ $json.estagio_atual }}\n- Temperatura: {{ $json.temperatura }}\n- Horas sem interação: {{ $json.horas_decorridas }}\n- Última objeção: {{ $json.ultima_objecao || 'Não identificada' }}\n- Últimos eventos: {{ JSON.stringify($json.ultimos_eventos || []) }}\n\nGere EXATAMENTE este JSON:\n{\n  \"nudge_vendedor\": \"Mensagem curta e empática para o vendedor (máx 200 chars). NÃO diga 'você está há X dias'. SUGIRA uma ação concreta.\",\n  \"mensagem_sugerida_cliente\": \"Mensagem WhatsApp pronta para o vendedor enviar ao cliente (máx 300 chars). Profissional mas humana.\",\n  \"estrategia\": \"Breve explicação da tática usada (ex: 'Oferecer simulação alternativa para contornar objeção de preço')\"\n}\n\nExemplos de bons nudges:\n- \"Parceiro, o Marcos deve ter esfriado com a taxa do banco. Clica no botão que eu te mando uma simulação com a financeira X.\"\n- \"O Carlos tava empolgado com o test drive. Bora mandar aquela foto do carro pronto pra ele?\"\n- \"A Dra. Ana pediu pra pensar, mas normalmente quem pede pra pensar quer ser convencido. Bora?\"",
+              "role": "system"
+            },
+            {
+              "content": "Gere o nudge para este lead.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": { "temperature": 0.7, "maxTokens": 500 }
+      },
+      "id": "llm-nudge",
+      "name": "LLM: Gerar Nudge Empático",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [740, 340],
+      "credentials": {
+        "openAiApi": { "id": "CREDENTIAL_ID_OPENAI", "name": "OpenAI API" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Preparar payload WhatsApp Interactive com botões de ação\nconst vars = $('Webhook: Zona Amarela Ativada').first().json;\nlet nudge;\ntry {\n  const raw = $input.first().json.text || '{}';\n  nudge = JSON.parse(raw.replace(/```json?\\n?/g, '').replace(/```/g, '').trim());\n} catch(e) {\n  nudge = {\n    nudge_vendedor: `📋 ${vars.nome_cliente} precisa de um follow-up. Clica em Gerar Mensagem que eu te ajudo.`,\n    mensagem_sugerida_cliente: `Olá! Passando para saber se tem novidades sobre o ${vars.veiculo_interesse || 'veículo'}. Estou à disposição!`,\n    estrategia: 'Follow-up padrão'\n  };\n}\n\nreturn [{ json: {\n  ...vars,\n  nudge,\n  whatsapp_payload: {\n    messaging_product: 'whatsapp',\n    to: vars.vendedor_whatsapp,\n    type: 'interactive',\n    interactive: {\n      type: 'button',\n      header: { type: 'text', text: '🟡 OTTO - Follow-up' },\n      body: { text: nudge.nudge_vendedor },\n      action: {\n        buttons: [\n          { type: 'reply', reply: { id: `gerar_msg_${vars.lead_id}`, title: '📝 Gerar Mensagem' } },\n          { type: 'reply', reply: { id: `ja_falei_${vars.lead_id}`, title: '✅ Já falei com ele' } }\n        ]\n      }\n    }\n  }\n}}];"
+      },
+      "id": "montar-nudge",
+      "name": "Montar Nudge com Botões",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [980, 340]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v18.0/{{ $env.WHATSAPP_PHONE_ID }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.whatsapp_payload) }}",
+        "options": {}
+      },
+      "id": "enviar-nudge",
+      "name": "Enviar Nudge WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1220, 340],
+      "credentials": {
+        "httpHeaderAuth": { "id": "CREDENTIAL_ID_WHATSAPP", "name": "WhatsApp Cloud API" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE cronometros_otto SET alerta_amarelo_enviado = TRUE WHERE id = '{{ $('Webhook: Zona Amarela Ativada').first().json.cronometro_id }}';",
+        "options": {}
+      },
+      "id": "marcar-enviado",
+      "name": "Marcar Alerta como Enviado",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1460, 340],
+      "credentials": {
+        "postgres": { "id": "CREDENTIAL_ID_SUPABASE_PG", "name": "Supabase PostgreSQL" }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook: Zona Amarela Ativada": { "main": [[{ "node": "Buscar Últimos Eventos", "type": "main", "index": 0 }]] },
+    "Buscar Últimos Eventos": { "main": [[{ "node": "LLM: Gerar Nudge Empático", "type": "main", "index": 0 }]] },
+    "LLM: Gerar Nudge Empático": { "main": [[{ "node": "Montar Nudge com Botões", "type": "main", "index": 0 }]] },
+    "Montar Nudge com Botões": { "main": [[{ "node": "Enviar Nudge WhatsApp", "type": "main", "index": 0 }]] },
+    "Enviar Nudge WhatsApp": { "main": [[{ "node": "Marcar Alerta como Enviado", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [
+    { "id": "otto-1", "name": "OTTO" },
+    { "id": "otto-8", "name": "Nudge" },
+    { "id": "otto-9", "name": "Épico 4" }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-02-26T12:00:00.000Z",
+  "versionId": "1"
+}
+
