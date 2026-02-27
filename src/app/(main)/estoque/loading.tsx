@@ -1,40 +1,45 @@
 import { Container } from '@/components/ui/container'
-import { Skeleton, VehicleGridSkeleton } from '@/components/ui/skeleton'
+import { Skeleton, FiltersSkeleton, VehicleHorizontalCardSkeleton } from '@/components/ui/skeleton'
 
 export default function EstoqueLoading() {
   return (
     <>
-      {/* Breadcrumb skeleton */}
-      <Container className="py-4">
-        <Skeleton className="h-4 w-48" />
-      </Container>
-
-      {/* Hero skeleton */}
-      <section className="py-12 bg-gradient-to-b from-background-soft to-background">
+      {/* Header with breadcrumb only */}
+      <section className="pt-28 pb-12 bg-gradient-to-b from-background-soft to-background">
         <Container>
-          <div className="max-w-2xl mx-auto text-center">
-            <Skeleton className="h-10 w-64 mx-auto mb-4" />
-            <Skeleton className="h-5 w-96 mx-auto" />
+          <div className="flex gap-2">
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-20" />
           </div>
         </Container>
       </section>
 
-      {/* Filters skeleton */}
-      <section className="py-6 bg-background-soft border-b border-border">
+      {/* Content with sidebar */}
+      <section className="pb-20">
         <Container>
-          <div className="flex flex-wrap gap-4">
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-        </Container>
-      </section>
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar filters */}
+            <aside className="lg:w-72 shrink-0">
+              <FiltersSkeleton />
+            </aside>
 
-      {/* Grid skeleton */}
-      <section className="py-12 bg-background">
-        <Container>
-          <VehicleGridSkeleton count={12} />
+            {/* Main content */}
+            <div className="flex-1">
+              {/* Sort bar */}
+              <div className="flex items-center justify-between mb-6">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-9 w-36 rounded-lg" />
+              </div>
+
+              {/* Vehicle cards */}
+              <div className="space-y-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <VehicleHorizontalCardSkeleton key={i} />
+                ))}
+              </div>
+            </div>
+          </div>
         </Container>
       </section>
     </>

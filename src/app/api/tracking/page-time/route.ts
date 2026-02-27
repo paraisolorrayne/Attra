@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
       session_db_id,
       page_path,
       time_on_page_seconds,
+      scroll_depth_percent,
+      is_exit,
     } = body
 
     if (!session_db_id || !page_path || time_on_page_seconds === undefined) {
@@ -40,11 +42,24 @@ export async function POST(request: NextRequest) {
       .limit(1)
 
     if (pageViews && pageViews.length > 0) {
+      const updateData: Record<string, unknown> = { time_on_page_seconds }
+      if (typeof scroll_depth_percent === 'number' && scroll_depth_percent > 0) {
+        updateData.scroll_depth_percent = scroll_depth_percent
+      }
       await supabase
         .from('visitor_page_views')
-        .update({ time_on_page_seconds })
+        .update(updateData)
         .eq('id', pageViews[0].id)
     }
+
+    // Update session heartbeat (last_activity_at + duration)
+    await supabase
+      .from('visitor_sessions')
+      .update({
+        last_activity_at: new Date().toISOString(),
+        ...(is_exit ? { ended_at: new Date().toISOString() } : {}),
+      })
+      .eq('id', session_db_id)
 
     return NextResponse.json({ success: true })
 

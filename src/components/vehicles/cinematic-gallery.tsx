@@ -25,6 +25,7 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set())
   const [errorImages, setErrorImages] = useState<Set<number>>(new Set())
+  const [fullscreenLoaded, setFullscreenLoaded] = useState<Set<number>>(new Set())
   const [mounted, setMounted] = useState(false)
 
   // Track if component is mounted (for Portal SSR compatibility)
@@ -241,17 +242,27 @@ export function CinematicGallery({ photos, vehicleName }: CinematicGalleryProps)
 
           {/* Main image container - área principal */}
           <div
-            className="w-full flex items-center justify-center px-12 md:px-16"
+            className="w-full flex items-center justify-center px-12 md:px-16 relative"
             style={{
               height: 'calc(100vh - 100px)',
               paddingTop: '16px'
             }}
           >
+            {/* Loading spinner for fullscreen image */}
+            {!fullscreenLoaded.has(currentIndex) && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-white/60 animate-spin" />
+              </div>
+            )}
             <img
               key={currentIndex}
               src={photos[currentIndex]}
               alt={`${vehicleName} - Imagem ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain animate-fade-in"
+              className={cn(
+                "max-w-full max-h-full object-contain transition-opacity duration-300",
+                fullscreenLoaded.has(currentIndex) ? "opacity-100" : "opacity-0"
+              )}
+              onLoad={() => setFullscreenLoaded(prev => new Set(prev).add(currentIndex))}
             />
           </div>
 

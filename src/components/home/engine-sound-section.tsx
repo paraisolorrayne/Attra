@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Volume2, VolumeX, Play, ArrowRight, PlayCircle } from 'lucide-react'
 import { Container } from '@/components/ui/container'
+import { EngineSoundSkeleton } from '@/components/ui/skeleton'
 import { useSiteSettings } from '@/hooks/use-site-settings'
 
 interface VehicleWithSound {
@@ -78,6 +79,7 @@ export function EngineSoundSection() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [engineTypes, setEngineTypes] = useState<EngineType[]>([])
+  const [isSoundsLoading, setIsSoundsLoading] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -105,6 +107,8 @@ export function EngineSoundSection() {
       } catch (error) {
         console.error('Failed to fetch engine sounds:', error)
         // On error, engineTypes stays empty and video review is shown
+      } finally {
+        setIsSoundsLoading(false)
       }
     }
     fetchSounds()
@@ -146,6 +150,11 @@ export function EngineSoundSection() {
         setIsPlaying(false)
       }
     }
+  }
+
+  // Show skeleton while loading sounds from API
+  if (settingsLoading || isSoundsLoading) {
+    return <EngineSoundSkeleton />
   }
 
   // If no sounds configured, show video review section

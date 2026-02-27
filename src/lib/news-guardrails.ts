@@ -30,35 +30,36 @@ export async function validateArticleWithAI(article: ArticleInput): Promise<Arti
     return { isAutomotive: true, confidence: 50, reason: 'AI validation skipped - no API key' }
   }
 
-  const prompt = `Você é o Editor Chefe da "Attra", uma plataforma exclusiva para indivíduos de altíssima renda (High-Net-Worth Individuals).
+  const prompt = `Você é o Editor Chefe da "Attra Veículos", uma concessionária de supercarros e veículos premium em Uberlândia-MG.
 
-Sua missão é filtrar notícias para um feed que mistura:
-1. Automobilismo de Elite (F1, Hypercars, Lançamentos Premium).
-2. Alta Relojoaria (Rolex, Patek, Leilões, Recordes).
-3. Mercado Financeiro Premium (Private Banking, Tendências de Investimento, Wealth Management) - SOMENTE notícias positivas ou analíticas, sem escândalos policiais.
+O feed de notícias da Attra é EXCLUSIVAMENTE sobre o MUNDO AUTOMOTIVO PREMIUM e FORMULA 1.
 
 Analise a seguinte notícia:
 Título: "${article.title}"
 Descrição: "${article.description || 'Sem descrição'}"
 Fonte: "${article.source || 'Desconhecida'}"
 
-Regras de Aprovação (Deve retornar true para 'isAutomotive'):
-- É sobre supercarros ou marcas de luxo (Ferrari, Porsche, etc.)? SIM.
-- É sobre Fórmula 1 (Pilotos, Tecnologia, Bastidores)? SIM.
-- É sobre relógios de luxo ou joias de alto valor? SIM.
-- É sobre investimentos, fusões de grandes empresas ou tendências de riqueza? SIM.
+APROVAR (isAutomotive = true) SOMENTE SE:
+- Notícia sobre supercarros, hypercars ou veículos de luxo (Ferrari, Porsche, Lamborghini, McLaren, Bugatti, Pagani, etc.) — lançamentos, testes, recordes, leilões de carros.
+- Notícia sobre Fórmula 1 — pilotos, corridas, equipes, tecnologia, bastidores, calendário.
+- Notícia sobre o mercado automotivo premium — vendas, tendências, novos modelos, fábricas, recalls de marcas premium.
+- Notícia sobre eventos automotivos — salões, exposições de carros, track days, encontros de supercarros.
 
-Regras de Rejeição (Deve retornar false):
-- Carros populares (Gol, Onix, Uber), trânsito comum, IPVA, multas.
+REJEITAR (isAutomotive = false) SE:
+- Colunas sociais, notas de inauguração de lojas, eventos de celebridades (mesmo que mencionem marcas como Rolex, BMW, etc. no contexto social).
+- Artigos genéricos de marketing, opinião ou tendências que apenas MENCIONAM marcas de luxo como exemplo mas NÃO são sobre os produtos em si.
+- Relógios, joias, moda, gastronomia — NÃO são o foco da Attra, mesmo sendo "luxo".
+- Carros populares, trânsito, IPVA, multas, Uber.
 - Crime, polícia, roubos, mortes, tragédias.
-- Fofoca de celebridades que não envolve o lifestyle de luxo.
-- Política partidária polarizada ou escândalos de corrupção (a menos que afete diretamente o mercado financeiro global).
+- Política, escândalos, fofoca.
 - Notícias puramente negativas ou deprimentes.
+
+IMPORTANTE: A Attra é uma CONCESSIONÁRIA DE CARROS. O foco é 100% automotivo. Não aprovar notícias sobre luxo genérico (relógios, joias, moda) a menos que o FOCO PRINCIPAL seja um veículo.
 
 Retorne APENAS um JSON neste formato, sem markdown:
 {
   "isAutomotive": boolean,
-  "confidence": number,
+  "confidence": number (de 0 a 100, ex: 95 para alta confiança),
   "reason": "string curta explicando a decisão",
   "category": "formula1" | "supercar" | "luxury" | "market" | "other"
 }`
@@ -101,6 +102,12 @@ Retorne APENAS um JSON neste formato, sem markdown:
     }
 
     const result = JSON.parse(jsonMatch[0]) as ArticleValidation
+
+    // Normalize confidence: if AI returned 0-1 scale, convert to 0-100
+    if (result.confidence > 0 && result.confidence <= 1) {
+      result.confidence = Math.round(result.confidence * 100)
+    }
+
     console.log(`[NewsGuardrails] "${article.title.substring(0, 50)}..." -> ${result.isAutomotive ? 'ACEITO' : 'REJEITADO'} (${result.confidence}%)`)
     
     return result

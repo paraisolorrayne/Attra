@@ -271,8 +271,14 @@ export async function runWeeklyNewsIngestion(): Promise<{
 
     const allArticles: Array<{ article: GNewsArticle, category_id: number }> = []
 
-    for (const { query, category } of queries) {
+    for (let i = 0; i < queries.length; i++) {
+      const { query, category } = queries[i]
       try {
+        // Delay between queries to avoid GNews API rate limiting (429)
+        if (i > 0) {
+          console.log(`[NewsIngestion] Waiting 2s before next query...`)
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        }
         const articles = await fetchGNewsArticles(query, ARTICLES_PER_QUERY)
         articles.forEach(article => {
           allArticles.push({ article, category_id: category })

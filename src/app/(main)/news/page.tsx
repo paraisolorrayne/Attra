@@ -5,6 +5,7 @@ import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Calendar, Newspaper, Trophy, Car, BookOpen, Search } from 'lucide-react'
 import { EDITORIAL_SECTION } from '@/lib/constants'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Notícias | Mercado Automotivo Premium e Formula 1',
@@ -39,13 +40,59 @@ interface NewsData {
 }
 
 async function getNews(): Promise<NewsData> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   try {
-    const res = await fetch(`${baseUrl}/api/news`, {
-      next: { revalidate: 3600 }
-    })
-    if (!res.ok) throw new Error('Failed to fetch news')
-    return res.json()
+    const supabase = await createClient()
+
+    // Get active cycle directly from Supabase (no fetch cache issues)
+    const { data: cycle, error: cycleError } = await supabase
+      .from('news_cycles')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (cycleError || !cycle) {
+      return { cycle: null, featured: [], formula1: [], premiumMarket: [] }
+    }
+
+    // Get featured articles
+    const { data: featured } = await supabase
+      .from('news_articles')
+      .select('*')
+      .eq('news_cycle_id', cycle.id)
+      .eq('is_featured', true)
+      .order('featured_order', { ascending: true })
+      .limit(3)
+
+    // Get Formula 1 articles (category_id = 2)
+    const { data: formula1 } = await supabase
+      .from('news_articles')
+      .select('*')
+      .eq('news_cycle_id', cycle.id)
+      .eq('category_id', 2)
+      .order('published_at', { ascending: false })
+      .limit(9)
+
+    // Get Premium Market articles (category_id = 3)
+    const { data: premiumMarket } = await supabase
+      .from('news_articles')
+      .select('*')
+      .eq('news_cycle_id', cycle.id)
+      .eq('category_id', 3)
+      .order('published_at', { ascending: false })
+      .limit(9)
+
+    return {
+      cycle: {
+        id: cycle.id,
+        week_start: cycle.week_start,
+        week_end: cycle.week_end,
+      },
+      featured: featured || [],
+      formula1: formula1 || [],
+      premiumMarket: premiumMarket || [],
+    }
   } catch {
     return { cycle: null, featured: [], formula1: [], premiumMarket: [] }
   }

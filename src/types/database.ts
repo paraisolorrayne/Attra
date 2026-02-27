@@ -586,6 +586,10 @@ export interface VisitorSession {
   country_code: string | null
   region: string | null
   city: string | null
+  gclid: string | null
+  fbclid: string | null
+  ttclid: string | null
+  last_activity_at: string | null
   page_views_count: number
   vehicles_viewed: number
   contacted_whatsapp: boolean
@@ -614,6 +618,8 @@ export interface VisitorPageView {
   clicked_form: boolean
   played_engine_sound: boolean
   viewed_at: string
+  metadata: Record<string, unknown> | null
+  event_id: string | null
 }
 
 export interface VisitorProfile {
@@ -652,6 +658,15 @@ export interface IdentityEvent {
   event_data: Record<string, unknown>
   source: string | null
   created_at: string
+}
+
+export interface IpGeolocationCache {
+  ip_address: string
+  country_code: string | null
+  region: string | null
+  city: string | null
+  cached_at: string
+  expires_at: string
 }
 
 export interface IpCompanyCache {

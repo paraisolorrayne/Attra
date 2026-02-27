@@ -78,6 +78,8 @@ export function VisitorTrackingProvider({ children }: Props) {
   const lastPathRef = useRef<string>('')
   const pageStartTimeRef = useRef<number>(Date.now())
   const initialized = useRef(false)
+  const scrollDepthRef = useRef<number>(0)
+  const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Abandoned lead detection refs
   const hasFilledFormRef = useRef(false)
@@ -130,20 +132,9 @@ export function VisitorTrackingProvider({ children }: Props) {
       const visitCount = getAndIncrementVisitCount()
       console.log('[VisitorTracking] Visit count:', visitCount)
 
-      // Fetch geolocation
+      // Initialize session with API first (to get session_db_id for geo update)
       let geoData: GeolocationData | null = null
-      try {
-        const geoResponse = await fetch('/api/geolocation')
-        if (geoResponse.ok) {
-          geoData = await geoResponse.json()
-          setGeolocation(geoData)
-          geolocationRef.current = geoData
-        }
-      } catch (e) {
-        console.error('[VisitorTracking] Geolocation fetch error:', e)
-      }
 
-      // Initialize session with API (includes click IDs for attribution)
       try {
         const response = await fetch('/api/tracking/session', {
           method: 'POST',
@@ -173,6 +164,21 @@ export function VisitorTrackingProvider({ children }: Props) {
         } else {
           const errorData = await response.json().catch(() => ({}))
           console.error('[VisitorTracking] Session API error:', response.status, errorData)
+        }
+
+        // Fetch geolocation (passes session_db_id so backend updates visitor_sessions)
+        try {
+          const geoUrl = sessionDbIdRef.current
+            ? `/api/geolocation?session_db_id=${sessionDbIdRef.current}`
+            : '/api/geolocation'
+          const geoResponse = await fetch(geoUrl)
+          if (geoResponse.ok) {
+            geoData = await geoResponse.json()
+            setGeolocation(geoData)
+            geolocationRef.current = geoData
+          }
+        } catch (e) {
+          console.error('[VisitorTracking] Geolocation fetch error:', e)
         }
 
         // Push session_start event to dataLayer with all collected data
@@ -299,7 +305,81 @@ export function VisitorTrackingProvider({ children }: Props) {
 
     lastPathRef.current = pathname
     pageStartTimeRef.current = Date.now()
+    scrollDepthRef.current = 0
   }, [pathname, searchParams])
+
+  // --- Heartbeat (15s) + visibilitychange + beforeunload ---
+  // Ensures time_on_page is captured even for the LAST page visited
+  useEffect(() => {
+    if (!sessionDbIdRef.current) return
+
+    const sendPageTime = (isExit = false) => {
+      const elapsed = Math.round((Date.now() - pageStartTimeRef.current) / 1000)
+      if (elapsed < 1 || !sessionDbIdRef.current || !lastPathRef.current) return
+
+      const payload = JSON.stringify({
+        session_db_id: sessionDbIdRef.current,
+        page_path: lastPathRef.current,
+        time_on_page_seconds: elapsed,
+        scroll_depth_percent: scrollDepthRef.current,
+        is_exit: isExit,
+      })
+
+      // Use sendBeacon for exit events (survives page unload)
+      if (isExit && navigator.sendBeacon) {
+        navigator.sendBeacon('/api/tracking/page-time', payload)
+      } else {
+        fetch('/api/tracking/page-time', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true,
+        }).catch(() => {})
+      }
+    }
+
+    // Heartbeat every 15s — updates last_activity_at + partial time_on_page
+    heartbeatIntervalRef.current = setInterval(() => sendPageTime(false), 15_000)
+
+    // Tab hidden → flush current dwell time
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') sendPageTime(true)
+    }
+
+    // Page unload → final beacon
+    const onBeforeUnload = () => sendPageTime(true)
+
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('beforeunload', onBeforeUnload)
+
+    return () => {
+      if (heartbeatIntervalRef.current) clearInterval(heartbeatIntervalRef.current)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener('beforeunload', onBeforeUnload)
+    }
+  }, [sessionDbIdRef.current])
+
+  // --- Scroll depth tracking (25/50/75/100%) ---
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop
+      const docHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight
+      ) - window.innerHeight
+      if (docHeight <= 0) return
+
+      const pct = Math.min(100, Math.round((scrollTop / docHeight) * 100))
+      // Snap to milestones
+      const milestone = pct >= 100 ? 100 : pct >= 75 ? 75 : pct >= 50 ? 50 : pct >= 25 ? 25 : 0
+      if (milestone > scrollDepthRef.current) {
+        scrollDepthRef.current = milestone
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [pathname])
 
   // Get current visitor context for enriching analytics events
   const getVisitorContext = useCallback((): VisitorContext => {

@@ -284,46 +284,6 @@ export default async function EstoquePage({ searchParams }: EstoquePageProps) {
       <section className="pt-28 pb-12 bg-gradient-to-b from-background-soft to-background">
         <Container>
           <Breadcrumb items={breadcrumbItems} />
-          <div className="mt-8">
-            <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              Veículos Premium Disponíveis para Pronta Entrega
-            </h1>
-            <div className="max-w-3xl space-y-3 text-foreground-secondary leading-relaxed">
-              <p>
-                Explore nosso estoque de carros premium em Uberlândia, com seleção de supercarros, importados e veículos de luxo prontos para entrega em todo o Brasil.
-              </p>
-              <p className="text-sm">
-                Você encontra aqui opções de Porsche, BMW, Mercedes‑Benz, Audi, Land Rover, Ferrari, Lamborghini, Cadillac e outros ícones do mercado automotivo de alto padrão. Todos os veículos passam por inspeção rigorosa e curadoria Attra, garantindo procedência, documentação verificada e experiência de compra de nível internacional.
-              </p>
-              <p className="text-sm">
-                <Link href="/jornada" className="text-primary hover:text-primary-hover transition-colors font-medium">
-                  Saiba mais sobre nosso processo de curadoria rigorosa de veículos premium na Jornada Attra →
-                </Link>
-              </p>
-            </div>
-
-            {/* Quick Filter Shortcuts */}
-            <div className="flex flex-wrap gap-2 mt-6">
-              <Link
-                href="/estoque?q=superesportivo&ordenar=preco-desc"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-full transition-colors border border-primary/20"
-              >
-                Ver superesportivos e supercarros <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <Link
-                href="/estoque?carroceria=suv&ordenar=preco-desc"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-full transition-colors border border-primary/20"
-              >
-                Ver SUVs de luxo para família <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-              <Link
-                href="/estoque?carroceria=sedan&ordenar=preco-desc"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-medium rounded-full transition-colors border border-primary/20"
-              >
-                Ver sedãs executivos premium <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </div>
         </Container>
       </section>
 

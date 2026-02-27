@@ -224,6 +224,20 @@ const nextConfig: NextConfig = {
     // Increase default quality
     minimumCacheTTL: 60 * 60 * 24, // 24 hours cache
   },
+  // Block access to automations folder (N8N workflows - internal only)
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/automations/:path*',
+          destination: '/404',
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+
   // Apply security headers to all routes
   async headers() {
     return [

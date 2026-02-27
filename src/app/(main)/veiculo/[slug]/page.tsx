@@ -11,6 +11,7 @@ import { VehicleContact } from '@/components/vehicles/vehicle-contact'
 import { RelatedVehicles } from '@/components/vehicles/related-vehicles'
 import { EngineAudioPlayer } from '@/components/vehicles/engine-audio-player'
 import { AIVehicleDescription, AIVehicleDescriptionSkeleton } from '@/components/vehicles/ai-vehicle-description'
+import { RelatedVehiclesSkeleton } from '@/components/ui/skeleton'
 import { VehicleContextSetter } from '@/components/vehicles/vehicle-context-setter'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
 import { getVehicleSoundByVehicleId } from '@/lib/vehicle-sounds-storage'
@@ -189,26 +190,7 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 			</Container>
 
 			{/* Related Vehicles */}
-			<Suspense fallback={
-				<div className="py-16 bg-background-soft">
-					<Container>
-						<div className="animate-pulse">
-							<div className="h-8 bg-foreground-secondary/10 rounded w-48 mb-8" />
-							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-								{[1, 2, 3, 4].map((i) => (
-									<div key={i} className="bg-background-card rounded-xl overflow-hidden">
-										<div className="aspect-[4/3] bg-foreground-secondary/10" />
-										<div className="p-4 space-y-3">
-											<div className="h-5 bg-foreground-secondary/10 rounded w-3/4" />
-											<div className="h-4 bg-foreground-secondary/10 rounded w-1/2" />
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</Container>
-				</div>
-			}>
+			<Suspense fallback={<RelatedVehiclesSkeleton />}>
 				<RelatedVehicles
 					currentVehicleId={vehicle.id}
 					brand={vehicle.brand}

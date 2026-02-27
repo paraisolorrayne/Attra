@@ -3,40 +3,40 @@ import { Skeleton, BlogGridSkeleton } from '@/components/ui/skeleton'
 
 export default function BlogLoading() {
   return (
-    <>
-      {/* Breadcrumb skeleton */}
-      <Container className="py-4">
-        <Skeleton className="h-4 w-32" />
-      </Container>
-
-      {/* Hero skeleton */}
-      <section className="py-16 lg:py-24 bg-gradient-to-b from-background-soft to-background">
+    <main className="bg-background min-h-screen">
+      {/* Hero Section - matches pt-28 pb-12 from actual page */}
+      <section className="pt-28 pb-12 bg-gradient-to-b from-background-soft to-background">
         <Container>
-          <div className="max-w-3xl mx-auto text-center">
-            <Skeleton className="h-12 w-48 mx-auto mb-6" />
-            <Skeleton className="h-5 w-96 mx-auto" />
+          {/* Breadcrumb */}
+          <div className="flex gap-2 mb-6">
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-16" />
           </div>
-        </Container>
-      </section>
-
-      {/* Categories skeleton */}
-      <section className="py-8 bg-background-soft border-b border-border">
-        <Container>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-24 rounded-full" />
-            ))}
+          {/* Title */}
+          <Skeleton className="h-10 lg:h-14 w-72 mb-4" />
+          {/* Description */}
+          <div className="max-w-2xl space-y-2">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-3/4" />
           </div>
+          <Skeleton className="h-4 w-96 mt-3" />
         </Container>
       </section>
 
-      {/* Grid skeleton */}
-      <section className="py-16 bg-background">
+      {/* Blog Content - Tabs skeleton */}
+      <section className="py-12">
         <Container>
-          <BlogGridSkeleton count={9} />
+          {/* Tab buttons */}
+          <div className="flex gap-4 mb-8 border-b border-border">
+            <Skeleton className="h-10 w-28 rounded-t-lg" />
+            <Skeleton className="h-10 w-28 rounded-t-lg" />
+          </div>
+          {/* Grid */}
+          <BlogGridSkeleton count={6} />
         </Container>
       </section>
-    </>
+    </main>
   )
 }
 

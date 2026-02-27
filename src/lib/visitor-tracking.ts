@@ -141,19 +141,33 @@ export function collectClickIds(): ClickIds {
   return result
 }
 
-// Collect UTM parameters from URL
+const UTM_COOKIE_DAYS = 30
+
+// Collect UTM parameters from URL and persist in cookies for SPA propagation
+// First visit: captures from URL query params and stores in cookies
+// Subsequent navigations: reads from cookies (URL params are gone in SPA)
 export function collectUTMParams(): Record<string, string | null> {
   if (typeof window === 'undefined') return {}
 
   const params = new URLSearchParams(window.location.search)
 
-  return {
-    utm_source: params.get('utm_source'),
-    utm_medium: params.get('utm_medium'),
-    utm_campaign: params.get('utm_campaign'),
-    utm_content: params.get('utm_content'),
-    utm_term: params.get('utm_term'),
+  const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const
+  const result: Record<string, string | null> = {}
+
+  for (const key of utmKeys) {
+    const cookieName = `attra_${key}`
+    const fromUrl = params.get(key)
+    if (fromUrl) {
+      // Fresh value from URL — persist in cookie
+      setCookie(cookieName, fromUrl, UTM_COOKIE_DAYS)
+      result[key] = fromUrl
+    } else {
+      // Fallback to stored cookie
+      result[key] = getCookie(cookieName)
+    }
   }
+
+  return result
 }
 
 // Generate SHA-256 hash of a string (for LGPD-compliant PII hashing)
