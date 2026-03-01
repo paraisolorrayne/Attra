@@ -71,9 +71,10 @@ export function generateVehicleMessage(
   vehicleYear?: string | number,
   geoLocation?: GeoLocation | null
 ): string {
-  const vehicle = vehicleBrand && vehicleModel
+  const hasVehicleInfo = vehicleBrand && vehicleModel
+  const vehicle = hasVehicleInfo
     ? `${vehicleBrand} ${vehicleModel}${vehicleYear ? ` ${vehicleYear}` : ''}`
-    : 'um veículo'
+    : null
 
   // Check if we have valid geolocation data
   // Gracefully omit location if city/region are undefined, empty, or "Não identificada"
@@ -83,12 +84,18 @@ export function generateVehicleMessage(
     geoLocation.city !== 'Não identificada' &&
     geoLocation.region !== 'Não identificada'
 
-  if (hasValidLocation) {
-    return `Vim do site e tenho interesse no ${vehicle}, sou de ${geoLocation.city}/${geoLocation.region}.`
+  const locationSuffix = hasValidLocation
+    ? `, sou de ${geoLocation.city}/${geoLocation.region}.`
+    : '.'
+
+  // When vehicle info is available, include it in the message
+  if (vehicle) {
+    return `Vim do site e tenho interesse no ${vehicle}${locationSuffix}`
   }
 
-  // Omit location entirely when unavailable for cleaner message
-  return `Vim do site e tenho interesse no ${vehicle}.`
+  // When vehicle info is NOT available, use a professional generic message
+  // that does not expose the missing data
+  return `Vim do site e gostaria de mais informações sobre os veículos disponíveis${locationSuffix}`
 }
 
 /**

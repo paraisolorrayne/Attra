@@ -69,7 +69,7 @@ function LinksContent() {
   useEffect(() => { setTheme('system') }, [setTheme])
 
   const whatsappMsg = encodeURIComponent(
-`Gostaria de atendimento para aquisição de um veículo.
+`Gostaria de atendimento sobre os veículos disponíveis.
 `
   )
 
