@@ -15,7 +15,9 @@ import {
   Home,
   Settings,
   Megaphone,
-  FileText
+  FileText,
+  Image,
+  MailOpen
 } from 'lucide-react'
 import type { AdminUser } from '@/lib/admin-auth-supabase'
 
@@ -64,6 +66,18 @@ export function AdminHeader({ admin }: AdminHeaderProps) {
       href: '/admin/blog',
       icon: <FileText className="w-4 h-4" />,
       allowedRoles: ['admin', 'gerente'],
+    },
+    {
+      label: 'Banners',
+      href: '/admin/banners',
+      icon: <Image className="w-4 h-4" />,
+      allowedRoles: ['admin', 'gerente'],
+    },
+    {
+      label: 'Newsletter',
+      href: '/admin/newsletter/campaigns',
+      icon: <MailOpen className="w-4 h-4" />,
+      allowedRoles: ['admin'],
     },
     {
       label: 'Marketing',

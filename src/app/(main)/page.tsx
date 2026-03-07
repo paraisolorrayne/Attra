@@ -12,23 +12,71 @@ import { ConciergeCtaSection } from '@/components/home/concierge-cta-section'
 import { FAQSchema } from '@/components/seo'
 import { homepageFAQs } from '@/lib/faq-data'
 import { getVehicles, getHomeSlides, HeroSlideData } from '@/lib/autoconf-api'
+import { createAdminClient } from '@/lib/supabase/server'
 import { Vehicle } from '@/types'
 
+/**
+ * Fetch banners from Supabase site_banners table.
+ * Returns HeroSlideData[] for compatibility with CinematicHero component.
+ */
+async function getSupabaseBanners(deviceType: 'desktop' | 'mobile'): Promise<HeroSlideData[]> {
+  try {
+    const supabase = createAdminClient()
+    const now = new Date().toISOString()
+
+    const { data, error } = await supabase
+      .from('site_banners')
+      .select('*')
+      .eq('is_active', true)
+      .or(`start_date.is.null,start_date.lte.${now}`)
+      .or(`end_date.is.null,end_date.gte.${now}`)
+      .in('device_type', ['all', deviceType])
+      .order('display_order', { ascending: true })
+      .limit(10)
+
+    if (error || !data || data.length === 0) {
+      return []
+    }
+
+    return data.map((banner) => ({
+      type: 'banner' as const,
+      image: deviceType === 'mobile' && banner.image_mobile_url ? banner.image_mobile_url : banner.image_url,
+      targetUrl: banner.target_url || '/',
+      ordem: banner.display_order,
+    }))
+  } catch {
+    return []
+  }
+}
+
 export default async function Home() {
-  // Fetch hero slides for both desktop and mobile
-  // Desktop: adsDesktop → destaques → fallback
-  // Mobile: adsMobile → adsDesktop → destaques → fallback
+  // Fetch hero slides: Supabase banners first, then AutoConf as fallback
   let desktopSlides: HeroSlideData[] = []
   let mobileSlides: HeroSlideData[] = []
 
   try {
-    // Fetch both in parallel for performance
-    const [desktop, mobile] = await Promise.all([
-      getHomeSlides(4, 'desktop'),
-      getHomeSlides(4, 'mobile'),
+    // Try Supabase banners first
+    const [supabaseDesktop, supabaseMobile] = await Promise.all([
+      getSupabaseBanners('desktop'),
+      getSupabaseBanners('mobile'),
     ])
-    desktopSlides = desktop
-    mobileSlides = mobile
+
+    if (supabaseDesktop.length > 0) {
+      desktopSlides = supabaseDesktop
+    }
+    if (supabaseMobile.length > 0) {
+      mobileSlides = supabaseMobile
+    }
+
+    // Fallback to AutoConf if no Supabase banners
+    if (desktopSlides.length === 0 || mobileSlides.length === 0) {
+      const [autoconfDesktop, autoconfMobile] = await Promise.all([
+        desktopSlides.length === 0 ? getHomeSlides(4, 'desktop') : Promise.resolve([]),
+        mobileSlides.length === 0 ? getHomeSlides(4, 'mobile') : Promise.resolve([]),
+      ])
+      if (desktopSlides.length === 0) desktopSlides = autoconfDesktop
+      if (mobileSlides.length === 0) mobileSlides = autoconfMobile
+    }
   } catch (error) {
     console.error('Failed to fetch home slides:', error)
   }

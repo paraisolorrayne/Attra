@@ -393,6 +393,74 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['eventos_boleto']['Row'], 'id' | 'criado_em'>
         Update: Partial<Database['public']['Tables']['eventos_boleto']['Insert']>
       }
+      // Site Banners
+      site_banners: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          image_url: string
+          image_mobile_url: string | null
+          target_url: string | null
+          display_order: number
+          is_active: boolean
+          start_date: string | null
+          end_date: string | null
+          device_type: 'all' | 'desktop' | 'mobile'
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['site_banners']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['site_banners']['Insert']>
+      }
+      // Newsletter Campaigns
+      newsletter_campaigns: {
+        Row: {
+          id: string
+          title: string
+          subject: string | null
+          featured_image: string | null
+          sections: Json
+          html_content: string | null
+          status: NewsletterCampaignStatus
+          scheduled_at: string | null
+          sent_at: string | null
+          recipient_count: number
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['newsletter_campaigns']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['newsletter_campaigns']['Insert']>
+      }
+      // Newsletter Subscribers
+      newsletter_subscribers: {
+        Row: {
+          id: string
+          email: string
+          name: string | null
+          is_active: boolean
+          source: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['newsletter_subscribers']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['newsletter_subscribers']['Insert']>
+      }
+      // Lead Notes (CRM)
+      lead_notes: {
+        Row: {
+          id: string
+          lead_id: string
+          content: string
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['lead_notes']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['lead_notes']['Insert']>
+      }
     }
     Views: {
       [_ in never]: never
@@ -416,6 +484,9 @@ export interface Database {
     }
   }
 }
+
+// Newsletter Enum Types
+export type NewsletterCampaignStatus = 'draft' | 'scheduled' | 'sent' | 'cancelled'
 
 // Marketing Enum Types
 export type MarketingCategory = 'seo' | 'social_media' | 'content' | 'paid_ads' | 'email' | 'events' | 'partnerships' | 'other'
@@ -483,6 +554,24 @@ export interface MarketingTaskWithDetails extends MarketingTask {
   assignees?: { id: string; email: string; name: string | null }[]
   comments_count?: number
 }
+
+// Site Banners Table Types
+export type SiteBanner = Database['public']['Tables']['site_banners']['Row']
+export type SiteBannerInsert = Database['public']['Tables']['site_banners']['Insert']
+export type SiteBannerUpdate = Database['public']['Tables']['site_banners']['Update']
+
+// Newsletter Table Types
+export type NewsletterCampaign = Database['public']['Tables']['newsletter_campaigns']['Row']
+export type NewsletterCampaignInsert = Database['public']['Tables']['newsletter_campaigns']['Insert']
+export type NewsletterCampaignUpdate = Database['public']['Tables']['newsletter_campaigns']['Update']
+export type NewsletterSubscriber = Database['public']['Tables']['newsletter_subscribers']['Row']
+export type NewsletterSubscriberInsert = Database['public']['Tables']['newsletter_subscribers']['Insert']
+export type NewsletterSubscriberUpdate = Database['public']['Tables']['newsletter_subscribers']['Update']
+
+// Lead Notes Table Types
+export type LeadNote = Database['public']['Tables']['lead_notes']['Row']
+export type LeadNoteInsert = Database['public']['Tables']['lead_notes']['Insert']
+export type LeadNoteUpdate = Database['public']['Tables']['lead_notes']['Update']
 
 // CRM Table Types
 export type Cliente = Database['public']['Tables']['clientes']['Row']

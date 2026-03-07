@@ -34,8 +34,15 @@ export function NewsletterSubscription({
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
     try {
+      // Save to Supabase newsletter_subscribers table
+      await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, source: `newsletter_${source}` }),
+      })
+
+      // Also send webhook notification
       const geoLocation = await getGeoLocation()
-      
       await sendWhatsAppWebhook({
         eventType: 'general_inquiry',
         sourcePage: `newsletter_${source}`,
@@ -43,7 +50,7 @@ export function NewsletterSubscription({
           userMessage: `Newsletter Subscription - Email: ${data.email}`,
         },
       }, geoLocation)
-      
+
       setIsSuccess(true)
       reset()
     } catch (error) {

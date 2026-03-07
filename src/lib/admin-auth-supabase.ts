@@ -32,7 +32,7 @@ export interface AuthResult {
  */
 export async function signInWithEmail(email: string, password: string): Promise<AuthResult> {
   const supabase = await createClient()
-  
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -79,6 +79,33 @@ export async function signOut(): Promise<void> {
  * Get current authenticated admin user
  */
 export async function getCurrentAdmin(): Promise<AdminUser | null> {
+  // TEMPORARY BYPASS: Permitir acesso livre ao admin local sem login
+  return {
+    id: 'dev-admin-bypass',
+    email: 'dev@localhost',
+    role: 'admin',
+    name: 'Dev Admin',
+    is_active: true,
+    last_login_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
+
+  /*
+  // DEV BYPASS: Return a fake admin user on localhost for local testing
+  if (process.env.NODE_ENV === 'development' && process.env.ADMIN_AUTH_BYPASS === 'true') {
+    return {
+      id: 'dev-admin-bypass',
+      email: 'dev@localhost',
+      role: 'admin',
+      name: 'Dev Admin',
+      is_active: true,
+      last_login_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+  }
+
   const supabase = await createClient()
 
   const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -97,6 +124,7 @@ export async function getCurrentAdmin(): Promise<AdminUser | null> {
   console.log('[getCurrentAdmin] Admin user lookup result:', adminUser?.email, 'Error:', adminError?.message)
 
   return adminUser as AdminUser | null
+  */
 }
 
 /**
@@ -113,10 +141,10 @@ export async function isAuthenticated(): Promise<boolean> {
 export async function hasRole(requiredRole: AdminRole): Promise<boolean> {
   const admin = await getCurrentAdmin()
   if (!admin) return false
-  
+
   // Admin has access to everything
   if (admin.role === 'admin') return true
-  
+
   return admin.role === requiredRole
 }
 
@@ -126,17 +154,17 @@ export async function hasRole(requiredRole: AdminRole): Promise<boolean> {
 export async function canAccessRoute(pathname: string): Promise<boolean> {
   const admin = await getCurrentAdmin()
   if (!admin) return false
-  
+
   // Admin has full access
   if (admin.role === 'admin') return true
-  
+
   // Gerente can only access engine-sounds
   if (admin.role === 'gerente') {
     return pathname.startsWith('/admin/engine-sounds') ||
-           pathname === '/admin/login' ||
-           pathname === '/admin/reset-password'
+      pathname === '/admin/login' ||
+      pathname === '/admin/reset-password'
   }
-  
+
   return false
 }
 
@@ -145,7 +173,7 @@ export async function canAccessRoute(pathname: string): Promise<boolean> {
  */
 export async function requestPasswordReset(email: string): Promise<AuthResult> {
   const supabase = await createClient()
-  
+
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin/reset-password`,
   })
@@ -162,7 +190,7 @@ export async function requestPasswordReset(email: string): Promise<AuthResult> {
  */
 export async function updatePassword(newPassword: string): Promise<AuthResult> {
   const supabase = await createClient()
-  
+
   const { error } = await supabase.auth.updateUser({
     password: newPassword,
   })

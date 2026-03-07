@@ -1,5 +1,6 @@
 import { Vehicle } from '@/types'
 import { generateVehicleDescription } from '@/lib/vehicle-description-generator'
+import { CopyVehicleButton } from './copy-vehicle-button'
 
 interface VehicleDescriptionProps {
   vehicle: Vehicle
@@ -16,9 +17,12 @@ export function VehicleDescription({ vehicle }: VehicleDescriptionProps) {
 
   return (
     <div className="bg-background-card border border-border rounded-xl p-6">
-      <h2 className="text-xl font-semibold text-foreground mb-4">
-        Sobre este veículo
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-foreground">
+          Sobre este veículo
+        </h2>
+        <CopyVehicleButton vehicle={vehicle} />
+      </div>
       <p className="text-foreground-secondary leading-relaxed">
         {description}
       </p>

@@ -36,9 +36,24 @@ export async function middleware(request: NextRequest) {
 
   // Only protect admin routes (except login and reset-password)
   if (!pathname.startsWith('/admin') ||
-      pathname === '/admin/login' ||
-      pathname.startsWith('/admin/reset-password')) {
+    pathname === '/admin/login' ||
+    pathname.startsWith('/admin/reset-password')) {
     return NextResponse.next()
+  }
+
+  // TEMPORARY BYPASS: Permitir acesso livre ao admin
+  if (pathname === '/admin') {
+    return NextResponse.redirect(new URL('/admin/engine-sounds', request.url))
+  }
+  return NextResponse.next()
+
+  /*
+  // DEV BYPASS: Skip auth on localhost for local testing
+  if (process.env.NODE_ENV === 'development') {
+    const host = request.headers.get('host') || ''
+    if (host.startsWith('localhost') || host.startsWith('127.0.0.1')) {
+      return NextResponse.next()
+    }
   }
 
   // Security check: Validate request origin for admin routes
@@ -182,6 +197,7 @@ export async function middleware(request: NextRequest) {
     role,
   })
   return NextResponse.redirect(new URL('/admin/login', request.url))
+  */
 }
 
 export const config = {

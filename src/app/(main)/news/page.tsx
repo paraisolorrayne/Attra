@@ -98,7 +98,7 @@ async function getNews(): Promise<NewsData> {
   }
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string | Date): string {
   const date = new Date(dateString)
   return date.toLocaleDateString('pt-BR', {
     day: 'numeric',
@@ -107,13 +107,25 @@ function formatDate(dateString: string): string {
   })
 }
 
+function getCurrentWeekRange(): string {
+  const now = new Date()
+  // Adjust to previous Sunday if today is not Sunday
+  const dayOfWeek = now.getDay()
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - dayOfWeek)
+
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 6)
+
+  return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`
+}
+
 function NewsCard({ article, featured = false }: { article: NewsArticle; featured?: boolean }) {
   return (
     <Link
       href={`/news/${article.slug || article.id}`}
-      className={`group block bg-background-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 ${
-        featured ? 'hover:shadow-xl hover:-translate-y-1' : 'hover:shadow-lg'
-      }`}
+      className={`group block bg-background-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 ${featured ? 'hover:shadow-xl hover:-translate-y-1' : 'hover:shadow-lg'
+        }`}
     >
       <div className={`relative ${featured ? 'aspect-[16/9]' : 'aspect-[16/10]'} bg-background-soft`}>
         {article.image_url ? (
@@ -138,9 +150,8 @@ function NewsCard({ article, featured = false }: { article: NewsArticle; feature
         </div>
       </div>
       <div className="p-4">
-        <h3 className={`font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 ${
-          featured ? 'text-lg' : 'text-base'
-        }`}>
+        <h3 className={`font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 ${featured ? 'text-lg' : 'text-base'
+          }`}>
           {article.title}
         </h3>
         {article.description && (
@@ -255,7 +266,7 @@ export default async function NewsPage() {
                 <SectionHeader
                   icon={Newspaper}
                   title="Destaques da Semana"
-                  subtitle={news.cycle ? `${formatDate(news.cycle.week_start)} - ${formatDate(news.cycle.week_end)}` : undefined}
+                  subtitle={getCurrentWeekRange()}
                 />
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {news.featured.map((article) => (
