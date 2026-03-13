@@ -35,7 +35,7 @@ export function AboutSectionExpanded() {
 
   return (
     <section ref={sectionRef} className="py-20 lg:py-28 bg-background-soft" id="sobre">
-      <Container>
+      <Container size="2xl">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left - Content */}
           <div className={`opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}>

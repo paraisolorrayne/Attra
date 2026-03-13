@@ -2,13 +2,13 @@ import {
   CinematicHero,
   FeaturedSupercars,
   ExperienceSection,
-  TestimonialsSection,
   LocationSection,
-  CTASection,
   FAQSection,
   AboutSectionExpanded,
+  ProofOfSolidity,
+  FeaturedEditorial,
+  JourneyPreview,
 } from '@/components/home'
-import { ConciergeCtaSection } from '@/components/home/concierge-cta-section'
 import { FAQSchema } from '@/components/seo'
 import { homepageFAQs } from '@/lib/faq-data'
 import { getVehicles, getHomeSlides, HeroSlideData } from '@/lib/autoconf-api'
@@ -82,15 +82,15 @@ export default async function Home() {
   }
 
   // Fetch featured vehicles for the supercars section
-  // Only show premium vehicles (R$ 500k+) ordered by highest price
+  // Only show premium vehicles (R$ 1M+) ordered by highest price
   let featuredVehicles: Vehicle[] = []
   try {
     const result = await getVehicles({
       tipo: 'carros',
-      registros_por_pagina: 6,
+      registros_por_pagina: 20,  // Increased to get more variety
       ordenar: 'preco',
       ordem: 'desc',
-      preco_de: 500000  // Filtro: apenas veículos acima de R$ 500 mil
+      preco_de: 1000000  // Filtro: apenas veículos acima de R$ 1 milhão
     })
     featuredVehicles = result.vehicles
   } catch (error) {
@@ -99,32 +99,32 @@ export default async function Home() {
 
   return (
     <>
-      {/* Full-screen cinematic hero with search widget */}
+      {/* Hero - Full-screen cinematic with search widget */}
       <CinematicHero desktopSlides={desktopSlides} mobileSlides={mobileSlides} />
 
-      {/* Featured supercar inventory with cinematic cards */}
+      {/* 3. Destaques do Estoque - Featured supercar inventory */}
       <FeaturedSupercars vehicles={featuredVehicles} />
 
-      {/* Attra experience showcase */}
-      <ExperienceSection />
-
-      {/* Concierge CTA - Agendar Atendimento Exclusivo */}
-      <ConciergeCtaSection />
-
-      {/* Expanded About Section - SEO optimized with 400+ words */}
+      {/* 1. Proposta Institucional - Expanded About Section */}
       <AboutSectionExpanded />
 
-      {/* Customer testimonials from Google */}
-      <TestimonialsSection />
+      {/* 2. Prova de Solidez - Numbers and pillars (NEW) */}
+      <ProofOfSolidity />
 
-      {/* FAQ Section with Schema */}
+      {/* 4. Frentes de Atuação - Attra experience showcase */}
+      <ExperienceSection />
+
+      {/* 5. Jornada Attra - Journey preview (NEW) */}
+      <JourneyPreview />
+
+      {/* 6. Conteúdo - Featured editorial highlights (NEW) */}
+      <FeaturedEditorial />
+
+      {/* 7. FAQ Section with Schema */}
       <FAQSection faqs={homepageFAQs} />
       <FAQSchema faqs={homepageFAQs} />
 
-      {/* Final CTA */}
-      <CTASection />
-
-      {/* Locations */}
+      {/* 8. Contato - Locations */}
       <LocationSection />
 
       {/* Organization JSON-LD */}

@@ -27,7 +27,7 @@ export function FAQSection({
 
   return (
     <section className={`py-16 lg:py-24 bg-background-soft ${className}`}>
-      <Container>
+      <Container size="2xl">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">

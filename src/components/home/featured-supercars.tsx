@@ -54,8 +54,24 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
     return () => observer.disconnect()
   }, [])
 
+  // Filter vehicles to show only those above R$ 1M
+  // This ensures consistency even if API filtering doesn't work
+  const filteredVehicles = vehicles.filter(v => (v.price || 0) >= 1000000)
+
+  // Deduplicate by brand + model to ensure variety
+  // Keep only the first (highest price) of each brand+model combination
+  const seenModels = new Set<string>()
+  const deduplicatedVehicles = filteredVehicles.filter(vehicle => {
+    const modelKey = `${vehicle.brand.toLowerCase()}-${vehicle.model.toLowerCase()}`
+    if (seenModels.has(modelKey)) {
+      return false
+    }
+    seenModels.add(modelKey)
+    return true
+  })
+
   // Take first 3 vehicles for display
-  const displayVehicles = vehicles.slice(0, 3)
+  const displayVehicles = deduplicatedVehicles.slice(0, 3)
 
   if (displayVehicles.length === 0) {
     return null // Don't render section if no vehicles
@@ -66,7 +82,7 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
       {/* Background accent */}
       <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
 
-      <Container className="relative z-10">
+      <Container size="2xl" className="relative z-10">
         {/* Section Header */}
         <div className={`mb-16 opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <div className="flex items-center gap-3 mb-4">
@@ -77,7 +93,7 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
             Supercarros e Veículos Premium em Destaque
           </h2>
           <p className="text-foreground-secondary text-lg max-w-2xl">
-            Estoque de supercarros e carros de luxo com curadoria rigorosa, prontos para entrega nacional
+            Seleção exclusiva de supercarros acima de R$ 1 milhão com curadoria rigorosa e entrega nacional
           </p>
         </div>
 

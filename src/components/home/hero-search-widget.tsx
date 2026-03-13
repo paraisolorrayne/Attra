@@ -221,17 +221,11 @@ export function HeroSearchWidget() {
             Explorar Estoque Premium Agora
             <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
           </Link>
-          <p className="mt-2 text-foreground-secondary/70 text-xs md:text-sm tracking-wide">
-            Supercarros, importados e veículos de luxo com curadoria Attra
-          </p>
         </div>
 
         {/* Transition Text - Elegant Divider (hidden on mobile) */}
         <div className="hidden md:flex items-center gap-5 mb-10">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
-          <span className="text-foreground-secondary text-sm tracking-wide whitespace-nowrap">
-            Busca personalizada premium — descreva o carro ideal e nossa equipe encontra para você
-          </span>
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
         </div>
 

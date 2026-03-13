@@ -44,7 +44,7 @@ export function ExperienceSection() {
 
   return (
     <section ref={sectionRef} className="py-24 bg-background relative overflow-hidden">
-      <Container>
+      <Container size="2xl">
         {/* Section Header */}
         <div className={`text-center mb-16 opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}>
           <span className="text-primary font-medium tracking-wide uppercase text-sm">Além do Carro</span>

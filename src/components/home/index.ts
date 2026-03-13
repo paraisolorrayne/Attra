@@ -15,4 +15,8 @@ export * from './testimonials-section'
 export * from './faq-section'
 export * from './about-section-expanded'
 export * from './concierge-cta-section'
+export * from './proof-of-solidity'
+export * from './featured-editorial'
+export * from './journey-preview'
+export * from './floating-cta-bar'
 
