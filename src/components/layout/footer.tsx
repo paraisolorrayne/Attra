@@ -51,6 +51,7 @@ export function Footer() {
                   'h-9 w-auto object-contain transition-opacity duration-300',
                   showWhiteLogo ? 'opacity-100' : 'opacity-0'
                 )}
+                unoptimized
               />
               {/* Black logo - visible in light mode */}
               <Image
@@ -62,6 +63,7 @@ export function Footer() {
                   'absolute left-0 h-9 w-auto object-contain transition-opacity duration-300',
                   showWhiteLogo ? 'opacity-0' : 'opacity-100'
                 )}
+                unoptimized
               />
             </Link>
             <p className="text-foreground-secondary text-sm mb-4">

@@ -35,6 +35,7 @@ export function BlogCard({ post }: BlogCardProps) {
               width={160}
               height={48}
               className="opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+              unoptimized
             />
           </div>
         )}

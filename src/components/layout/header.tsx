@@ -194,6 +194,7 @@ export function Header() {
                   (!isScrolled || !isLightMode) ? 'opacity-100' : 'opacity-0'
                 )}
                 priority
+                unoptimized
               />
               {/* Black logo - only visible when scrolled AND in light theme */}
               <Image
@@ -206,6 +207,7 @@ export function Header() {
                   isScrolled && isLightMode ? 'opacity-100' : 'opacity-0'
                 )}
                 priority
+                unoptimized
               />
             </Link>
 
