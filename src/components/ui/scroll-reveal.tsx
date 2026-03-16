@@ -74,7 +74,13 @@ export function ScrollReveal({
       observer.observe(ref.current)
     }
 
-    return () => observer.disconnect()
+    // Fallback: garante que o conteúdo aparece mesmo sem scroll (mobile)
+    const timeout = setTimeout(() => setIsVisible(true), 1500)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(timeout)
+    }
   }, [once])
 
   const styles = variantStyles[variant]

@@ -43,11 +43,20 @@ export function FeaturedEditorial() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true)
+      },
       { threshold: 0.1 }
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
-    return () => observer.disconnect()
+
+    // Fallback: garante que o conteúdo aparece mesmo sem scroll (mobile)
+    const timeout = setTimeout(() => setIsVisible(true), 1500)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(timeout)
+    }
   }, [])
 
   return (

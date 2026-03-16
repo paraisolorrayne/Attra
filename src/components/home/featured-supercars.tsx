@@ -47,11 +47,20 @@ export function FeaturedSupercars({ vehicles = [] }: FeaturedSupercarsProps) {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.2 }
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true)
+      },
+      { threshold: 0.15 }
     )
     if (sectionRef.current) observer.observe(sectionRef.current)
-    return () => observer.disconnect()
+
+    // Fallback: garante que o conteúdo aparece mesmo sem scroll (mobile)
+    const timeout = setTimeout(() => setIsVisible(true), 1500)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(timeout)
+    }
   }, [])
 
   // Take first 3 vehicles for display
