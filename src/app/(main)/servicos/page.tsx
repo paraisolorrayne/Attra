@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Globe, Wallet, Shield, Truck, ArrowRight, CheckCircle, Star, Crown, HelpCircle, MessageCircle, ChevronDown, Handshake } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -65,8 +66,8 @@ const mainServices = [
 const whyChooseAttra = [
   {
     icon: Star,
-    title: 'Desde 2008 no Mercado Premium',
-    description: 'A Attra Veículos atua há 18 anos no segmento de veículos nacionais, importados, seminovos premium e supercarros em Uberlândia/MG.'
+    title: 'Desde 2009 no Mercado Premium',
+    description: 'A Attra Veículos atua há 16+ anos no segmento de veículos nacionais, importados, seminovos premium e supercarros em Uberlândia/MG.'
   },
   {
     icon: Shield,
@@ -230,7 +231,7 @@ export default function ServicosPage() {
                 <p className="text-sm text-foreground-secondary">Veículos/Ano</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl lg:text-4xl font-bold text-primary">15+</p>
+                <p className="text-3xl lg:text-4xl font-bold text-primary">16+</p>
                 <p className="text-sm text-foreground-secondary">Anos de Mercado</p>
               </div>
               <div className="text-center">
@@ -385,6 +386,32 @@ export default function ServicosPage() {
         </Container>
       </section>
 
+      {/* Transporte Especializado - Imagem do caminhão Attra */}
+      <section className="py-16 lg:py-20 bg-background-soft">
+        <Container>
+          <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden">
+            <Image
+              src="/about/attra-caminhao-transporte.jpeg"
+              alt="Caminhão da Attra Veículos preparado para embarque e desembarque seguro de veículos premium"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+              quality={85}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            <div className="absolute bottom-6 left-6 lg:bottom-8 lg:left-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/90 rounded-full mb-2">
+                <Truck className="w-4 h-4 text-white" />
+                <span className="text-xs font-semibold text-white uppercase tracking-wider">Logística Premium</span>
+              </div>
+              <p className="text-white text-lg lg:text-xl font-semibold max-w-md">
+                Transporte especializado com segurança total para seu veículo
+              </p>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       {/* POR QUE ESCOLHER A ATTRA? */}
       <section className="py-16 bg-background" id="por-que-attra">
         <Container>
@@ -397,7 +424,7 @@ export default function ServicosPage() {
               Por Que Escolher a Attra Veículos?
             </h2>
             <p className="text-foreground-secondary max-w-2xl mx-auto">
-              Há 18 anos no mercado premium, a Attra se consolidou como referência em veículos nacionais, importados, seminovos premium e supercarros.
+              Há 16+ anos no mercado premium, a Attra se consolidou como referência em veículos nacionais, importados, seminovos premium e supercarros.
             </p>
           </div>
 
@@ -488,8 +515,8 @@ export default function ServicosPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6">
-                <Link href="/estoque">
-                  Ver Estoque Completo
+                <Link href="/veiculos">
+                  Ver Todos os Veículos
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>

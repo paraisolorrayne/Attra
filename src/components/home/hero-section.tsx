@@ -30,15 +30,15 @@ export function HeroSection() {
 
             {/* Quick Search */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/estoque" className="flex-1">
+              <Link href="/veiculos" className="flex-1">
                 <div className="flex items-center gap-3 px-4 py-3 bg-background-card border border-border rounded-lg hover:border-primary transition-colors cursor-pointer">
                   <Search className="w-5 h-5 text-foreground-secondary" />
                   <span className="text-foreground-secondary">Buscar por marca ou modelo...</span>
                 </div>
               </Link>
               <Button size="lg" asChild>
-                <Link href="/estoque" className="flex items-center gap-2">
-                  Ver Estoque <ArrowRight className="w-5 h-5" />
+                <Link href="/veiculos" className="flex items-center gap-2">
+                  Ver Veículos <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
             </div>
@@ -50,7 +50,7 @@ export function HeroSection() {
                 <p className="text-sm text-foreground-secondary">Veículos vendidos</p>
               </div>
               <div>
-                <p className="text-2xl lg:text-3xl font-bold text-primary">15+</p>
+                <p className="text-2xl lg:text-3xl font-bold text-primary">16+</p>
                 <p className="text-sm text-foreground-secondary">Anos de mercado</p>
               </div>
               <div>

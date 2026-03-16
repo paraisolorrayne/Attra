@@ -29,7 +29,7 @@ export function BrandSearch() {
           {brands.map((brand) => (
             <Link
               key={brand.name}
-              href={`/estoque?marca=${brand.name.toLowerCase().replace(' ', '-')}`}
+              href={`/veiculos?marca=${brand.name.toLowerCase().replace(' ', '-')}`}
               className="flex flex-col items-center justify-center p-4 bg-background-card border border-border rounded-xl hover:border-primary hover:shadow-md transition-all group"
             >
               <div className="w-12 h-12 mb-2 flex items-center justify-center bg-background rounded-full">

@@ -43,7 +43,7 @@ export function mapChannelToBehavior(
     case 'default':
       // Fall back to path-based detection
       if (currentPath.includes('/veiculo/')) return 'vehicle'
-      if (currentPath === '/estoque' || currentPath.startsWith('/estoque')) return 'estoque'
+      if (currentPath === '/veiculos' || currentPath.startsWith('/veiculos') || currentPath === '/estoque' || currentPath.startsWith('/estoque')) return 'estoque'
       return 'general'
     default:
       return 'general'

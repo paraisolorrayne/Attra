@@ -40,7 +40,7 @@ export function UrgencyBanner({
       bgColor: 'bg-amber-500/10 border-amber-500/20',
       iconColor: 'text-amber-600',
       textColor: 'text-amber-700 dark:text-amber-400',
-      message: `Apenas ${displayCount} unidades disponíveis em estoque`,
+      message: `Apenas ${displayCount} unidades disponíveis`,
     },
     views: {
       icon: Eye,

@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import { HeroControl } from '@/components/ui/brand'
 import { HeroSearchWidget } from './hero-search-widget'
 import { HeroSlideData } from '@/lib/autoconf-api'
 
@@ -61,7 +62,7 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
     : [{
         type: 'banner',
         image: HERO_BACKGROUNDS.light,
-        targetUrl: '/estoque',
+        targetUrl: '/veiculos',
         ordem: 0,
       }]
 
@@ -255,47 +256,45 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
       {/* Navigation Arrows - Side positioned, visible on larger screens */}
       {totalSlides > 1 && (
         <>
-          <button
+          <HeroControl
+            direction="prev"
+            variant="side"
             onClick={(e) => { e.preventDefault(); goToPrev() }}
-            className="hidden md:block absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-black/60 hover:text-white hover:border-white/40 transition-all group"
-            aria-label="Slide anterior"
-          >
-            <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform" />
-          </button>
-          <button
+            className="hidden md:block absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20"
+          />
+          <HeroControl
+            direction="next"
+            variant="side"
             onClick={(e) => { e.preventDefault(); goToNext() }}
-            className="hidden md:block absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white/70 hover:bg-black/60 hover:text-white hover:border-white/40 transition-all group"
-            aria-label="Próximo slide"
-          >
-            <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform" />
-          </button>
+            className="hidden md:block absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20"
+          />
         </>
       )}
 
       {/* Bottom Stats Bar - Fixed at bottom, theme-aware */}
       {/* Hidden for banner slides to show full promotional image */}
-      <div className={`absolute bottom-0 left-0 right-0 z-20 hero-stats-bar transition-opacity duration-300 ${isBannerSlide ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`hero-shell__stats transition-opacity duration-300 ${isBannerSlide ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 md:py-4">
           <div className="flex items-center justify-between">
             {/* Vehicle Stats - Left side */}
             {currentVehicle ? (
               <div className={`flex items-center gap-4 sm:gap-6 md:gap-8 opacity-0 ${isLoaded ? 'animate-fade-in-up stagger-2' : ''}`}>
                 <div className="text-center">
-                  <p className="hero-stats-label text-[10px] md:text-xs uppercase tracking-wider">Ano</p>
-                  <p className="hero-stats-text text-sm md:text-base font-medium">{currentVehicle.year_model}</p>
+                  <p className="stat-label">Ano</p>
+                  <p className="stat-value text-sm md:text-base">{currentVehicle.year_model}</p>
                 </div>
                 <div className="text-center">
-                  <p className="hero-stats-label text-[10px] md:text-xs uppercase tracking-wider">Km</p>
-                  <p className="hero-stats-text text-sm md:text-base font-medium">{formatMileage(currentVehicle.mileage)}</p>
+                  <p className="stat-label">Km</p>
+                  <p className="stat-value text-sm md:text-base">{formatMileage(currentVehicle.mileage)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="hero-stats-label text-[10px] md:text-xs uppercase tracking-wider">Valor</p>
-                  <p className="hero-stats-text text-sm md:text-base font-semibold">{formatPrice(currentVehicle.price)}</p>
+                  <p className="stat-label">Valor</p>
+                  <p className="stat-value text-sm md:text-base">{formatPrice(currentVehicle.price)}</p>
                 </div>
                 {/* CTA Button */}
                 <Link
                   href={`/veiculo/${currentVehicle.slug}`}
-                  className="hidden sm:inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-xs md:text-sm font-medium px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-colors ml-2"
+                  className="hero-shell__cta hidden sm:inline-flex ml-2"
                 >
                   Ver detalhes
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -303,7 +302,7 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
               </div>
             ) : (
               <div className={`opacity-0 ${isLoaded ? 'animate-fade-in-up stagger-2' : ''}`}>
-                <p className="hero-stats-label text-xs md:text-sm">Explore nossa seleção exclusiva</p>
+                <p className="stat-label text-xs md:text-sm">Explore nossa seleção exclusiva</p>
               </div>
             )}
 
@@ -311,36 +310,28 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
             {totalSlides > 1 && (
               <div className="flex items-center gap-3 md:gap-4">
                 {/* Dots */}
-                <div className="flex gap-1.5">
+                <div className="hero-shell__dots flex gap-1.5">
                   {slides.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => goToSlide(index)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        index === currentSlide
-                          ? 'bg-primary w-5'
-                          : 'bg-foreground/30 hover:bg-foreground/50 w-2'
-                      }`}
+                      data-active={index === currentSlide ? 'true' : 'false'}
                       aria-label={`Ir para slide ${index + 1}`}
                     />
                   ))}
                 </div>
                 {/* Arrows */}
                 <div className="flex gap-1.5">
-                  <button
+                  <HeroControl
+                    direction="prev"
+                    variant="inline"
                     onClick={(e) => { e.preventDefault(); goToPrev() }}
-                    className="p-1.5 md:p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 hero-stats-text transition-colors"
-                    aria-label="Slide anterior"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
+                  />
+                  <HeroControl
+                    direction="next"
+                    variant="inline"
                     onClick={(e) => { e.preventDefault(); goToNext() }}
-                    className="p-1.5 md:p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 hero-stats-text transition-colors"
-                    aria-label="Próximo slide"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                  />
                 </div>
               </div>
             )}
@@ -351,7 +342,7 @@ export function CinematicHero({ desktopSlides = [], mobileSlides = [] }: Cinemat
             <div className={`sm:hidden mt-3 opacity-0 ${isLoaded ? 'animate-fade-in-up stagger-3' : ''}`}>
               <Link
                 href={`/veiculo/${currentVehicle.slug}`}
-                className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary/90 text-white text-sm font-medium py-2.5 rounded-full transition-colors"
+                className="hero-shell__cta flex items-center justify-center w-full py-2.5"
               >
                 Ver detalhes
                 <ArrowRight className="w-4 h-4" />

@@ -34,7 +34,7 @@ const journeySteps = [
 ]
 
 export function JourneyPreview() {
-  const sectionRef = useRef<HTMLSection>(null)
+  const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export function JourneyPreview() {
             </Link>
           </Button>
           <p className="text-foreground-secondary text-sm mt-4">
-            Explore cada etapa em detalhes, históricos de clientes e nossa trajetória de 18+ anos
+            Explore cada etapa em detalhes, históricos de clientes e nossa trajetória de 16+ anos
           </p>
         </div>
       </Container>

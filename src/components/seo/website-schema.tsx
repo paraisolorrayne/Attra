@@ -8,7 +8,7 @@ export function WebsiteSchema() {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://attraveiculos.com.br/estoque?q={search_term_string}',
+        urlTemplate: 'https://attraveiculos.com.br/veiculos?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },

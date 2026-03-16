@@ -23,5 +23,10 @@ export * from './ai-vehicle-description'
 // CTA components
 export * from './vehicle-card-ctas'
 
+// Vehicles page components
+export * from './featured-vehicle-hero'
+export * from './vehicle-search-bar'
+export * from './editorial-categories'
+
 // Manual Attra glossary tooltip
 export * from './glossary-tooltip'

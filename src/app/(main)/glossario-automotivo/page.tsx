@@ -110,13 +110,13 @@ export default function GlossarioPage() {
               Quer ver esses conceitos na prática?
             </h2>
             <p className="text-foreground-secondary mb-6">
-              Explore nosso estoque de supercarros e veículos premium e veja a tecnologia de ponta em ação.
+              Explore nossos veículos premium e supercarros e veja a tecnologia de ponta em ação.
             </p>
             <Link
-              href="/estoque"
+              href="/veiculos"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
             >
-              Ver Estoque Premium
+              Explorar Veículos Premium
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

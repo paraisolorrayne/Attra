@@ -154,7 +154,7 @@ export function HeroSearchWidget() {
       if (model) params.set('q', model)
     }
 
-    router.push(`/estoque?${params.toString()}`)
+    router.push(`/veiculos?${params.toString()}`)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -212,13 +212,13 @@ export function HeroSearchWidget() {
       {/* Premium Container - Luxury Dashboard Panel */}
       <div className="bg-background-card/80 backdrop-blur-2xl rounded-2xl md:rounded-3xl p-4 md:p-10 shadow-xl shadow-black/5 border border-border/40">
 
-        {/* Primary CTA - Explorar estoque premium */}
+        {/* Primary CTA - Explorar veículos premium */}
         <div className="text-center mb-4 md:mb-10">
           <Link
-            href="/estoque?ordenar=preco-desc"
+            href="/veiculos?ordenar=preco-desc"
             className="group inline-flex items-center justify-center gap-2 md:gap-3 bg-foreground/[0.92] hover:bg-foreground/[0.98] text-background font-normal text-xs md:text-base uppercase tracking-[0.08em] px-6 md:px-12 py-2.5 md:py-3.5 rounded-lg md:rounded-xl transition-all duration-300 ease-out shadow-sm shadow-black/5 hover:shadow-md hover:shadow-black/8 focus:outline-none focus:ring-1 focus:ring-foreground/20 focus:ring-offset-2 focus:ring-offset-background-card w-full md:w-auto"
           >
-            Explorar Estoque Premium Agora
+            Explorar Veículos Premium Agora
             <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
           </Link>
         </div>

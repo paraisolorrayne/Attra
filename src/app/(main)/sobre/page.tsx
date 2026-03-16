@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Award, MapPin, Users, Shield, Building2, Globe, Car, ArrowRight, Star, CheckCircle, Handshake, Target, Heart, MessageCircle } from 'lucide-react'
+import { Award, MapPin, Users, Shield, Building2, Globe, Car, ArrowRight, Star, CheckCircle, Handshake, Target, Heart, MessageCircle, Camera } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { getWhatsAppUrl } from '@/lib/constants'
+import { HistoryGallery, type HistoryEra } from '@/components/about/history-gallery'
 
 export const metadata: Metadata = {
   title: 'Sobre a Attra Veículos | Loja de Veículos Premium em Uberlândia',
@@ -29,7 +30,7 @@ function SobreSchema() {
     },
     telephone: '+55-34-3014-3232',
     url: 'https://attraveiculos.com.br',
-    foundingDate: '2010',
+    foundingDate: '2009',
     areaServed: { '@type': 'Country', name: 'Brasil' },
     priceRange: '$$$$$',
   }
@@ -67,33 +68,66 @@ const timeline = [
 const commitments = [
   {
     icon: Shield,
-    title: 'Transparência Total',
-    description: 'Cada veículo possui histórico completo, documentação verificada e laudo técnico detalhado. Não há surpresas - você sabe exatamente o que está comprando.',
+    title: 'Transparência como processo',
+    description: 'Histórico completo, documentação verificada e laudo técnico detalhado. Cada informação é compartilhada antes da decisão — sem surpresas.',
   },
   {
     icon: Target,
-    title: 'Curadoria Rigorosa',
-    description: 'Apenas veículos que atendem aos nossos rígidos padrões de qualidade entram no showroom. Inspeção de 200 itens, verificação de procedência e análise de histórico.',
+    title: 'Curadoria com critério',
+    description: 'Apenas veículos que atendem aos padrões da Attra entram no showroom. Inspeção rigorosa, verificação de procedência e análise de histórico.',
   },
   {
     icon: Shield,
-    title: 'Segurança Garantida',
-    description: 'Transações seguras, documentação completa e logística com seguro premium. Seu investimento está protegido do início ao fim da negociação.',
+    title: 'Segurança em cada etapa',
+    description: 'Transações seguras, documentação organizada e logística com seguro premium. Cada etapa é conduzida com responsabilidade.',
   },
   {
     icon: Handshake,
-    title: 'Relacionamento Duradouro',
-    description: 'Não vendemos apenas veículos, construímos relacionamentos. Muitos dos nossos clientes retornam para novas aquisições e nos indicam para amigos e parceiros.',
+    title: 'Relacionamento contínuo',
+    description: 'A relação com o cliente não termina na entrega. Muitos retornam para novas aquisições e nos indicam — o que reforça a confiança construída.',
   },
 ]
 
 const differentials = [
-  { icon: Award, title: 'Referência em MG', description: 'Reconhecidos como a maior loja de veículos premium de Minas Gerais, com atendimento que se estende para todo o Brasil.' },
-  { icon: Globe, title: 'Atendimento Nacional', description: 'Enviamos para todo o Brasil com logística especializada, seguro premium e rastreamento em tempo real.' },
-  { icon: Shield, title: 'Procedência Verificada', description: 'Todos os veículos passam por rigorosa inspeção de 200 itens e verificação completa de histórico.' },
-  { icon: Users, title: 'Equipe Especializada', description: 'Consultores especialistas em cada marca para atendimento consultivo e personalizado.' },
-  { icon: Car, title: '+500 Veículos/Ano', description: 'Mais de 500 veículos comercializados anualmente para colecionadores de todo o Brasil.' },
-  { icon: Building2, title: '5.000m² de Estrutura', description: 'Showroom climatizado com iluminação profissional e ambiente exclusivo para apreciação.' },
+  { icon: Award, title: 'Referência em MG', description: 'Maior dealer de veículos premium do Triângulo Mineiro, com atendimento que alcança os 27 estados do Brasil.' },
+  { icon: Globe, title: 'Atendimento Nacional', description: 'Logística especializada com seguro premium e rastreamento em tempo real para qualquer cidade do Brasil.' },
+  { icon: Shield, title: 'Procedência Verificada', description: 'Cada veículo passa por inspeção rigorosa e verificação completa de histórico antes de entrar no showroom.' },
+  { icon: Users, title: 'Equipe Especializada', description: 'Consultores com experiência em cada marca, oferecendo atendimento consultivo e personalizado.' },
+  { icon: Car, title: '+500 Veículos/Ano', description: 'Mais de 500 veículos comercializados anualmente — resultado de confiança construída ao longo de 16+ anos.' },
+  { icon: Building2, title: '5.000m² de Estrutura', description: 'Showroom climatizado com iluminação profissional projetado para exibir cada veículo como patrimônio.' },
+]
+
+const historyEras: HistoryEra[] = [
+  {
+    label: 'Attra Veículos — Hoje',
+    description: 'Referência nacional em veículos premium',
+    slides: [
+      { image: '/about/attra-fachada-showroom-atual.jpg', year: '2026', caption: 'Showroom renovado com presença digital consolidada', alt: 'Attra Veículos showroom moderno em 2026' },
+      { image: '/about/attra-acervo-veiculos-premium.jpg', year: '2022', caption: 'Attra digital — nova marca mesmos valores', alt: 'Attra Veículos mudança de branding' },
+      { image: '/about/attra-curadoria-veiculos.jpg', year: '2025', caption: 'Fachada atual do showroom de 5.000m² em Uberlândia', alt: 'Fachada do showroom Attra Veículos Uberlândia' },
+      { image: '/about/attra-colecao-supercarros-showroom.jpg', year: '2025', caption: 'Coleção de supercarros no showroom climatizado', alt: 'Coleção de supercarros Attra Veículos' },
+      { image: '/about/attra-porsche-exposicao.jpg', year: '2025', caption: 'Lamborghini em destaque — curadoria de cada detalhe', alt: 'Lamborghini em exposição no showroom Attra' },
+      { image: '/about/attra-ferrari-destaque-showroom.jpg', year: '2024', caption: 'Importação como peça central do cliente', alt: 'Importação em destaque no showroom Attra Veículos' },
+      { image: '/about/attra-entrega-veiculo-premium.jpg', year: '2024', caption: 'Momento de entrega — cada veículo tratado como patrimônio', alt: 'Entrega de veículo premium Attra Veículos' },
+      { image: '/about/attra-showroom-iluminacao-noturna.jpg', year: '2024', caption: 'Iluminação profissional — cada carro como obra de arte', alt: 'Showroom Attra Veículos com iluminação noturna' },
+      { image: '/about/attra-operacao-nacional-logistica.jpg', year: '2023', caption: 'Operação nacional com logística especializada', alt: 'Logística e operação nacional Attra Veículos' },
+      { image: '/about/attra-estrutura-5000m-uberlandia.jpg', year: '2023', caption: 'Estrutura completa de 5.000m² consolidada', alt: 'Estrutura de 5000m² Attra Veículos Uberlândia' },
+      { image: '/about/attra-inicio-uberlandia.jpg', year: '2022', caption: 'As primeiras mudanças', alt: 'Início da Attra em Uberlândia 2009' },
+    ],
+  },
+  {
+    label: 'Attra Exclusive — Origens',
+    description: 'De onde tudo começou',
+    slides: [
+      { image: '/about/attra-evento-lancamento.jpg', year: 'Attra Exclusive', caption: 'Eventos que marcaram o início da trajetória', alt: 'Evento da época Attra Exclusive' },
+      { image: '/about/attra-presenca-digital-2026.png', year: 'Attra Exclusive', caption: 'Primeiros veículos premium do acervo', alt: 'Acervo de veículos Attra Exclusive' },
+      { image: '/about/attra-showroom-moderno-2026.png', year: 'Attra Exclusive', caption: 'Curadoria como convicção desde o primeiro dia', alt: 'Curadoria de veículos Attra Exclusive' },
+      { image: '/about/attra-expansao-showroom.jpg', year: 'Attra Exclusive', caption: 'A primeira expansão — crescendo com propósito', alt: 'Expansão do showroom Attra Exclusive' },
+      { image: '/about/attra-equipe-fundadores.jpg', year: 'Attra Exclusive', caption: 'A equipe que construiu a Attra desde o início', alt: 'Equipe fundadora Attra Exclusive' },
+      { image: '/about/attra-primeiro-superesportivo.jpg', year: 'Attra Exclusive', caption: 'O primeiro superesportivo — o marco que mudou tudo', alt: 'Primeiro superesportivo Attra Exclusive' },
+      { image: '/about/attra-showroom-primeiros-anos.jpg', year: 'Attra Exclusive', caption: 'Os primeiros anos — estrutura enxuta, visão clara', alt: 'Showroom Attra Exclusive primeiros anos' },
+    ],
+  },
 ]
 
 export default function SobrePage() {
@@ -120,13 +154,13 @@ export default function SobrePage() {
               Sobre a <span className="text-metallic text-metallic-animate">Attra Veículos</span>
             </h1>
             <p className="text-lg lg:text-xl text-foreground-secondary mb-8 max-w-3xl mx-auto leading-relaxed">
-              Somos uma loja de veículos premium em Uberlândia, referência em <strong className="text-foreground">veículos nacionais, importados, seminovos premium e supercarros</strong>.
-              Com atendimento nacional, levamos os melhores veículos para colecionadores de todo o Brasil.
+              Uma operação construída para que grandes carros venham acompanhados de grandes experiências.
+              Desde 2008, a Attra atua com <strong className="text-foreground">curadoria, transparência e relacionamento</strong> no mercado de veículos premium.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="text-lg px-8 py-6">
-                <Link href="/estoque">
-                  <Car className="w-5 h-5 mr-2" />Conhecer Nosso Estoque
+                <Link href="/veiculos">
+                  <Car className="w-5 h-5 mr-2" />Conhecer Nossos Veículos
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
@@ -144,7 +178,7 @@ export default function SobrePage() {
         <Container>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
             <div>
-              <p className="text-4xl lg:text-5xl font-bold">15+</p>
+              <p className="text-4xl lg:text-5xl font-bold">16+</p>
               <p className="text-white/80">Anos de Mercado</p>
             </div>
             <div>
@@ -177,19 +211,20 @@ export default function SobrePage() {
               </h2>
               <div className="space-y-4 text-lg text-foreground-secondary leading-relaxed">
                 <p>
-                  A <strong className="text-foreground">Attra Veículos</strong> é uma loja de veículos premium em Uberlândia,
-                  especializada em supercarros, importados e seminovos de alto padrão. Nossa missão é oferecer
-                  uma experiência de compra diferenciada para colecionadores e entusiastas automotivos.
+                  A <strong className="text-foreground">Attra Veículos</strong> nasceu em 2009 da percepção de que o mercado
+                  de veículos de alto padrão oferecia grandes carros, mas raramente a mesma qualidade em curadoria,
+                  transparência e relacionamento. A empresa foi fundada como um negócio familiar em Uberlândia,
+                  com a convicção de que era possível fazer diferente.
                 </p>
                 <p>
-                  Com foco em <strong className="text-foreground">atendimento consultivo</strong>, entendemos que cada cliente
-                  possui necessidades únicas. Por isso, oferecemos curadoria personalizada, buscando exatamente
-                  o veículo que atende suas expectativas - seja um Porsche para uso diário ou um Ferrari para sua coleção.
+                  Com foco em <strong className="text-foreground">atendimento consultivo</strong>, a Attra trata cada veículo
+                  como patrimônio e cada cliente com o nível de atenção que esse tipo de decisão exige — seja um
+                  Porsche para uso diário ou um Ferrari para coleção.
                 </p>
                 <p>
-                  Nosso <strong className="text-foreground">atendimento nacional</strong> permite que colecionadores de qualquer
-                  cidade do Brasil tenham acesso aos melhores veículos premium, com toda a comodidade e segurança
-                  da logística especializada.
+                  O <strong className="text-foreground">atendimento nacional</strong> permite que clientes de qualquer
+                  cidade do Brasil tenham acesso aos melhores veículos premium, com toda a segurança
+                  da logística especializada e a confiança construída em 16+ anos de operação.
                 </p>
               </div>
             </div>
@@ -278,18 +313,38 @@ export default function SobrePage() {
               </h2>
               <div className="space-y-4 text-lg text-foreground-secondary leading-relaxed">
                 <p>
-                  A Attra Veículos conta com um <strong className="text-foreground">showroom de 5.000m² em Uberlândia</strong>,
-                  projetado para exibir cada veículo como uma obra de arte. Nossa estrutura foi pensada para proporcionar
-                  a melhor experiência em compra de veículos premium.
+                  A Attra conta com um <strong className="text-foreground">showroom de 5.000m² em Uberlândia</strong>,
+                  projetado para exibir cada veículo com o destaque que ele merece. A estrutura foi pensada para
+                  proporcionar clareza, conforto e confiança em cada etapa da negociação.
                 </p>
                 <p>
-                  Localizada em posição estratégica em Minas Gerais, oferecemos <strong className="text-foreground">atendimento nacional</strong> com
-                  logística especializada para entrega em qualquer cidade do Brasil. Colecionadores de São Paulo, Rio de Janeiro,
+                  Localizada em posição estratégica em Minas Gerais, a Attra oferece <strong className="text-foreground">atendimento nacional</strong> com
+                  logística especializada para entrega em qualquer cidade do Brasil. Clientes de São Paulo, Rio de Janeiro,
                   Brasília e todas as capitais confiam na Attra para suas aquisições.
                 </p>
               </div>
             </div>
           </div>
+        </Container>
+      </section>
+
+      {/* Galeria Histórica */}
+      <section className="py-16 lg:py-24 bg-background-soft overflow-hidden">
+        <Container>
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
+              <Camera className="w-4 h-4 text-primary" />
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider">Documentário Visual</span>
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              De onde viemos. Para onde vamos.
+            </h2>
+            <p className="text-foreground-secondary max-w-2xl mx-auto text-lg leading-relaxed">
+              Percorra nossa evolução em imagens — do presente ao começo de tudo.
+              Uma galeria que mostra o que construímos e de onde veio a confiança.
+            </p>
+          </div>
+          <HistoryGallery eras={historyEras} />
         </Container>
       </section>
 
@@ -303,7 +358,7 @@ export default function SobrePage() {
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">Nosso Compromisso</h2>
             <p className="text-foreground-secondary max-w-2xl mx-auto">
-              Os valores que guiam nosso atendimento e relacionamento com cada colecionador.
+              Os princípios que sustentam cada negociação e cada relacionamento na Attra.
             </p>
           </div>
 
@@ -335,7 +390,7 @@ export default function SobrePage() {
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">Por que Escolher a Attra</h2>
             <p className="text-foreground-secondary max-w-2xl mx-auto">
-              Os motivos que fazem da Attra Veículos a escolha de colecionadores em todo o Brasil.
+              O que sustenta a confiança de quem escolhe a Attra para decisões de alto valor.
             </p>
           </div>
 
@@ -362,8 +417,8 @@ export default function SobrePage() {
               Visite Nosso Showroom
             </h2>
             <p className="text-lg text-white/80 mb-8 leading-relaxed">
-              Conheça de perto nossa estrutura de 5.000m² em Uberlândia e encontre o veículo dos seus sonhos.
-              Atendemos apaixonados por carros de todo o Brasil com excelência.
+              Conheça de perto nossa estrutura de 5.000m² em Uberlândia.
+              Uma operação construída para que cada visita seja tão relevante quanto a decisão que ela representa.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 font-semibold">
@@ -372,8 +427,8 @@ export default function SobrePage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6">
-                <Link href="/estoque">
-                  Ver Estoque Completo <ArrowRight className="w-5 h-5 ml-2" />
+                <Link href="/veiculos">
+                  Ver Todos os Veículos <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
             </div>

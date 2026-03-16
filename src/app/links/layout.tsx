@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Links | Attra Veículos',
   description:
-    'Seu hub de acesso rápido à Attra Veículos. Fale com um especialista no WhatsApp, veja o estoque completo e conheça nosso showroom.',
+    'Seu hub de acesso rápido à Attra Veículos. Fale com um especialista no WhatsApp, veja nossos veículos premium e conheça nosso showroom.',
   robots: {
     index: false,
     follow: false,

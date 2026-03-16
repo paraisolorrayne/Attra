@@ -45,7 +45,7 @@ function getNotificationType(formType?: string, sourcePage?: string): Notificati
   if (sourcePage) {
     if (sourcePage.includes('financiamento')) return 'financing_inquiry'
     if (sourcePage.includes('vender') || sourcePage.includes('troca')) return 'trade_in_inquiry'
-    if (sourcePage.includes('veiculo') || sourcePage.includes('estoque')) return 'vehicle_inquiry'
+    if (sourcePage.includes('veiculo') || sourcePage.includes('estoque') || sourcePage.includes('veiculos')) return 'vehicle_inquiry'
     if (sourcePage.includes('lead_magnet') || sourcePage.includes('guia')) return 'lead_magnet'
     if (sourcePage.includes('alerta')) return 'vehicle_alert'
   }

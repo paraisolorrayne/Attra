@@ -19,7 +19,7 @@ export interface PageChannelSetting {
 // Default settings if database is not available
 const DEFAULT_SETTINGS: PageChannelSetting[] = [
   { page_path: '/', page_name: 'Página Inicial', channel_behavior: 'leadster_ai', custom_greeting: null, custom_whatsapp_message: null, is_enabled: true },
-  { page_path: '/estoque', page_name: 'Estoque', channel_behavior: 'leadster_static', custom_greeting: null, custom_whatsapp_message: null, is_enabled: true },
+  { page_path: '/veiculos', page_name: 'Veículos', channel_behavior: 'leadster_static', custom_greeting: null, custom_whatsapp_message: null, is_enabled: true },
   { page_path: '/veiculo/*', page_name: 'Página de Veículo', channel_behavior: 'whatsapp_direct', custom_greeting: null, custom_whatsapp_message: null, is_enabled: true },
 ]
 

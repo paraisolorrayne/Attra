@@ -91,22 +91,28 @@ const nextConfig: NextConfig = {
   // 301 Redirects for old URLs (SEO - permanent redirects)
   async redirects() {
     return [
-      // Old brand pages → stock filter
+      // Old /estoque → /veiculos (premium rebrand)
       {
-        source: '/marca/:brand',
-        destination: '/estoque?marca=:brand',
+        source: '/estoque',
+        destination: '/veiculos',
         permanent: true,
       },
-      // Old model pages → stock
+      // Old brand pages → vehicles filter
+      {
+        source: '/marca/:brand',
+        destination: '/veiculos?marca=:brand',
+        permanent: true,
+      },
+      // Old model pages → vehicles
       {
         source: '/modelo/:model',
-        destination: '/estoque',
+        destination: '/veiculos',
         permanent: true,
       },
       // Old pagination pattern
       {
         source: '/estoque-2-2',
-        destination: '/estoque',
+        destination: '/veiculos',
         permanent: true,
       },
       // Old company page → about
@@ -186,20 +192,20 @@ const nextConfig: NextConfig = {
         destination: '/blog/bmw-m2-a-revolucao-da-nova-geracao-g87',
         permanent: true,
       },
-      // Old vehicle URLs with specific slugs → stock (vehicles may have been sold)
+      // Old vehicle URLs with specific slugs → vehicles (vehicles may have been sold)
       {
         source: '/veiculo/ferrari-sf90-spider-2024-0km',
-        destination: '/estoque?marca=Ferrari',
+        destination: '/veiculos?marca=Ferrari',
         permanent: true,
       },
       {
         source: '/veiculo/porsche-718-boxster-2023-scp-8a88',
-        destination: '/estoque?marca=Porsche',
+        destination: '/veiculos?marca=Porsche',
         permanent: true,
       },
       {
         source: '/veiculo/lamborghini-aventador-roadster-2015-bsy-2122',
-        destination: '/estoque?marca=Lamborghini',
+        destination: '/veiculos?marca=Lamborghini',
         permanent: true,
       },
     ]

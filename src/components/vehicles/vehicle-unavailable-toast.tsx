@@ -28,7 +28,7 @@ export function VehicleUnavailableToast() {
       const params = new URLSearchParams(searchParams.toString())
       params.delete('veiculo_indisponivel')
       const newQuery = params.toString()
-      const newPath = newQuery ? `/estoque?${newQuery}` : '/estoque'
+      const newPath = newQuery ? `/veiculos?${newQuery}` : '/veiculos'
       router.replace(newPath, { scroll: false })
     }
   }, [searchParams, router, showToast])

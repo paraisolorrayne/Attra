@@ -41,7 +41,7 @@ type PageMode = 'vehicle' | 'stock' | 'general'
 
 function getPageMode(pathname: string): PageMode {
   if (pathname.startsWith('/veiculo/') || pathname.startsWith('/veiculos/')) return 'vehicle'
-  if (pathname === '/estoque' || pathname.startsWith('/estoque')) return 'stock'
+  if (pathname === '/veiculos' || pathname.startsWith('/veiculos') || pathname === '/estoque' || pathname.startsWith('/estoque')) return 'stock'
   return 'general'
 }
 

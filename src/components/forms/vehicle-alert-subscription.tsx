@@ -51,7 +51,7 @@ export function VehicleAlertSubscription() {
       
       await sendWhatsAppWebhook({
         eventType: 'general_inquiry',
-        sourcePage: 'estoque_vehicle_alerts',
+        sourcePage: 'veiculos_vehicle_alerts',
         context: {
           userMessage: `Alerta de Veículos - Email: ${data.email}, Marcas: ${brandNames}`,
         },

@@ -36,7 +36,7 @@ export async function FeaturedVehicles() {
             </p>
           </div>
           <Button variant="outline" asChild>
-            <Link href="/estoque" className="flex items-center gap-2">
+            <Link href="/veiculos" className="flex items-center gap-2">
               Ver todos <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>

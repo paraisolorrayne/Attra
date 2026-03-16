@@ -47,7 +47,7 @@ export function InventoryStatusBar({
           </div>
           <div>
             <p className="text-2xl font-bold text-foreground">{totalVehicles}</p>
-            <p className="text-xs text-foreground-secondary">veículos em estoque</p>
+            <p className="text-xs text-foreground-secondary">veículos disponíveis</p>
           </div>
         </div>
 

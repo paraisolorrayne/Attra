@@ -98,7 +98,7 @@ export function VehicleInfo({ vehicle }: VehicleInfoProps) {
       {vehicle.status === 'sold' && (
         <div className="mt-4 p-4 bg-foreground-secondary/10 rounded-lg">
           <p className="text-sm text-foreground-secondary">
-            Este veículo já foi vendido. Confira veículos similares em nosso estoque.
+            Este veículo já foi vendido. Confira veículos similares em nosso acervo.
           </p>
         </div>
       )}

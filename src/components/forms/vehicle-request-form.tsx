@@ -47,7 +47,7 @@ export function VehicleRequestForm() {
       const visitorContext = getVisitorContext()
       trackFormSubmission({
         formName: 'vehicle_request_form',
-        formLocation: '/estoque',
+        formLocation: '/veiculos',
         vehicleName: `${data.brand} ${data.model}`,
       }, visitorContext)
 

@@ -18,7 +18,7 @@ const PREMIUM_BRANDS = [
 ]
 
 const bodyStyles = ['Cupê', 'Sedan', 'SUV', 'Conversível', 'Hatch', 'Wagon']
-const powertrains = ['Gasolina', 'Híbrido', 'Elétrico', 'Flex']
+const powertrains = ['Gasolina', 'Diesel', 'Híbrido', 'Elétrico', 'Flex']
 const years = Array.from({ length: 10 }, (_, i) => (2025 - i).toString())
 const priceRanges = [
   { label: 'Até R$ 300 mil', min: 0, max: 300000 },
@@ -179,7 +179,7 @@ export function AdvancedFilters() {
       params.set(key, value)
     }
     params.delete('pagina') // Reset pagination when filtering
-    router.push(`/estoque?${params.toString()}`)
+    router.push(`/veiculos?${params.toString()}`)
   }
 
   const handleBrandChange = (brand: string | null) => {
@@ -190,7 +190,7 @@ export function AdvancedFilters() {
       params.delete('marca')
     }
     params.delete('pagina') // Reset pagination
-    router.push(`/estoque?${params.toString()}`)
+    router.push(`/veiculos?${params.toString()}`)
   }
 
   const applyPriceRange = (min: number, max: number | null) => {
@@ -208,11 +208,11 @@ export function AdvancedFilters() {
       else params.delete('precoMax')
     }
     params.delete('pagina')
-    router.push(`/estoque?${params.toString()}`)
+    router.push(`/veiculos?${params.toString()}`)
   }
 
   const clearFilters = () => {
-    router.push('/estoque')
+    router.push('/veiculos')
   }
 
   const isRangeSelected = (min: number, max: number | null) => {

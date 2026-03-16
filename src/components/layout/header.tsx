@@ -12,7 +12,7 @@ import { X } from 'lucide-react'
 
 // Minimal navigation for premium boutique feel
 const navigation = [
-  { name: 'Estoque', href: '/estoque' },
+  { name: 'Veículos', href: '/veiculos' },
   { name: 'Jornada Attra', href: '/jornada' },
   { name: 'Serviços', href: '/servicos' },
   { name: 'Notícias', href: '/news' },
@@ -164,25 +164,18 @@ export function Header() {
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-          // Always apply semi-transparent dark background with blur for maximum legibility
+          'site-header',
           isScrolled
             ? isLightMode
-              ? 'bg-white/95 backdrop-blur-xl border-b border-border shadow-lg'
-              : 'bg-[rgba(5,5,5,0.95)] backdrop-blur-xl border-b border-white/10 shadow-lg'
-            : 'bg-[rgba(10,10,10,0.65)] backdrop-blur-[12px]'
+              ? 'site-header--scrolled-light'
+              : 'site-header--scrolled-dark'
+            : 'site-header--overlay'
         )}
-        style={{
-          // Subtle shadow for separation from content
-          boxShadow: isScrolled
-            ? undefined
-            : '0 4px 30px rgba(0, 0, 0, 0.1)'
-        }}
       >
         <Container>
           <nav className="flex items-center justify-between h-20 py-4">
             {/* Logo - always white when not scrolled (dark header), theme-aware when scrolled */}
-            <Link href="/" className="flex items-center group relative h-10">
+            <Link href="/" className="site-header__logo group">
               {/* White logo - visible when not scrolled OR scrolled in dark mode */}
               <Image
                 src="/images/logo-white.png"
@@ -218,30 +211,14 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'relative text-sm font-semibold tracking-wide uppercase transition-all duration-300 py-2',
-                    // When not scrolled: always white text for dark header
-                    // When scrolled: theme-aware colors
-                    isScrolled
-                      ? isLightMode
-                        ? 'text-gray-700 hover:text-primary'
-                        : 'text-white/90 hover:text-white'
-                      : 'text-white/90 hover:text-white',
-                    activeSection === item.href && 'text-primary'
+                    'site-header__nav-link',
+                    isScrolled && isLightMode
+                      ? 'site-header__nav-link--dark'
+                      : 'site-header__nav-link--light',
+                    activeSection === item.href && 'active'
                   )}
-                  style={{
-                    // Text shadow for extra legibility over images when not scrolled
-                    textShadow: !isScrolled
-                      ? '0 1px 3px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)'
-                      : 'none'
-                  }}
                 >
                   {item.name}
-                  {/* Underline indicator on hover */}
-                  <span className={cn(
-                    'absolute bottom-0 left-0 w-full h-0.5 bg-primary transform transition-transform duration-300 origin-left',
-                    'scale-x-0 group-hover:scale-x-100',
-                    activeSection === item.href ? 'scale-x-100' : 'hover:scale-x-100'
-                  )} />
                 </Link>
               ))}
             </div>

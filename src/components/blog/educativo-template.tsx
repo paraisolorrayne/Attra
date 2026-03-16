@@ -147,12 +147,12 @@ export function EducativoTemplate({ post }: EducativoTemplateProps) {
                 Procurando seu próximo veículo?
               </h3>
               <p className="text-foreground-secondary mb-6 max-w-lg mx-auto">
-                Explore nosso estoque curado de veículos premium ou fale com um consultor especializado.
+                Explore nosso acervo curado de veículos premium ou fale com um consultor especializado.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button asChild size="lg">
-                  <Link href="/estoque">
-                    Ver Estoque
+                  <Link href="/veiculos">
+                    Ver Veículos
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>

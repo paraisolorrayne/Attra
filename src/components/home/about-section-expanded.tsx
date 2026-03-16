@@ -6,18 +6,19 @@ import Image from 'next/image'
 import { ArrowRight, Award, Users, MapPin, Calendar, CheckCircle } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
+import { SectionKicker, SectionHeading } from '@/components/ui/brand'
 
 const stats = [
-  { value: '18+', label: 'Anos de Mercado', icon: Calendar },
+  { value: '16+', label: 'Anos de Mercado', icon: Calendar },
   { value: '500+', label: 'Veículos/Ano', icon: Award },
   { value: '27', label: 'Estados Atendidos', icon: MapPin },
   { value: '5.0', label: 'Avaliação Google', icon: Users },
 ]
 
 const pillars = [
-  'Negócio familiar com quase 20 anos de história',
-  'Referência em veículos premium e carros de luxo em Uberlândia e no Brasil',
-  'Atendimento transparente, respeitoso e consultivo',
+  'Curadoria antes de catálogo',
+  'Relação antes de transação',
+  'Procedência antes de pressa',
 ]
 
 export function AboutSectionExpanded() {
@@ -39,19 +40,17 @@ export function AboutSectionExpanded() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left - Content */}
           <div className={`opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}>
-            <span className="text-primary font-medium tracking-wide uppercase text-sm">Sobre a Attra</span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mt-3 mb-6">
-              Referência em Veículos Premium em Uberlândia e no Brasil
-            </h2>
+            <SectionKicker className="mb-3">Posicionamento</SectionKicker>
+            <SectionHeading as="h2" size="lg" className="mb-6">
+              Mais do que carros. Uma visão.
+            </SectionHeading>
 
-            {/* 1 parágrafo principal – história + confiança */}
+            {/* 1 parágrafo principal */}
             <p className="text-foreground-secondary leading-relaxed mb-6">
-              Fundada em 2008 por Irineu, a <strong className="text-foreground">Attra Veículos</strong> nasceu como
-              um negócio familiar em Uberlândia, construído sobre integridade e paixão automotiva. Ao longo de
-              quase duas décadas, a família transformou a Attra em sinônimo de confiança na{' '}
-              <strong className="text-foreground">compra de carros de luxo em todo o Brasil</strong> — com
-              atendimento nacional a partir de Uberlândia, avaliações entre 4.7 e 4.9 no Google Maps e centenas
-              de clientes que validam nossa reputação.
+              A história da Attra começa com uma inquietação simples: por que a compra de um carro
+              extraordinário tantas vezes vinha acompanhada de uma experiência comum? A empresa nasceu
+              para corrigir esse desalinhamento, tratando cada veículo como patrimônio e cada cliente
+              com o nível de atenção que esse tipo de decisão exige.
             </p>
 
             {/* 3 bullets – pilares */}
@@ -64,24 +63,10 @@ export function AboutSectionExpanded() {
               ))}
             </div>
 
-            {/* Teaser curadoria + link /jornada */}
-            <p className="text-foreground-secondary leading-relaxed mb-8">
-              Cada veículo passa por <strong className="text-foreground">curadoria rigorosa, inspeção técnica
-              completa e verificação de documentação</strong>, garantindo a segurança que clientes de veículos
-              premium e supercarros exigem.{' '}
-              <Link
-                href="/jornada"
-                className="text-primary hover:text-primary-hover font-medium transition-colors inline-flex items-center gap-1"
-              >
-                Veja em detalhes como funciona nossa curadoria na Jornada Attra
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </p>
-
             {/* CTA */}
             <Button asChild size="lg">
               <Link href="/sobre" className="flex items-center gap-2">
-                Conheça Nossa História <ArrowRight className="w-5 h-5" />
+                Conheça o posicionamento completo <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
           </div>
@@ -93,11 +78,11 @@ export function AboutSectionExpanded() {
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-background border border-border rounded-xl p-5 text-center hover:border-primary/30 transition-colors"
+                  className="institutional-card p-5 text-center hover:border-primary/30 transition-colors"
                 >
                   <stat.icon className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-foreground-secondary">{stat.label}</p>
+                  <p className="type-display-md">{stat.value}</p>
+                  <p className="type-label">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -105,7 +90,7 @@ export function AboutSectionExpanded() {
             {/* CEO Photo - Thiago */}
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border">
               <Image
-                src="/about/thiago-ceo.png"
+                src="/about/attra-ceo-thiago-fundador.png"
                 alt="Thiago - CEO Attra Veículos"
                 fill
                 className="object-cover object-center"

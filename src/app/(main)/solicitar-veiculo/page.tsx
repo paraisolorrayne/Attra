@@ -33,7 +33,7 @@ export default function SolicitarVeiculoPage() {
           <div className="max-w-3xl mx-auto text-center mt-8">
             <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">Solicitar Veículo</h1>
             <p className="text-lg text-foreground-secondary">
-              Não encontrou o carro dos seus sonhos em nosso estoque?
+              Não encontrou o carro dos seus sonhos em nosso acervo?
               Nossa equipe busca em todo o Brasil para você.
             </p>
           </div>

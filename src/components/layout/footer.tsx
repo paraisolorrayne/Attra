@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import { PHONE_NUMBER, PHONE_DISPLAY, PHONE_NUMBER_2, PHONE_DISPLAY_2, CELLPHONE_NUMBER, CELLPHONE_DISPLAY } from '@/lib/constants'
 
 const quickLinks = [
-  { name: 'Estoque', href: '/estoque' },
+  { name: 'Veículos', href: '/veiculos' },
   { name: 'Sobre Nós', href: '/sobre' },
   { name: 'Financiamento', href: '/financiamento' },
   { name: 'Compramos seu Carro', href: '/compramos-seu-carro' },
@@ -103,7 +103,7 @@ export function Footer() {
             <ul className="space-y-2">
               {brands.map((brand) => (
                 <li key={brand}>
-                  <Link href={`/estoque?marca=${brand.toLowerCase()}`} className="text-foreground-secondary hover:text-primary text-sm transition-colors">
+                  <Link href={`/veiculos?marca=${brand.toLowerCase()}`} className="text-foreground-secondary hover:text-primary text-sm transition-colors">
                     {brand}
                   </Link>
                 </li>

@@ -24,8 +24,8 @@ const getDefaultPageBehavior = (sourcePage: string, vehicleId?: string): PageBeh
     return 'vehicle'
   }
 
-  // Estoque page: /estoque - Leadster sem IA + redirect WhatsApp
-  if (sourcePage === '/estoque' || sourcePage.startsWith('/estoque')) {
+  // Veículos page: /veiculos (or legacy /estoque) - Leadster sem IA + redirect WhatsApp
+  if (sourcePage === '/veiculos' || sourcePage.startsWith('/veiculos') || sourcePage === '/estoque' || sourcePage.startsWith('/estoque')) {
     return 'estoque'
   }
 
@@ -50,7 +50,7 @@ const getContextMessage = (sourcePage: string, pageBehavior: PageBehavior, vehic
     return {
       title: 'Procurando algo específico?',
       subtitle: 'Fale diretamente no WhatsApp',
-      message: 'Olá! Estou navegando pelo estoque e gostaria de ajuda para encontrar o veículo ideal.',
+      message: 'Olá! Estou navegando pelos veículos e gostaria de ajuda para encontrar o modelo ideal.',
       icon: Car,
       buttonText: 'Abrir WhatsApp',
       behavior: 'estoque' as PageBehavior,

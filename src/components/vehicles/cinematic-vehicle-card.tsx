@@ -107,22 +107,19 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
   // Horizontal layout - Clean design prioritizing vehicle visibility
   return (
     <div className="group bg-background-card border border-border rounded-2xl overflow-hidden flex flex-col md:flex-row transition-all duration-300 hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1">
-      {/* Image container with consistent 4:3 aspect ratio - clickable link */}
-      <Link href={`/veiculo/${vehicle.slug}`} className="relative aspect-[4/3] md:w-2/5 lg:w-1/2 overflow-hidden bg-background-soft vehicle-image-container block">
+      {/* Image container - fixed 4:3 aspect + object-cover */}
+      <Link href={`/veiculo/${vehicle.slug}`} className="relative aspect-[4/3] md:w-[55%] shrink-0 overflow-hidden bg-background-soft block">
         <Image
           src={vehicle.photos?.[0] || '/placeholder.jpg'}
           alt={`${vehicle.brand} ${vehicle.model}`}
           fill
-          className="card-vehicle-image transition-transform duration-500 group-hover:scale-[1.03]"
-          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+          sizes="(max-width: 768px) 100vw, 55vw"
         />
 
-        {/* Subtle edge gradient for text readability - only on right edge */}
-        <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background-card/60 to-transparent hidden md:block pointer-events-none" />
-
-        {/* Badges - positioned top-left to not cover car body */}
+        {/* Badges - positioned bottom-left */}
         {badges.length > 0 && (
-          <div className="absolute top-4 left-4 flex gap-2">
+          <div className="absolute bottom-4 left-4 flex gap-2">
             {badges.map((badge, i) => (
               <Badge key={i} variant={badge.variant} className="shadow-sm">{badge.label}</Badge>
             ))}
@@ -131,19 +128,19 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
       </Link>
 
       {/* Content */}
-      <div className="p-6 md:p-8 flex-1 flex flex-col justify-center">
+      <div className="p-5 md:p-6 flex-1 flex flex-col justify-center">
         <Link href={`/veiculo/${vehicle.slug}`} className="block">
-          <p className="text-primary text-xs font-semibold mb-2 uppercase tracking-wider">{vehicle.brand}</p>
-          <h3 className="text-2xl lg:text-3xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+          <p className="text-primary text-xs font-semibold mb-1 uppercase tracking-wider">{vehicle.brand}</p>
+          <h3 className="text-xl lg:text-2xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
             {vehicle.model}
           </h3>
           {vehicle.version && (
-            <p className="text-foreground-secondary text-sm mb-4 line-clamp-1">{vehicle.version}</p>
+            <p className="text-foreground-secondary text-sm mb-3 line-clamp-1">{vehicle.version}</p>
           )}
         </Link>
 
-        {/* Specs row - compact design */}
-        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-5 text-sm text-foreground-secondary">
+        {/* Specs row */}
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 mb-4 text-sm text-foreground-secondary">
           <span className="flex items-center gap-1.5">
             <Gauge className="w-4 h-4 text-primary/70" />
             {vehicle.year_model}
@@ -156,22 +153,16 @@ export function CinematicVehicleCard({ vehicle, layout = 'horizontal' }: Cinemat
             <Fuel className="w-4 h-4 text-primary/70" />
             {vehicle.fuel_type}
           </span>
-          {vehicle.horsepower && (
-            <span className="flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-primary/70" />
-              {vehicle.horsepower} cv
-            </span>
-          )}
         </div>
 
         {/* Price */}
         <Link href={`/veiculo/${vehicle.slug}`}>
-          <p className="text-2xl lg:text-3xl font-bold text-foreground hover:text-primary transition-colors mb-4">
+          <p className="text-xl lg:text-2xl font-bold text-foreground hover:text-primary transition-colors mb-4">
             {formatPrice(vehicle.price)}
           </p>
         </Link>
 
-        {/* CTA Button - full width below price */}
+        {/* CTA Button */}
         <VehicleCardCTAs vehicle={vehicle} variant="compact" />
       </div>
     </div>

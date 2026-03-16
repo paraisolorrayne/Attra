@@ -13,9 +13,47 @@ import { EngineAudioPlayer } from '@/components/vehicles/engine-audio-player'
 import { AIVehicleDescription, AIVehicleDescriptionSkeleton } from '@/components/vehicles/ai-vehicle-description'
 import { RelatedVehiclesSkeleton } from '@/components/ui/skeleton'
 import { VehicleContextSetter } from '@/components/vehicles/vehicle-context-setter'
+import { FAQSection } from '@/components/home'
+import { FAQSchema } from '@/components/seo'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
 import { getVehicleSoundByVehicleId } from '@/lib/vehicle-sounds-storage'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, formatMileage } from '@/lib/utils'
+import { Vehicle } from '@/types'
+
+/** Generate dynamic FAQ items based on vehicle data for SEO */
+function generateVehicleFAQs(vehicle: Vehicle) {
+	const name = `${vehicle.brand} ${vehicle.model}`
+	const faqs: { question: string; answer: string }[] = []
+
+	faqs.push({
+		question: `Qual o preço do ${name} na Attra Veículos?`,
+		answer: `O ${name} ${vehicle.year_model} está disponível por ${formatPrice(vehicle.price)} na Attra Veículos. ${vehicle.mileage === 0 ? 'Este veículo é 0 km.' : `Este veículo possui ${formatMileage(vehicle.mileage)} rodados.`} Entre em contato para condições de financiamento e formas de pagamento.`,
+	})
+
+	faqs.push({
+		question: `O ${name} possui garantia?`,
+		answer: `${vehicle.is_new || vehicle.mileage === 0 ? `Sim, o ${name} 0 km possui garantia de fábrica integral.` : `Sim, o ${name} seminovo passou pela inspeção rigorosa da Attra e conta com garantia.`} Todos os veículos da Attra passam por curadoria técnica antes de serem disponibilizados para venda.`,
+	})
+
+	faqs.push({
+		question: `Quais as especificações do ${name} ${vehicle.year_model}?`,
+		answer: `O ${name} ${vehicle.year_model} possui motor ${vehicle.fuel_type}, câmbio ${vehicle.transmission}, cor ${vehicle.color}${vehicle.horsepower ? `, ${vehicle.horsepower} cv de potência` : ''}${vehicle.torque ? ` e ${vehicle.torque} Nm de torque` : ''}. ${vehicle.version ? `Versão: ${vehicle.version}.` : ''}`,
+	})
+
+	faqs.push({
+		question: `A Attra entrega o ${name} em todo o Brasil?`,
+		answer: `Sim, a Attra Veículos realiza entrega nacional com logística especializada para veículos de alto valor. O ${name} pode ser entregue em qualquer cidade do Brasil com transporte em caminhão fechado, seguro completo e rastreamento em tempo real.`,
+	})
+
+	if (vehicle.mileage > 0) {
+		faqs.push({
+			question: `Qual a quilometragem do ${name}?`,
+			answer: `Este ${name} ${vehicle.year_model} possui ${formatMileage(vehicle.mileage)} rodados. ${vehicle.mileage <= 10000 ? 'Trata-se de um veículo com baixíssima quilometragem, em excelente estado de conservação.' : 'O veículo passou por inspeção completa da equipe técnica da Attra.'}`,
+		})
+	}
+
+	return faqs
+}
 
 interface VehiclePageProps {
 	params: Promise<{ slug: string }>
@@ -47,21 +85,21 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 	const { slug } = await params
 
 	if (!slug) {
-		redirect('/estoque?veiculo_indisponivel=true')
+		redirect('/veiculos?veiculo_indisponivel=true')
 	}
 
 	const vehicle = await getVehicleBySlug(slug)
 
 	if (!vehicle) {
-		redirect('/estoque?veiculo_indisponivel=true')
+		redirect('/veiculos?veiculo_indisponivel=true')
 	}
 
 	// Fetch engine sound from admin panel database (if configured)
 	const vehicleSound = await getVehicleSoundByVehicleId(vehicle.id)
 
 	const breadcrumbItems = [
-		{ label: 'Estoque', href: '/estoque' },
-		{ label: vehicle.brand, href: `/estoque?marca=${vehicle.brand.toLowerCase()}` },
+		{ label: 'Veículos', href: '/veiculos' },
+		{ label: vehicle.brand, href: `/veiculos?marca=${vehicle.brand.toLowerCase()}` },
 		{ label: `${vehicle.model} ${vehicle.year_model}` },
 	]
 
@@ -197,6 +235,22 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 					category={vehicle.category}
 				/>
 			</Suspense>
+
+			{/* Vehicle FAQ — SEO structured data */}
+			{(() => {
+				const vehicleFaqs = generateVehicleFAQs(vehicle)
+				return (
+					<>
+						<FAQSection
+							faqs={vehicleFaqs}
+							title={`Perguntas sobre o ${vehicle.brand} ${vehicle.model}`}
+							subtitle={`Dúvidas frequentes sobre este ${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`}
+							className="mt-0"
+						/>
+						<FAQSchema faqs={vehicleFaqs} pageName={`${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`} />
+					</>
+				)
+			})()}
 		</main>
 	)
 }

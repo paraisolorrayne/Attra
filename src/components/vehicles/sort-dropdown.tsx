@@ -13,7 +13,7 @@ export function SortDropdown({ currentSort }: SortDropdownProps) {
 
   const handleChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value && value !== 'recentes') {
+    if (value && value !== 'preco-desc') {
       params.set('ordenar', value)
     } else {
       params.delete('ordenar')
@@ -24,13 +24,13 @@ export function SortDropdown({ currentSort }: SortDropdownProps) {
   return (
     <select
       name="ordenar"
-      value={currentSort || 'recentes'}
+      value={currentSort || 'preco-desc'}
       onChange={(e) => handleChange(e.target.value)}
       className="bg-background-card border border-border rounded-lg px-4 py-2 text-foreground text-sm cursor-pointer"
     >
-      <option value="recentes">Mais recentes</option>
-      <option value="preco-asc">Menor preço</option>
       <option value="preco-desc">Maior preço</option>
+      <option value="preco-asc">Menor preço</option>
+      <option value="ano-desc">Mais recentes</option>
       <option value="km-asc">Menor km</option>
     </select>
   )

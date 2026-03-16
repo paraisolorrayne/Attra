@@ -115,17 +115,17 @@ export default function ManualAttraIndexPage() {
         <Container>
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Veja estas tecnologias no estoque Attra
+              Veja estas tecnologias nos veículos Attra
             </h2>
             <p className="text-foreground-secondary mb-6">
               Cada veículo do nosso acervo é selecionado com o rigor técnico que você leu
-              aqui. Explore o estoque e encontre o seu próximo carro.
+              aqui. Explore nossos veículos e encontre o seu próximo carro.
             </p>
             <Link
-              href="/estoque"
+              href="/veiculos"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
             >
-              Explorar Estoque Premium
+              Explorar Veículos Premium
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

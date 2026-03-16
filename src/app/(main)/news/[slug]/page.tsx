@@ -258,7 +258,7 @@ export default async function NewsArticlePage({ params }: PageProps) {
             </div>
           )}
 
-          {/* CTA Estoque */}
+          {/* CTA Veículos */}
           <div className="bg-gradient-to-br from-primary via-primary to-primary-hover rounded-2xl p-8 lg:p-10 text-center mb-8 relative overflow-hidden">
             {/* Decorative background elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -272,11 +272,11 @@ export default async function NewsArticlePage({ params }: PageProps) {
                 Apaixonado por carros premium?
               </h3>
               <p className="text-white/80 max-w-md mx-auto mb-6 leading-relaxed">
-                Explore nosso estoque exclusivo de supercarros e veículos de luxo. A Attra traz o melhor do mundo automotivo para você.
+                Explore nosso acervo exclusivo de supercarros e veículos de luxo. A Attra traz o melhor do mundo automotivo para você.
               </p>
               <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold text-lg px-8 py-6">
-                <Link href="/estoque">
-                  Ver Estoque Premium
+                <Link href="/veiculos">
+                  Explorar Veículos Premium
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>

@@ -181,17 +181,17 @@ export default async function ManualAttraTermPage({ params }: ManualAttraTermPag
         <Container>
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              Encontre veículos com {term.title} no estoque Attra
+              Encontre veículos com {term.title} na Attra
             </h2>
             <p className="text-foreground-secondary mb-6">
               Nosso acervo é curado com o rigor técnico que você leu aqui.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link
-                href="/estoque"
+                href="/veiculos"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-colors"
               >
-                Ver Estoque Premium
+                Explorar Veículos Premium
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link

@@ -497,7 +497,7 @@ function CTASection({ brand, model, isPrimary = false }: {
           Interessado neste veículo?
         </h2>
         <p className="text-lg text-foreground-secondary mb-10 max-w-2xl mx-auto">
-          Entre em contato com nossos especialistas para mais informações sobre o {brand} {model} ou explore modelos similares em nosso estoque.
+          Entre em contato com nossos especialistas para mais informações sobre o {brand} {model} ou explore modelos similares em nosso acervo.
         </p>
 
         {/* CTA Buttons - Padronizados */}
@@ -510,11 +510,11 @@ function CTASection({ brand, model, isPrimary = false }: {
             </a>
           </Button>
 
-          {/* Secondary CTA - Ver Estoque */}
+          {/* Secondary CTA - Ver Veículos */}
           <Button asChild variant="outline" size="lg" className="min-h-[52px] text-base font-semibold">
-            <Link href={`/estoque?marca=${brand?.toLowerCase()}`}>
+            <Link href={`/veiculos?marca=${brand?.toLowerCase()}`}>
               <Car className="w-5 h-5 mr-2" />
-              Ver Estoque {brand}
+              Ver Veículos {brand}
             </Link>
           </Button>
 
@@ -539,15 +539,15 @@ function ArticleFooter({ brand }: { brand?: string }) {
     <footer className="py-10 lg:py-14 border-t border-border">
       <Container>
         <div className="flex flex-col lg:flex-row justify-between gap-8">
-          {/* Links para estoque */}
+          {/* Links para veículos */}
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-4">
-              Explore Nosso Estoque
+              Explore Nossos Veículos
             </h3>
             <div className="flex flex-wrap gap-3">
               {brand && (
                 <Link
-                  href={`/estoque?marca=${brand.toLowerCase()}`}
+                  href={`/veiculos?marca=${brand.toLowerCase()}`}
                   className="px-4 py-2 bg-background-card rounded-lg border border-border
                              hover:border-primary/40 transition-colors text-sm"
                 >
@@ -555,14 +555,14 @@ function ArticleFooter({ brand }: { brand?: string }) {
                 </Link>
               )}
               <Link
-                href="/estoque"
+                href="/veiculos"
                 className="px-4 py-2 bg-background-card rounded-lg border border-border
                            hover:border-primary/40 transition-colors text-sm"
               >
-                Todo o Estoque
+                Todos os Veículos
               </Link>
               <Link
-                href="/estoque?categoria=superesportivos"
+                href="/veiculos?categoria=superesportivos"
                 className="px-4 py-2 bg-background-card rounded-lg border border-border
                            hover:border-primary/40 transition-colors text-sm"
               >
@@ -785,7 +785,7 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
             />
 
             {/* ================================================================== */}
-            {/* DISPONIBILIDADE NO ESTOQUE */}
+            {/* DISPONIBILIDADE NA ATTRA */}
             {/* ================================================================== */}
             {car_review?.availability && (
               <div className="mt-12 p-6 lg:p-8 rounded-2xl border-2 border-primary/30 bg-primary/5">
@@ -796,7 +796,7 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
                         <>
                           <CheckCircle className="w-6 h-6 text-green-500" />
                           <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                            Disponível em Estoque Attra
+                            Disponível na Attra Veículos
                           </span>
                         </>
                       ) : (
@@ -820,7 +820,7 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
                   {car_review.availability.in_stock && car_review.availability.stock_url && (
                     <Button asChild size="lg" className="min-h-[52px]">
                       <Link href={car_review.availability.stock_url}>
-                        Ver Detalhes no Estoque
+                        Ver Detalhes do Veículo
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </Link>
                     </Button>

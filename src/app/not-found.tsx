@@ -41,14 +41,14 @@ export default function NotFound() {
           </Link>
 
           <Link
-            href="/estoque"
+            href="/veiculos"
             className="flex items-center gap-3 p-4 bg-background-card border border-border rounded-xl hover:border-primary/50 hover:bg-primary/5 transition-all group"
           >
             <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
               <Search className="w-5 h-5 text-primary" />
             </div>
             <div className="text-left">
-              <p className="font-semibold text-foreground">Estoque</p>
+              <p className="font-semibold text-foreground">Veículos</p>
               <p className="text-xs text-foreground-secondary">Ver veículos</p>
             </div>
           </Link>

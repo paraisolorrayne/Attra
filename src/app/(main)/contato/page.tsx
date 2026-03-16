@@ -298,8 +298,8 @@ export default function ContatoPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6">
-                <Link href="/estoque">
-                  Ver Estoque Completo
+                <Link href="/veiculos">
+                  Ver Todos os Veículos
                 </Link>
               </Button>
             </div>

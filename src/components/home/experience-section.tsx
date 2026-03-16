@@ -2,30 +2,31 @@
 
 import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Building2, Truck, Shield, UserCheck } from 'lucide-react'
+import { ArrowRight, Search, UserCheck, Cpu, HeartHandshake } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
+import { SectionKicker, SectionHeading } from '@/components/ui/brand'
 
-const experiences = [
+const pillars = [
   {
-    icon: Building2,
-    title: 'Showrooms com Curadoria',
-    description: 'Ambientação exclusiva projetada para exibir cada veículo como uma obra de arte. Iluminação profissional, climatização e espaço pensado para apreciação.',
-  },
-  {
-    icon: Truck,
-    title: 'Logística Nacional Premium',
-    description: 'Entrega em qualquer estado do Brasil com seguro especializado para veículos de alto valor, rastreamento em tempo real e cuidado obsessivo.',
-  },
-  {
-    icon: Shield,
-    title: 'Procedência Verificada',
-    description: 'Cada veículo passa por análise rigorosa de histórico, documentação e inspeção técnica de 200 itens antes de integrar nosso acervo.',
+    icon: Search,
+    title: 'Curadoria rigorosa',
+    description: 'Cada veículo passa por seleção e análise criteriosa antes de integrar o acervo.',
   },
   {
     icon: UserCheck,
-    title: 'Atendimento Sob Medida',
-    description: 'Consultores especializados dedicados a entender seu perfil e apresentar as melhores opções com discrição, agilidade e total personalização.',
+    title: 'Experiência personalizada',
+    description: 'O atendimento considera o carro desejado e o momento do cliente.',
+  },
+  {
+    icon: Cpu,
+    title: 'Tecnologia aplicada ao relacionamento',
+    description: 'IA e sistemas próprios tornam o atendimento mais ágil, eficiente e conectado.',
+  },
+  {
+    icon: HeartHandshake,
+    title: 'Acompanhamento contínuo',
+    description: 'A relação continua depois da entrega.',
   },
 ]
 
@@ -47,38 +48,40 @@ export function ExperienceSection() {
       <Container size="2xl">
         {/* Section Header */}
         <div className={`text-center mb-16 opacity-0 ${isVisible ? 'animate-fade-in-up' : ''}`}>
-          <span className="text-primary font-medium tracking-wide uppercase text-sm">Além do Carro</span>
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mt-4 mb-4">
-            A Experiência Attra em Veículos Premium
-          </h2>
-          <p className="text-foreground-secondary text-lg max-w-2xl mx-auto">
-            Do primeiro contato à entrega das chaves, cada detalhe é pensado para quem exige o extraordinário na compra de carros de luxo e supercarros
+          <SectionKicker className="mb-4">Operação</SectionKicker>
+          <SectionHeading as="h2" size="lg" className="mb-4">
+            Um novo jeito de operar
+          </SectionHeading>
+          <p className="text-foreground-secondary text-lg max-w-3xl mx-auto">
+            Com o tempo, a Attra evoluiu. O que começou como uma visão clara sobre curadoria passou a
+            incorporar tecnologia, inteligência de dados e novos modelos de relacionamento. Hoje, a empresa
+            combina sensibilidade automotiva com eficiência operacional — ampliando atendimento sem perder
+            proximidade, confiança e atenção aos detalhes.
           </p>
         </div>
 
-        {/* Experience Grid */}
+        {/* Pillars Grid */}
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-          {experiences.map((exp, index) => (
+          {pillars.map((pillar, index) => (
             <div
-              key={exp.title}
-              className={`group bg-background-card border border-border rounded-2xl overflow-hidden
+              key={pillar.title}
+              className={`group institutional-card overflow-hidden
                 transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5
                 opacity-0 ${isVisible ? `animate-fade-in-up stagger-${index + 1}` : ''}`}
             >
-              {/* Content - Static layout for mobile, overlay for desktop */}
               <div className="p-5 sm:p-6">
                 <div className="flex gap-4">
                   <div className="p-3 bg-primary/10 rounded-xl border border-primary/10
                                   group-hover:bg-primary/15 group-hover:border-primary/20 transition-colors
                                   shrink-0 self-start">
-                    <exp.icon className="w-6 h-6 text-primary" />
+                    <pillar.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      {exp.title}
+                    <h3 className="type-display-md text-lg sm:text-xl group-hover:text-primary transition-colors mb-2">
+                      {pillar.title}
                     </h3>
                     <p className="text-sm sm:text-base text-foreground-secondary leading-relaxed">
-                      {exp.description}
+                      {pillar.description}
                     </p>
                   </div>
                 </div>
@@ -94,9 +97,6 @@ export function ExperienceSection() {
               Ver a Jornada Attra em Detalhes <ArrowRight className="w-5 h-5" />
             </Link>
           </Button>
-          <p className="mt-3 text-foreground-secondary text-sm max-w-xl mx-auto">
-            Entenda passo a passo como funciona nossa experiência premium, da escolha à entrega em todo o Brasil
-          </p>
         </div>
       </Container>
     </section>

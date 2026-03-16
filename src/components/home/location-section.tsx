@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { MapPin, Phone, Clock, ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
@@ -42,34 +43,34 @@ export function LocationSection() {
                 key={location.id}
                 className="bg-background border border-border rounded-xl p-8 hover:border-primary transition-colors"
               >
-                <h3 className="text-2xl font-semibold text-foreground mb-6">
+                <h3 className="text-2xl lg:text-3xl font-semibold text-foreground mb-6">
                   {location.name}
                 </h3>
-                
-                <div className="space-y-4">
+
+                <div className="space-y-5">
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-6 h-6 text-primary mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-base text-foreground">{location.address}</p>
-                      <p className="text-sm text-foreground-secondary">
+                      <p className="text-lg lg:text-xl text-foreground font-medium">{location.address}</p>
+                      <p className="text-base lg:text-lg text-foreground-secondary">
                         {location.city} - {location.state}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-primary flex-shrink-0" />
+                    <Phone className="w-6 h-6 text-primary flex-shrink-0" />
                     <a
                       href={`tel:${location.phone.replace(/\D/g, '')}`}
-                      className="text-base text-foreground hover:text-primary transition-colors font-medium"
+                      className="text-lg lg:text-xl text-foreground hover:text-primary transition-colors font-medium"
                     >
                       {location.phone}
                     </a>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-primary flex-shrink-0" />
-                    <p className="text-sm text-foreground-secondary">{location.hours}</p>
+                    <Clock className="w-6 h-6 text-primary flex-shrink-0" />
+                    <p className="text-base lg:text-lg text-foreground-secondary">{location.hours}</p>
                   </div>
                 </div>
 
@@ -78,26 +79,23 @@ export function LocationSection() {
                     href="https://maps.app.goo.gl/q8RmVwZpLo7n7W8B8"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-base text-primary hover:text-primary-hover font-semibold transition-colors"
+                    className="inline-flex items-center text-lg text-primary hover:text-primary-hover font-semibold transition-colors"
                   >
-                    Ver no mapa <ArrowRight className="w-4 h-4 ml-1" />
+                    Ver no mapa <ArrowRight className="w-5 h-5 ml-1" />
                   </a>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Right: Google Map Embed */}
-          <div className="bg-background border border-border rounded-xl overflow-hidden h-full min-h-[400px] lg:min-h-[550px]">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3752.7623839425146!2d-48.27717!3d-18.91861!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1sAttra%20Ve%C3%ADculos!2sAv.%20Rondon%20Pacheco%2C%201670%20-%20Uberlandia%2C%20MG%2038408-343!5e0!3m2!1spt-BR!2sbr!4v1234567890"
-              width="100%"
-              height="100%"
-              style={{ border: 0, minHeight: '400px' }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="w-full h-full"
+          {/* Right: Showroom Image */}
+          <div className="relative rounded-xl overflow-hidden h-full min-h-[400px] lg:min-h-[550px]">
+            <Image
+              src="/about/attra-curadoria-veiculos.jpg"
+              alt="Showroom Attra Veículos em Uberlândia"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
         </div>

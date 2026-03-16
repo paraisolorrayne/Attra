@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { MapPin, Building2, Award, Clock, Star, Users, Truck, Search, FileCheck, CheckCircle, Phone, MessageCircle, ArrowRight, Shield, Handshake, Eye, FileText, CreditCard, HeadphonesIcon } from 'lucide-react'
+import { MapPin, Award, Clock, Star, Users, Truck, Search, FileCheck, CheckCircle, Phone, MessageCircle, ArrowRight, Shield, Handshake, Eye, FileText, CreditCard, HeadphonesIcon, Play, Youtube } from 'lucide-react'
 import { getWhatsAppUrl } from '@/lib/constants'
 
 export const metadata: Metadata = {
@@ -89,7 +89,7 @@ const testimonials = [
 
 const achievements = [
   {
-    year: 2008,
+    year: 2009,
     title: 'Fundação',
     description:
       'A Attra Veículos nasceu com o propósito de oferecer uma experiência diferenciada na compra e venda de veículos, unindo transparência, credibilidade e atendimento personalizado. Fundada como uma empresa familiar, a Attra foi construída sobre valores sólidos, com foco em profissionalização, respeito aos processos e compromisso com o cliente.',
@@ -150,9 +150,9 @@ export default function JornadaPage() {
             className="object-cover"
             priority
           />
-          {/* Theme-aware overlays using custom CSS classes */}
-          <div className="absolute inset-0 jornada-hero-overlay md:!bg-transparent" />
-          <div className="absolute inset-0 hidden md:block jornada-hero-overlay-gradient" />
+          {/* Theme-aware overlays — responsiveness handled in CSS */}
+          <div className="absolute inset-0 jornada-hero-overlay" />
+          <div className="absolute inset-0 jornada-hero-overlay-gradient" />
         </div>
 
         <Container className="relative z-10">
@@ -239,7 +239,7 @@ export default function JornadaPage() {
               {
                 icon: CheckCircle,
                 title: 'Inspeção Técnica de 150 Pontos',
-                description: 'Cada carro de luxo é submetido a uma inspeção completa de 150 itens — mecânica, elétrica, estrutura, pintura e acabamento — antes de entrar no estoque.',
+                description: 'Cada carro de luxo é submetido a uma inspeção completa de 150 itens — mecânica, elétrica, estrutura, pintura e acabamento — antes de integrar nosso acervo.',
               },
               {
                 icon: FileText,
@@ -324,39 +324,40 @@ export default function JornadaPage() {
         </Container>
       </section>
 
-      {/* Showroom Section */}
+      {/* Vídeo Institucional */}
       <section className="py-16 lg:py-20 bg-background-soft">
         <Container>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
-                <Building2 className="w-4 h-4 text-primary" />
-                <span className="text-xs font-semibold text-primary uppercase tracking-wider">Estrutura</span>
-              </div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6">
-                Showroom Premium de 5.000m²
-              </h2>
-              <p className="text-lg text-foreground-secondary mb-6 leading-relaxed">
-                Nossa estrutura em Uberlândia foi projetada para proporcionar a melhor experiência em compra de supercarros.
-                Ambiente climatizado, iluminação profissional e espaço pensado para você apreciar cada detalhe do seu próximo veículo.
-              </p>
-              <ul className="space-y-3 mb-8">
-                {['Showroom climatizado de 5.000m²', 'Iluminação profissional para cada veículo', 'Ambiente exclusivo para negociação', 'Estacionamento privativo para clientes'].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-foreground-secondary">
-                    <CheckCircle className="w-5 h-5 text-primary shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button asChild size="lg">
-                <Link href={getWhatsAppUrl('Olá! Gostaria de agendar uma visita ao showroom.')} target="_blank">
-                  <MessageCircle className="w-5 h-5 mr-2" />Agendar Visita
-                </Link>
-              </Button>
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full mb-4">
+              <Play className="w-4 h-4 text-primary" />
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider">Conheça a Attra</span>
             </div>
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
-              <Image src="/experience/showroom.jpg" alt="Showroom Attra Veículos - 5000m²" fill className="object-cover" />
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              A experiência por trás de cada entrega
+            </h2>
+            <p className="text-foreground-secondary text-lg max-w-2xl mx-auto">
+              Veja de perto como a Attra opera — da curadoria à entrega do seu veículo.
+            </p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-background-card border border-border">
+              <iframe
+                src="https://www.youtube.com/embed/Y1UA3pYc7TE?rel=0&modestbranding=1"
+                title="Attra Veículos — Conheça a Attra"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
             </div>
+          </div>
+          {/* CTA YouTube */}
+          <div className="text-center mt-8">
+            <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 gap-2">
+              <a href="https://www.youtube.com/@attraveiculos" target="_blank" rel="noopener noreferrer">
+                <Youtube className="w-5 h-5 text-red-600" />
+                Acompanhe nossos vídeos no YouTube
+              </a>
+            </Button>
           </div>
         </Container>
       </section>

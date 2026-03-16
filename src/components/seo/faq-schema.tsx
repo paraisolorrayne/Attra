@@ -55,9 +55,9 @@ export const homeFAQs: FAQItem[] = [
   },
 ]
 
-export const estoqueFAQs: FAQItem[] = [
+export const veiculosFAQs: FAQItem[] = [
   {
-    question: 'Como posso reservar um veículo do estoque?',
+    question: 'Como posso reservar um veículo da Attra?',
     answer: 'Para reservar um veículo, entre em contato pelo WhatsApp ou visite nossa loja. A reserva é confirmada após sinal e análise de crédito (se for financiamento). Nossos consultores te guiam em todo o processo.',
   },
   {
@@ -73,8 +73,8 @@ export const estoqueFAQs: FAQItem[] = [
     answer: 'Sim, avaliamos seu veículo atual e oferecemos valor justo de mercado como parte do pagamento. Nossa equipe faz avaliação profissional considerando estado, quilometragem e demanda de mercado.',
   },
   {
-    question: 'Com que frequência novos veículos entram no estoque?',
-    answer: 'Nosso estoque é atualizado constantemente. Novos veículos chegam semanalmente. Você pode se cadastrar para receber alertas de novos modelos das marcas de seu interesse.',
+    question: 'Com que frequência novos veículos chegam à Attra?',
+    answer: 'Nosso acervo é atualizado constantemente. Novos veículos chegam semanalmente. Você pode se cadastrar para receber alertas de novos modelos das marcas de seu interesse.',
   },
 ]
 

@@ -31,19 +31,19 @@ export const homepageFAQs: FAQItem[] = [
   },
 ]
 
-// Estoque FAQs - Questions about inventory and buying (SEO + LLMO optimized)
-export const estoqueFAQs: FAQItem[] = [
+// Veículos FAQs - Questions about inventory and buying (SEO + LLMO optimized)
+export const veiculosFAQs: FAQItem[] = [
   {
-    question: 'Os veículos premium do estoque estão disponíveis para pronta entrega?',
-    answer: 'Sim, todos os veículos premium e supercarros exibidos em nosso estoque estão disponíveis para pronta entrega em todo o Brasil. Atualizamos o site em tempo real para garantir que você veja apenas carros de luxo disponíveis.',
+    question: 'Os veículos premium da Attra estão disponíveis para pronta entrega?',
+    answer: 'Sim, todos os veículos premium e supercarros exibidos em nosso acervo estão disponíveis para pronta entrega em todo o Brasil. Atualizamos o site em tempo real para garantir que você veja apenas carros de luxo disponíveis.',
   },
   {
     question: 'Como agendar um test drive de um carro de luxo na Attra?',
     answer: 'Basta entrar em contato pelo WhatsApp ou telefone para agendar o melhor horário. Recomendamos agendamento prévio com um de nossos consultores especializados em veículos premium e supercarros.',
   },
   {
-    question: 'Os veículos premium passam por inspeção antes de entrar no estoque?',
-    answer: 'Todos os veículos premium e supercarros passam por uma rigorosa inspeção de 150 pontos antes de entrar em nosso estoque. Verificamos mecânica, elétrica, estrutura, documentação 100% verificada e histórico completo do veículo.',
+    question: 'Os veículos premium passam por inspeção antes de integrar o acervo?',
+    answer: 'Todos os veículos premium e supercarros passam por uma rigorosa inspeção de 150 pontos antes de integrar nosso acervo. Verificamos mecânica, elétrica, estrutura, documentação 100% verificada e histórico completo do veículo.',
   },
   {
     question: 'A Attra aceita meu carro como parte do pagamento de um veículo premium?',
