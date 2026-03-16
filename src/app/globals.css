@@ -137,3 +137,34 @@ html {
   background: var(--primary); border-radius: 3px;
   transition: height 0.1s linear;
 }
+
+/* ===== Custom Cursor ===== */
+/* Hide native cursor on non-touch devices */
+@media (pointer: fine) {
+  *,
+  *::before,
+  *::after {
+    cursor: none !important;
+  }
+}
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease;
+  mix-blend-mode: difference;
+}
+
+.custom-cursor__image {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  user-select: none;
+  transition: filter 0.3s ease;
+}

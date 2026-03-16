@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ToastProvider } from '@/components/ui/toast'
 import { VisitorTrackingProvider } from '@/components/providers/visitor-tracking-provider'
 import { AnalyticsProvider, AnalyticsNoScript } from '@/components/analytics'
+import { CustomCursor } from '@/components/ui/custom-cursor'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -93,6 +94,7 @@ export default function RootLayout({
         {/* GTM NoScript fallback for users without JavaScript */}
         <AnalyticsNoScript />
         <ThemeProvider>
+          <CustomCursor />
           <ToastProvider>
             <Suspense fallback={null}>
               <VisitorTrackingProvider>

@@ -173,3 +173,102 @@
   50% { height: 100%; }
 }
 
+/* ===== Premium Loading System ===== */
+
+/* Diagonal shimmer sweep — replaces basic pulse */
+@keyframes attra-shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+/* Logo breathe — slow elegant pulse for branded loader */
+@keyframes attra-breathe {
+  0%, 100% { opacity: 0.4; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* Ring expand — concentric ring pulse */
+@keyframes attra-ring {
+  0% { transform: scale(0.8); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+/* Premium skeleton shimmer class */
+.skeleton-premium {
+  position: relative;
+  overflow: hidden;
+  background: var(--foreground-secondary);
+  opacity: 0.06;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-premium::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(154, 28, 28, 0.08) 45%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(154, 28, 28, 0.08) 55%,
+    transparent 70%
+  );
+  animation: attra-shimmer 2s var(--ease-premium) infinite;
+}
+
+.dark .skeleton-premium {
+  opacity: 0.1;
+}
+
+.dark .skeleton-premium::after {
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(154, 28, 28, 0.12) 45%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(154, 28, 28, 0.12) 55%,
+    transparent 70%
+  );
+}
+
+/* Branded loader */
+.attra-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.attra-loader__logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  animation: attra-breathe 2.4s var(--ease-premium) infinite;
+  filter: grayscale(0.2);
+}
+
+.attra-loader__ring {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--primary);
+  border-radius: 50%;
+  animation: attra-ring 2.4s var(--ease-premium) infinite;
+}
+
+.attra-loader__ring--delayed {
+  animation-delay: 0.8s;
+}
+
+.attra-loader__text {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--foreground-secondary);
+  opacity: 0.7;
+}
+

@@ -8,10 +8,59 @@ export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
       className={cn(
-        'animate-pulse rounded-md bg-foreground-secondary/10',
+        'skeleton-premium',
         className
       )}
     />
+  )
+}
+
+/**
+ * AttraLoader — branded full-section or full-page loading indicator.
+ * Uses the Attra "A" mark with a breathing animation + concentric rings.
+ */
+interface AttraLoaderProps {
+  /** 'page' = centered in viewport, 'section' = centered in parent, 'inline' = small inline */
+  variant?: 'page' | 'section' | 'inline'
+  /** Optional text shown below the logo */
+  text?: string
+  className?: string
+}
+
+export function AttraLoader({ variant = 'section', text, className }: AttraLoaderProps) {
+  const sizes = {
+    page: { logo: 48, ring: 72, wrapper: 'min-h-screen' },
+    section: { logo: 40, ring: 60, wrapper: 'min-h-[320px]' },
+    inline: { logo: 24, ring: 36, wrapper: 'min-h-[120px]' },
+  }
+
+  const s = sizes[variant]
+
+  return (
+    <div className={cn('attra-loader', s.wrapper, className)}>
+      <div className="relative flex items-center justify-center">
+        {/* Concentric rings */}
+        <div
+          className="attra-loader__ring"
+          style={{ width: s.ring, height: s.ring }}
+        />
+        <div
+          className="attra-loader__ring attra-loader__ring--delayed"
+          style={{ width: s.ring, height: s.ring }}
+        />
+        {/* Logo mark */}
+        <img
+          src="/images/A.png"
+          alt=""
+          className="attra-loader__logo"
+          style={{ width: s.logo, height: s.logo }}
+          draggable={false}
+        />
+      </div>
+      {text && variant !== 'inline' && (
+        <span className="attra-loader__text">{text}</span>
+      )}
+    </div>
   )
 }
 
