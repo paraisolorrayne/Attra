@@ -5,7 +5,6 @@ import { RacingProgress } from '@/components/ui/racing-progress'
 import { OrganizationSchema, WebsiteSchema } from '@/components/seo'
 import { VehicleProvider } from '@/contexts/vehicle-context'
 import { StickyContactForm } from '@/components/forms'
-import { FloatingCTABar } from '@/components/home'
 
 export default function MainLayout({
   children,
@@ -22,7 +21,6 @@ export default function MainLayout({
         <main className="flex-1 page-enter">{children}</main>
         <Footer />
       </div>
-      <FloatingCTABar />
       <WhatsAppButton />
       <StickyContactForm />
     </VehicleProvider>
