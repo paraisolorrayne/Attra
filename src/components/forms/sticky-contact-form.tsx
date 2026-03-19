@@ -93,6 +93,13 @@ export function StickyContactForm() {
     }
   }, [pathname]) // reset delay on each SPA navigation
 
+  // ── Dismiss handler (must be declared before effects that use it) ──
+  const handleDismiss = useCallback(() => {
+    setIsDismissed(true)
+    setIsVisible(false)
+    sessionStorage.setItem(DISMISSED_KEY, 'true')
+  }, [])
+
   // ── Exit intent listener ──
   useEffect(() => {
     const handleMouseLeave = (e: MouseEvent) => {
@@ -158,12 +165,6 @@ export function StickyContactForm() {
       setIsSubmitting(false)
     }
   }
-
-  const handleDismiss = useCallback(() => {
-    setIsDismissed(true)
-    setIsVisible(false)
-    sessionStorage.setItem(DISMISSED_KEY, 'true')
-  }, [])
 
   if (!isVisible || isDismissed) return null
 
