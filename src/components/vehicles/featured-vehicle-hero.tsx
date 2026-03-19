@@ -48,7 +48,7 @@ export function FeaturedVehicleHero({ vehicle }: FeaturedVehicleHeroProps) {
           <div className="relative z-10 lg:w-2/5 flex justify-center w-full">
             <div className="relative w-full aspect-[16/9] sm:aspect-[16/9] max-w-[280px] sm:max-w-md lg:max-w-lg rounded-xl sm:rounded-2xl overflow-hidden shadow-xl shadow-black/15 border border-border/50">
               <Image
-                src={vehicle.photos?.[1] || vehicle.photos?.[0] || '/placeholder.jpg'}
+                src={vehicle.photos?.[0] || '/placeholder.jpg'}
                 alt={`${vehicle.brand} ${vehicle.model}`}
                 fill
                 className="object-cover drop-shadow-2xl mix-blend-lighten"

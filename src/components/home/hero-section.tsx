@@ -15,7 +15,7 @@ export function HeroSection() {
           {/* Content */}
           <div className="space-y-6">
             <div className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
-              Referência em veículos premium
+              Curadoria em veículos premium
             </div>
             
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
@@ -24,8 +24,7 @@ export function HeroSection() {
             </h1>
             
             <p className="text-lg text-foreground-secondary max-w-lg">
-              Especialistas em veículos nacionais, importados, seminovos e supercarros. 
-              RS6 Avant, X6M, Escalade e os melhores modelos do mercado premium brasileiro.
+              Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.
             </p>
 
             {/* Quick Search */}

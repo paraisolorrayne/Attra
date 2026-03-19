@@ -26,21 +26,23 @@ export function AnalyticsProvider() {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID
 
-  // If GTM is configured, use it (GA4 should be inside GTM)
+  // If GTM is configured, use it (GA4 and Clarity should be inside GTM)
   // If only GA4 is configured, use direct implementation
   const useGTM = !!gtmId
   const useDirectGA = !gtmId && !!gaMeasurementId
+  // Only load Clarity directly if GTM is NOT active (Clarity is already configured inside GTM)
+  const useDirectClarity = !gtmId && !!clarityId
 
   return (
     <>
-      {/* Google Tag Manager (recommended) */}
+      {/* Google Tag Manager (recommended - includes GA4, Clarity, and Google Ads) */}
       {useGTM && <GoogleTagManager gtmId={gtmId} />}
 
       {/* Direct GA4 (fallback if no GTM) */}
       {useDirectGA && <GoogleAnalytics measurementId={gaMeasurementId} />}
 
-      {/* Microsoft Clarity for heatmaps and recordings */}
-      {clarityId && <MicrosoftClarity clarityId={clarityId} />}
+      {/* Microsoft Clarity - only when GTM is not active (avoids double loading) */}
+      {useDirectClarity && <MicrosoftClarity clarityId={clarityId!} />}
     </>
   )
 }

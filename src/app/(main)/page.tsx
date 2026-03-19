@@ -135,7 +135,7 @@ export default async function Home() {
             '@context': 'https://schema.org',
             '@type': 'AutoDealer',
             name: 'Attra Veículos',
-            description: 'Referência em veículos premium, carros de luxo, importados e supercarros em Uberlândia. Loja de veículos premium em Minas Gerais com curadoria rigorosa e entrega nacional.',
+            description: 'Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.',
             url: 'https://attraveiculos.com.br',
             telephone: '+55-34-3014-3232',
             address: {

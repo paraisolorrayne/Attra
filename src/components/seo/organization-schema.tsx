@@ -3,7 +3,7 @@ export function OrganizationSchema() {
     '@context': 'https://schema.org',
     '@type': 'AutoDealer',
     name: 'Attra Veículos',
-    description: 'Referência em veículos premium, importados e supercarros em Uberlândia e Minas Gerais. Atendimento nacional.',
+    description: 'Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.',
     url: 'https://attraveiculos.com.br',
     logo: 'https://attraveiculos.com.br/logo.png',
     image: 'https://attraveiculos.com.br/showroom.jpg',

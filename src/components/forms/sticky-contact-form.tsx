@@ -111,6 +111,16 @@ export function StickyContactForm() {
     return () => document.removeEventListener('mouseleave', handleMouseLeave)
   }, [isDismissed, hasUserMadeContact, isVisible])
 
+  // ── Close on Escape key ──
+  useEffect(() => {
+    if (!isVisible) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDismiss()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isVisible, handleDismiss])
+
   // ── Form submission ──
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
@@ -164,8 +174,8 @@ export function StickyContactForm() {
       : 'Olá! Gostaria de mais informações sobre um veículo do site.'
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden lg:flex">
-        <div className="bg-background-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-slide-up">
+      <div className="fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm hidden lg:flex" onClick={handleDismiss}>
+        <div className="bg-background-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
           {/* Header */}
           <div className="bg-primary px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-white">
@@ -227,8 +237,8 @@ export function StickyContactForm() {
   // ── Stock page: "Não encontrou?" centered modal ──
   if (pageMode === 'stock') {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden lg:flex">
-        <div className="bg-background-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-slide-up">
+      <div className="fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm hidden lg:flex" onClick={handleDismiss}>
+        <div className="bg-background-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-slide-up" onClick={(e) => e.stopPropagation()}>
           <div className="bg-secondary px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-white">
               <Search className="w-5 h-5" />

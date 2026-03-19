@@ -108,7 +108,7 @@ function mapAutoConfToVehicle(autoconfVehicle: AutoConfVehicle): Vehicle {
     transmission: autoconfVehicle.cambio_nome,
     price,
     category,
-    body_type: autoconfVehicle.carroceria_nome || 'Sedan',
+    body_type: autoconfVehicle.carroceria_nome || 'Outros',
     location_id: '1',
     photos: autoconfVehicle.fotos?.map(f => f.url) || [autoconfVehicle.foto],
     videos: null,

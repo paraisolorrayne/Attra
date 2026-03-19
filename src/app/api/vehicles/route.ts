@@ -72,12 +72,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply general search filter (searches across brand, model, version)
+    // Normalizes hyphens/special chars so "G63" matches "G-63", etc.
     if (search) {
-      const searchLower = search.toLowerCase().trim()
-      const searchTerms = searchLower.split(/\s+/) // Split by whitespace for multi-word search
+      const normalizeSearch = (text: string) =>
+        text.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[-_./]/g, '')
+      const searchNormalized = normalizeSearch(search)
+      const searchTerms = searchNormalized.split(/\s+/)
 
       vehicles = vehicles.filter(v => {
-        const searchText = `${v.brand} ${v.model} ${v.version || ''}`.toLowerCase()
+        const searchText = normalizeSearch(`${v.brand} ${v.model} ${v.version || ''}`)
         // All search terms must be present somewhere in the search text
         return searchTerms.every(term => searchText.includes(term))
       })

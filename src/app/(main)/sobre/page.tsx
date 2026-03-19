@@ -9,7 +9,7 @@ import { HistoryGallery, type HistoryEra } from '@/components/about/history-gall
 
 export const metadata: Metadata = {
   title: 'Sobre a Attra Veículos | Loja de Veículos Premium em Uberlândia',
-  description: 'Conheça a Attra Veículos, referência em veículos nacionais, importados, seminovos premium e supercarros em Uberlândia/MG. Atendimento nacional para colecionadores de todo o Brasil.',
+  description: 'Conheça a Attra Veículos. Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.',
   keywords: ['Attra Veículos Uberlândia', 'loja de veículos premium', 'supercarros Minas Gerais', 'loja de carros de luxo', 'referência em veículos premium'],
 }
 

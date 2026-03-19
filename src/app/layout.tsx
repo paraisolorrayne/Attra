@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: '%s | Attra Veículos',
   },
   description:
-    'Referência em veículos nacionais, importados, seminovos e supercarros em Uberlândia. Porsche, BMW, Mercedes-Benz, Audi, Land Rover e mais. Atendimento nacional.',
+    'Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil. Porsche, BMW, Mercedes-Benz, Audi, Land Rover e mais.',
   keywords: [
     'carros premium',
     'veículos importados',
@@ -64,13 +64,13 @@ export const metadata: Metadata = {
     siteName: 'Attra Veículos',
     title: 'Attra Veículos - Carros Premium em Uberlândia',
     description:
-      'Referência em veículos nacionais, importados, seminovos e supercarros em Uberlândia.',
+      'Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Attra Veículos - Carros Premium em Uberlândia',
     description:
-      'Referência em veículos nacionais, importados, seminovos e supercarros em Uberlândia.',
+      'Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.',
   },
   robots: {
     index: true,

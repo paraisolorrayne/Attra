@@ -22,10 +22,10 @@ export function GoogleTagManager({ gtmId }: GoogleTagManagerProps) {
 
   return (
     <>
-      {/* GTM Script - loads after page becomes interactive */}
+      {/* GTM Script - loads before page becomes interactive for earliest possible tracking */}
       <Script
         id="gtm-script"
-        strategy="afterInteractive"
+        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{
           __html: `
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

@@ -154,12 +154,14 @@ export default async function VeiculosPage({ searchParams }: VeiculosPageProps) 
       featuredVehicle = top3[dayIndex]
     }
 
-    // Helper function to normalize text for search (removes accents and lowercases)
+    // Helper function to normalize text for search (removes accents, hyphens, special chars and lowercases)
+    // This ensures "G63" matches "G-63", "Mercedes Benz" matches "Mercedes-Benz", etc.
     const normalizeText = (text: string): string => {
       return text
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[-_./]/g, '')          // Remove hyphens, underscores, dots, slashes
     }
 
     // Apply client-side filtering for all filter types

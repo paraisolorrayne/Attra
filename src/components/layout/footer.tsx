@@ -67,8 +67,7 @@ export function Footer() {
               />
             </Link>
             <p className="text-foreground-secondary text-sm mb-4">
-              Referência em veículos nacionais, importados, seminovos e supercarros em Uberlândia e região. 
-              Atendimento nacional a partir de Minas Gerais.
+              Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.
             </p>
             <div className="flex gap-3">
               <a href="https://instagram.com/attra.veiculos" target="_blank" rel="noopener noreferrer" className="p-2 bg-background hover:bg-primary hover:text-white rounded-lg transition-colors">

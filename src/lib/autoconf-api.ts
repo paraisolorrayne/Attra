@@ -350,7 +350,7 @@ export function mapAutoConfToVehicle(autoconfVehicle: AutoConfVehicle): Vehicle 
     transmission: autoconfVehicle.cambio_nome || 'Não informado',
     price,
     category,
-    body_type: autoconfVehicle.carroceria_nome || 'Sedan',
+    body_type: autoconfVehicle.carroceria_nome || 'Outros',
     location_id: '1', // Default location
     photos: autoconfVehicle.fotos?.map(f => f.url) || (autoconfVehicle.foto ? [autoconfVehicle.foto] : []),
     videos: null,
