@@ -320,6 +320,20 @@ export interface Database {
           modelo_interesse: string | null
           prioridade: PrioridadeLead
           status: StatusLead
+          // Tracking / attribution columns
+          session_id: string | null
+          visitor_session_db_id: string | null
+          ip_address: string | null
+          landing_page: string | null
+          referrer: string | null
+          utm_source: string | null
+          utm_medium: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_term: string | null
+          fbclid: string | null
+          gclid: string | null
+          ttclid: string | null
           criado_em: string
           atualizado_em: string
         }

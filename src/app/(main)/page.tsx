@@ -90,9 +90,10 @@ export default async function Home() {
       registros_por_pagina: 20,  // Increased to get more variety
       ordenar: 'preco',
       ordem: 'desc',
-      preco_de: 1000000  // Filtro: apenas veículos acima de R$ 1 milhão
+      preco_de: 500000  // Filtro: apenas veículos acima de R$ 500 mil
     })
-    featuredVehicles = result.vehicles
+    // Filtro client-side para garantir que nenhum veículo abaixo de R$ 500k apareça
+    featuredVehicles = result.vehicles.filter(v => v.price >= 500000)
   } catch (error) {
     console.error('Failed to fetch featured vehicles:', error)
   }

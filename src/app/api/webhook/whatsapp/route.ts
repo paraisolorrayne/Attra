@@ -25,6 +25,19 @@ const whatsappEventSchema = z.object({
     userName: z.string().optional(),
     userPhone: z.string().optional(),
     userEmail: z.string().optional(),
+    // Tracking / attribution
+    sessionId: z.string().optional(),
+    ipAddress: z.string().optional(),
+    landingPage: z.string().optional(),
+    referrer: z.string().optional(),
+    utmSource: z.string().optional(),
+    utmMedium: z.string().optional(),
+    utmCampaign: z.string().optional(),
+    utmContent: z.string().optional(),
+    utmTerm: z.string().optional(),
+    fbclid: z.string().optional(),
+    gclid: z.string().optional(),
+    ttclid: z.string().optional(),
     // dados livres enviados a partir de formulários; chave string, valor qualquer
     formData: z.record(z.string(), z.unknown()).optional(),
   }).optional(),
@@ -150,6 +163,20 @@ export async function POST(request: NextRequest) {
       categoria_interesse: context.vehicleCategory || null,
       faixa_preco_interesse_min: context.vehiclePrice ? context.vehiclePrice * 0.8 : null,
       faixa_preco_interesse_max: context.vehiclePrice ? context.vehiclePrice * 1.2 : null,
+      // Tracking / attribution
+      session_id: context.sessionId || null,
+      ip_address: context.ipAddress || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
+      landing_page: context.landingPage || data.sourcePage || null,
+      referrer: context.referrer || request.headers.get('referer') || null,
+      utm_source: context.utmSource || null,
+      utm_medium: context.utmMedium || null,
+      utm_campaign: context.utmCampaign || null,
+      utm_content: context.utmContent || null,
+      utm_term: context.utmTerm || null,
+      fbclid: context.fbclid || null,
+      gclid: context.gclid || null,
+      ttclid: context.ttclid || null,
+      payload_bruto: body,
     }
 
     const { data: newLead, error: leadError } = await supabase
