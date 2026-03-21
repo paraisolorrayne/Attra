@@ -4,8 +4,6 @@ import { getBlogPost } from '@/lib/blog-api'
 import { EducativoTemplate, CarReviewTemplate } from '@/components/blog'
 import { InstagramEmbedProvider } from '@/components/blog/instagram-embed-provider'
 
-export const dynamic = 'force-dynamic'
-
 interface PageProps {
 	params: Promise<{ slug: string }>
 }

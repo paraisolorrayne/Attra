@@ -1,7 +1,18 @@
 import type { DualBlogPost, BlogPostType, BlogAuthor, EducativoFields, CarReviewFields, BlogPostSEO } from '@/types'
 import { importedBlogPosts } from './imported-blog-posts'
 import { processInstagramEmbeds } from './instagram-processor'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+
+/**
+ * Create a lightweight Supabase client for public read-only queries.
+ * Does NOT use cookies/headers, so it works in both static and dynamic contexts.
+ */
+function createPublicClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 // ===========================================
 // HELPERS
@@ -44,7 +55,7 @@ export async function getBlogPosts(options: GetBlogPostsOptions = {}): Promise<D
   // Fetch published posts from Supabase
   let supabasePosts: DualBlogPost[] = []
   try {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
     const { data: dbPosts, error } = await supabase
       .from('dual_blog_posts')
       .select('*')
@@ -84,7 +95,7 @@ export async function getBlogPosts(options: GetBlogPostsOptions = {}): Promise<D
 export async function getBlogPost(slug: string): Promise<DualBlogPost | null> {
   // Try Supabase first (admin-created posts)
   try {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
     const { data: dbPost, error } = await supabase
       .from('dual_blog_posts')
       .select('*')

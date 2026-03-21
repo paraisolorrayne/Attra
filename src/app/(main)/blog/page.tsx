@@ -5,8 +5,6 @@ import { BlogTabs } from '@/components/blog'
 import { getBlogPosts } from '@/lib/blog-api'
 import { EDITORIAL_SECTION } from '@/lib/constants'
 
-export const dynamic = 'force-dynamic'
-
 export const metadata: Metadata = {
 	title: 'Blog Attra | Insights sobre Superesportivos e Veículos Premium',
 	description: 'No Blog Attra você encontra Insights exclusivos sobre superesportivos, colecionáveis e mercado premium automotivo. Reviews, análises de especialistas e tendências do setor.',
