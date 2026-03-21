@@ -25,6 +25,7 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://attraveiculos.com.br'),
   title: {
     default: 'Attra Veículos - Carros Premium em Uberlândia',
     template: '%s | Attra Veículos',
