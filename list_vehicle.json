@@ -1,10 +1,49 @@
 [
   {
-    "count": 0,
+    "count": 3,
     "registros_por_pagina": "20",
     "pagina_atual": 1,
     "ultima_pagina": 1,
-    "veiculos": []
+    "veiculos": [
+      {
+        "id": "bmw-x5-2024-001",
+        "marca_nome": "BMW",
+        "modelopai_nome": "X5",
+        "anomodelo": 2024,
+        "preco": "580000.00",
+        "estoque": 1,
+        "km_total": 3200,
+        "cambio_nome": "Automático",
+        "cor_nome": "Branca",
+        "procedencia": "Brasil",
+        "foto_principal_url": "https://via.placeholder.com/500x400?text=BMW+X5+2024"
+      },
+      {
+        "id": "porsche-911-2023-002",
+        "marca_nome": "Porsche",
+        "modelopai_nome": "911 Carrera S",
+        "anomodelo": 2023,
+        "preco": "1150000.00",
+        "estoque": 1,
+        "km_total": 4500,
+        "cambio_nome": "Manual",
+        "cor_nome": "Cinza",
+        "procedencia": "Importado",
+        "foto_principal_url": "https://via.placeholder.com/500x400?text=Porsche+911+2023"
+      },
+      {
+        "id": "range-rover-2023-003",
+        "marca_nome": "Range Rover",
+        "modelopai_nome": "Sport",
+        "anomodelo": 2023,
+        "preco": "550000.00",
+        "estoque": 1,
+        "km_total": 5800,
+        "cambio_nome": "Automático",
+        "cor_nome": "Preto",
+        "procedencia": "Brasil",
+        "foto_principal_url": "https://via.placeholder.com/500x400?text=Range+Rover+2023"
+      }
+    ]
   }
 ]
-

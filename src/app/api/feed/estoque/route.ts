@@ -40,15 +40,60 @@ interface FeedItem {
 /**
  * Escape XML special characters
  * Prevents XML injection and parsing errors
+ * Validates input length to prevent DoS attacks
  */
-function escapeXml(text: string | undefined | null): string {
+function escapeXml(text: string | undefined | null, maxLength: number = 10000): string {
   if (!text) return ''
+  
+  // Limit input length to prevent extremely large payloads
+  if (text.length > maxLength) {
+    console.warn(`XML field exceeded max length of ${maxLength} chars, truncating`)
+    text = text.substring(0, maxLength)
+  }
+  
   return String(text)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;')
+}
+
+/**
+ * Validate and sanitize URLs
+ * Ensures URLs are properly formatted and safe to include in feed
+ * Supports only http and https protocols
+ */
+function isValidUrl(url: string | undefined): boolean {
+  if (!url) return false
+  
+  try {
+    const parsed = new URL(url)
+    // Only allow http and https
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Generate ETag for cache validation
+ * Allows efficient cache validation (304 Not Modified responses)
+ */
+function generateETag(content: string): string {
+  // Simple ETag: hash of content length + first 100 chars + timestamp hour
+  const hour = Math.floor(Date.now() / 3600000)
+  const key = `${content.length}-${content.substring(0, 100)}-${hour}`
+  
+  // Simple hash function (in production, use crypto.subtle.digest)
+  let hash = 0
+  for (let i = 0; i < key.length; i++) {
+    const char = key.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  
+  return `"${Math.abs(hash).toString(16)}"`
 }
 
 /**
@@ -75,11 +120,20 @@ interface VehicleData {
 
 async function getVehicleInventory(): Promise<VehicleData[]> {
   try {
-    // Import the real data source
-    const inventoryData = await import('../../list_vehicle.json')
+    // Import the real data source using dynamic import
+    // This works with both development and production builds
+    const { readFileSync } = await import('fs')
+    const { join } = await import('path')
+    const { cwd } = await import('process')
+    
+    // Read the JSON file from the project root
+    const filePath = join(cwd(), 'list_vehicle.json')
+    const fileContent = readFileSync(filePath, 'utf-8')
+    const data = JSON.parse(fileContent)
     
     // Extract vehicles from response structure
-    const response = Array.isArray(inventoryData.default) ? inventoryData.default[0] : inventoryData.default
+    // The API returns an array of pagination objects, we want the first one
+    const response = Array.isArray(data) ? data[0] : data
     const vehicles = response?.veiculos || []
     
     // Transform to VehicleData format
@@ -131,12 +185,15 @@ function vehicleToFeedItem(vehicle: VehicleData): FeedItem {
   
   const description = `${brand} ${model} ${year} com ${features}. Curadoria premium Attra Veículos. Veículo certificado de qualidade.`
   
-  // Generate link
-  const link = `https://attraveiculos.com.br/estoque/${vehicle.id}`
+  // Generate link (always valid since we control the format)
+  const link = `https://attraveiculos.com.br/estoque/${encodeURIComponent(vehicle.id)}`
   
-  // Get images (defaults provided)
-  const imageLink = vehicle.foto_principal_url || 'https://via.placeholder.com/500x400?text=Attra+Veiculo'
-  const additionalImageLinks = (vehicle.fotos_adicionais_urls || []).slice(0, 10) // Google allows max 10
+  // Get images (validate URLs for security)
+  const defaultImageUrl = 'https://via.placeholder.com/500x400?text=Attra+Veiculo'
+  const imageLink = isValidUrl(vehicle.foto_principal_url) ? vehicle.foto_principal_url : defaultImageUrl
+  const additionalImageLinks = (vehicle.fotos_adicionais_urls || [])
+    .filter(url => isValidUrl(url)) // Only include valid URLs
+    .slice(0, 10) // Google allows max 10
   
   // Determine availability
   const availability = (vehicle.estoque || 0) > 0 ? 'in stock' : 'out of stock'
@@ -246,18 +303,22 @@ function generateXmlFeed(items: FeedItem[]): string {
 
 /**
  * Main handler for GET requests
- * Generates and serves the vehicle feed
+ * Generates and serves the vehicle feed with optimized caching
+ * Supports ETag validation for efficient cache hits (304 Not Modified)
  */
 export async function GET(request: NextRequest) {
   const startTime = Date.now()
+  const maxFeedSize = 10 * 1024 * 1024 // 10 MB max feed size (DoS protection)
   
   try {
     // Log request
     const userAgent = request.headers.get('user-agent') || 'unknown'
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown'
     console.log({
       timestamp: new Date().toISOString(),
       event: 'feed_request',
       userAgent: userAgent.substring(0, 100),
+      client: clientIp.substring(0, 50),
     })
     
     // Get vehicle inventory
@@ -276,6 +337,34 @@ export async function GET(request: NextRequest) {
       throw new Error('Invalid XML structure generated')
     }
     
+    // DoS Protection: Check feed size
+    if (xmlContent.length > maxFeedSize) {
+      throw new Error(`Feed size exceeds maximum allowed (${xmlContent.length} > ${maxFeedSize} bytes)`)
+    }
+    
+    // Generate cache validation headers
+    const etag = generateETag(xmlContent)
+    const ifNoneMatch = request.headers.get('if-none-match')
+    
+    // Check if client has valid cached version
+    if (ifNoneMatch === etag) {
+      console.log({
+        timestamp: new Date().toISOString(),
+        event: 'cache_hit_etag',
+        itemCount: feedItems.length,
+        durationMs: Date.now() - startTime,
+      })
+      
+      // Return 304 Not Modified (browser/CDN uses cached version)
+      return new NextResponse(null, {
+        status: 304,
+        headers: {
+          'ETag': etag,
+          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+        },
+      })
+    }
+    
     // Log success
     const duration = Date.now() - startTime
     console.log({
@@ -286,12 +375,15 @@ export async function GET(request: NextRequest) {
       durationMs: duration,
     })
     
-    // Return response with proper caching headers
+    // Return response with comprehensive cache headers
+    const lastModified = new Date()
     return new NextResponse(xmlContent, {
       status: 200,
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200', // ISR: 1h, stale for 2h
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200', // ISR: 1h cache + 2h stale
+        'ETag': etag,
+        'Last-Modified': lastModified.toUTCString(),
         'X-Generated-At': new Date().toISOString(),
         'X-Item-Count': feedItems.length.toString(),
       },
@@ -305,6 +397,7 @@ export async function GET(request: NextRequest) {
     })
     
     // Return error feed (valid XML but with error message)
+    // Note: Error feeds are NOT cached (no-cache directive)
     const errorXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
