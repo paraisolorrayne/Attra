@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
 
+export const dynamic = 'force-dynamic'
+
 interface RouteParams {
   params: Promise<{ slug: string }>
 }

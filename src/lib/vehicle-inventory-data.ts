@@ -67,7 +67,7 @@ function determineCategoryFromVehicle(vehicle: AutoConfVehicle, price: number): 
  */
 function generateDescription(vehicle: AutoConfVehicle): string {
   const isNew = vehicle.zero_km === 1
-  const km = vehicle.km.toLocaleString('pt-BR')
+  const km = (vehicle.km ?? 0).toLocaleString('pt-BR')
 
   if (isNew) {
     return `${vehicle.marca_nome} ${vehicle.modelopai_nome} ${vehicle.anomodelo} 0km. ${vehicle.versao_descricao || ''} Motor ${vehicle.combustivel_nome}, câmbio ${vehicle.cambio_nome}. Verifique a disponibilidade com nossos consultores.`
@@ -103,7 +103,7 @@ function mapAutoConfToVehicle(autoconfVehicle: AutoConfVehicle): Vehicle {
     year_manufacture: parseInt(autoconfVehicle.anofabricacao),
     year_model: parseInt(autoconfVehicle.anomodelo),
     color: autoconfVehicle.cor_nome,
-    mileage: autoconfVehicle.km,
+    mileage: autoconfVehicle.km ?? 0,
     fuel_type: autoconfVehicle.combustivel_nome,
     transmission: autoconfVehicle.cambio_nome,
     price,
@@ -115,7 +115,7 @@ function mapAutoConfToVehicle(autoconfVehicle: AutoConfVehicle): Vehicle {
     options: uniqueOptions.length > 0 ? uniqueOptions : null,
     description: generateDescription(autoconfVehicle),
     seo_title: `${autoconfVehicle.marca_nome} ${autoconfVehicle.modelopai_nome} ${autoconfVehicle.anomodelo} | Attra Veículos`,
-    seo_description: `${autoconfVehicle.marca_nome} ${autoconfVehicle.modelopai_nome} ${autoconfVehicle.anomodelo} com ${autoconfVehicle.km.toLocaleString('pt-BR')} km. Compre com a Attra Veículos.`,
+    seo_description: `${autoconfVehicle.marca_nome} ${autoconfVehicle.modelopai_nome} ${autoconfVehicle.anomodelo} com ${(autoconfVehicle.km ?? 0).toLocaleString('pt-BR')} km. Compre com a Attra Veículos.`,
     status: 'available',
     is_featured: autoconfVehicle.prioridade_veiculo > 0,
     is_new: autoconfVehicle.zero_km === 1,

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
 import { generateVehicleDescription } from '@/lib/gemini-service'
 
+export const dynamic = 'force-dynamic'
+
 // Rate limiting - simple in-memory implementation
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 const RATE_LIMIT = 10 // requests per minute
