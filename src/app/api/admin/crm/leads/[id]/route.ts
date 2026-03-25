@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase/server'
-import type { LeadUpdate } from '@/types/database'
+import type { LeadUpdate, EtapaFunil } from '@/types/database'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -18,13 +18,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params
     const supabase = createAdminClient()
 
-    // Get lead with cliente
+    // Get lead (sem join com clientes — não há FK entre leads e clientes)
     const { data: lead, error } = await supabase
       .from('leads')
-      .select(`
-        *,
-        cliente:clientes(*)
-      `)
+      .select('*')
       .eq('id', id)
       .single()
 
@@ -67,7 +64,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const allowedFields: (keyof LeadUpdate)[] = [
       'status', 'prioridade', 'cliente_id', 'interesse_tipo',
       'faixa_preco_interesse_min', 'faixa_preco_interesse_max',
-      'categoria_interesse', 'marca_interesse', 'modelo_interesse'
+      'categoria_interesse', 'marca_interesse', 'modelo_interesse',
+      'etapa_funil', 'motivo_perda', 'motivo_perda_texto', 'vendedor_responsavel'
     ]
 
     const updateData: LeadUpdate = {}
@@ -75,6 +73,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       if (body[field] !== undefined) {
         (updateData as Record<string, unknown>)[field] = body[field]
       }
+    }
+
+    // Regra de negócio: ao sair de 'perdido', limpar motivo de perda
+    if (updateData.etapa_funil && updateData.etapa_funil !== 'perdido') {
+      updateData.motivo_perda = null
+      updateData.motivo_perda_texto = null
+    }
+
+    // Regra de negócio: para motivo != 'outro', limpar texto livre
+    if (updateData.motivo_perda && updateData.motivo_perda !== 'outro') {
+      updateData.motivo_perda_texto = null
     }
 
     if (Object.keys(updateData).length === 0) {

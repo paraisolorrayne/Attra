@@ -336,6 +336,12 @@ export interface Database {
           ttclid: string | null
           criado_em: string
           atualizado_em: string
+          // Funil de vendas
+          etapa_funil: EtapaFunil
+          motivo_perda: MotivoPerdaTipo | null
+          motivo_perda_texto: string | null
+          /** Provissório (text). Migrar para vendedor_responsavel_id (FK admin_users) em sprint futura. */
+          vendedor_responsavel: string | null
         }
         Insert: Omit<Database['public']['Tables']['leads']['Row'], 'id' | 'criado_em' | 'atualizado_em'>
         Update: Partial<Database['public']['Tables']['leads']['Insert']>
@@ -386,6 +392,7 @@ export interface Database {
           data_emissao: string
           data_vencimento: string
           data_pagamento: string | null
+          valor_pago: number | null
           status: StatusBoleto
           forma_cobranca: FormaCobranca
           origem: OrigemBoleto
@@ -495,6 +502,8 @@ export interface Database {
       forma_cobranca: FormaCobranca
       origem_boleto: OrigemBoleto
       evento_boleto_tipo: EventoBoletoTipo
+      etapa_funil: EtapaFunil
+      motivo_perda_tipo: MotivoPerdaTipo
     }
   }
 }
@@ -521,6 +530,8 @@ export type StatusBoleto = 'pendente' | 'vencido' | 'pago' | 'cancelado' | 'em_n
 export type FormaCobranca = 'boleto' | 'pix_copia_cola' | 'link_pagamento'
 export type OrigemBoleto = 'manual' | 'gateway_x' | 'sistema_y'
 export type EventoBoletoTipo = 'criado' | 'enviado' | 'lembranca' | 'pago' | 'cancelado' | 'renegociado'
+export type EtapaFunil = 'novo_lead' | 'primeiro_contato' | 'visita_agendada' | 'visita_realizada' | 'proposta_enviada' | 'negociacao' | 'ganho' | 'perdido'
+export type MotivoPerdaTipo = 'preco' | 'credito_recusado' | 'comprou_outro_lugar' | 'desistiu' | 'outro'
 
 // Existing Table Types
 export type Vehicle = Database['public']['Tables']['vehicles']['Row']

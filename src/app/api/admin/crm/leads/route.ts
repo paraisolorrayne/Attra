@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase/server'
-import type { LeadWithCliente, StatusLead, PrioridadeLead, OrigemLead } from '@/types/database'
+import type { LeadWithCliente, StatusLead, PrioridadeLead, OrigemLead, EtapaFunil } from '@/types/database'
 
 // GET /api/admin/crm/leads - List leads with filters
 export async function GET(request: NextRequest) {
@@ -21,29 +21,33 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') as StatusLead | null
     const prioridade = searchParams.get('prioridade') as PrioridadeLead | null
     const origem = searchParams.get('origem') as OrigemLead | null
-    const responsavel = searchParams.get('responsavel')
+    const vendedor = searchParams.get('vendedor')
+    const modelo = searchParams.get('modelo')
     const dateFrom = searchParams.get('dateFrom')
     const dateTo = searchParams.get('dateTo')
     const search = searchParams.get('search')
+    const etapaFunil = searchParams.get('etapa_funil') as EtapaFunil | null
 
     const supabase = createAdminClient()
 
-    // Build query
+    // Build query (sem join com clientes — não há FK entre leads e clientes)
     let query = supabase
       .from('leads')
-      .select(`
-        *,
-        cliente:clientes(id, nome, telefone, email)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
 
     // Apply filters
     if (status) query = query.eq('status', status)
     if (prioridade) query = query.eq('prioridade', prioridade)
     if (origem) query = query.eq('origem', origem)
+    if (etapaFunil) query = query.eq('etapa_funil', etapaFunil)
+    if (vendedor) query = query.ilike('vendedor_responsavel', `%${vendedor}%`)
+    if (modelo) query = query.or(`modelo_interesse.ilike.%${modelo}%,marca_interesse.ilike.%${modelo}%`)
     if (dateFrom) query = query.gte('criado_em', dateFrom)
-    if (dateTo) query = query.lte('criado_em', dateTo)
+    if (dateTo) query = query.lte('criado_em', `${dateTo}T23:59:59`)
     if (search) {
-      query = query.or(`nome.ilike.%${search}%,telefone.ilike.%${search}%,email.ilike.%${search}%`)
+      query = query.or(
+        `nome.ilike.%${search}%,telefone.ilike.%${search}%,email.ilike.%${search}%,marca_interesse.ilike.%${search}%,modelo_interesse.ilike.%${search}%`
+      )
     }
 
     // Get next contact for each lead (subquery simulation)

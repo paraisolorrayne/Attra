@@ -29,7 +29,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Leads', href: '/admin/crm/leads', icon: Users },
-  { name: 'Clientes', href: '/admin/crm/clientes', icon: UserCheck },
+  { name: 'Contatos', href: '/admin/crm/contatos', icon: UserCheck },
   { name: 'Cobranças', href: '/admin/crm/cobrancas', icon: Receipt },
   { name: 'Insights', href: '/admin/crm/insights', icon: TrendingUp },
 ]

@@ -11,10 +11,13 @@ import {
   Mail,
   Calendar,
   AlertCircle,
-  Loader2
+  Loader2,
+  MessageCircle,
+  X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { LeadWithCliente, StatusLead, PrioridadeLead } from '@/types/database'
+import type { LeadWithCliente, StatusLead, PrioridadeLead, EtapaFunil, OrigemLead } from '@/types/database'
+import { etapaLabels, etapaColors, etapaOrdem } from '@/lib/crm/funil'
 
 const statusLabels: Record<StatusLead, string> = {
   novo: 'Novo',
@@ -38,6 +41,13 @@ const prioridadeColors: Record<PrioridadeLead, string> = {
   alta: 'text-red-500'
 }
 
+const origemLabels: Record<OrigemLead, string> = {
+  site_chat: 'Chat do Site',
+  whatsapp_ia: 'WhatsApp IA',
+  instagram_form: 'Formulário Instagram',
+  crm_externo: 'CRM Externo'
+}
+
 interface LeadsResponse {
   success: boolean
   data: LeadWithCliente[]
@@ -47,6 +57,12 @@ interface LeadsResponse {
     total: number
     totalPages: number
   }
+}
+
+// Formata telefone para wa.me (remove não-dígitos, garante DDI 55)
+function formatWhatsApp(tel: string): string {
+  const digits = tel.replace(/\D/g, '')
+  return digits.startsWith('55') ? digits : `55${digits}`
 }
 
 function LeadsContent() {
@@ -60,7 +76,18 @@ function LeadsContent() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusLead | ''>('')
   const [prioridadeFilter, setPrioridadeFilter] = useState<PrioridadeLead | ''>('')
+  const [etapaFilter, setEtapaFilter] = useState<EtapaFunil | ''>('')
+  const [origemFilter, setOrigemFilter] = useState<OrigemLead | ''>('')
+  const [vendedorFilter, setVendedorFilter] = useState('')
+  const [modeloFilter, setModeloFilter] = useState('')
+  const [dateFromFilter, setDateFromFilter] = useState('')
+  const [dateToFilter, setDateToFilter] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+
+  const activeFilterCount = [
+    statusFilter, prioridadeFilter, etapaFilter, origemFilter,
+    vendedorFilter, modeloFilter, dateFromFilter, dateToFilter
+  ].filter(Boolean).length
 
   const fetchLeads = useCallback(async () => {
     setLoading(true)
@@ -71,6 +98,12 @@ function LeadsContent() {
       if (search) params.set('search', search)
       if (statusFilter) params.set('status', statusFilter)
       if (prioridadeFilter) params.set('prioridade', prioridadeFilter)
+      if (etapaFilter) params.set('etapa_funil', etapaFilter)
+      if (origemFilter) params.set('origem', origemFilter)
+      if (vendedorFilter) params.set('vendedor', vendedorFilter)
+      if (modeloFilter) params.set('modelo', modeloFilter)
+      if (dateFromFilter) params.set('dateFrom', dateFromFilter)
+      if (dateToFilter) params.set('dateTo', dateToFilter)
 
       const response = await fetch(`/api/admin/crm/leads?${params}`)
       const data: LeadsResponse = await response.json()
@@ -84,7 +117,12 @@ function LeadsContent() {
     } finally {
       setLoading(false)
     }
-  }, [pagination.page, pagination.limit, search, statusFilter, prioridadeFilter])
+  }, [
+    pagination.page, pagination.limit, search,
+    statusFilter, prioridadeFilter, etapaFilter,
+    origemFilter, vendedorFilter, modeloFilter,
+    dateFromFilter, dateToFilter
+  ])
 
   useEffect(() => {
     fetchLeads()
@@ -94,6 +132,18 @@ function LeadsContent() {
     e.preventDefault()
     setPagination(prev => ({ ...prev, page: 1 }))
     fetchLeads()
+  }
+
+  const clearFilters = () => {
+    setStatusFilter('')
+    setPrioridadeFilter('')
+    setEtapaFilter('')
+    setOrigemFilter('')
+    setVendedorFilter('')
+    setModeloFilter('')
+    setDateFromFilter('')
+    setDateToFilter('')
+    setSearch('')
   }
 
   const formatDate = (date: string | null) => {
@@ -136,7 +186,7 @@ function LeadsContent() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-secondary" />
             <input
               type="text"
-              placeholder="Buscar por nome, telefone ou email..."
+              placeholder="Buscar por nome, telefone, email, marca ou modelo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
@@ -146,7 +196,7 @@ function LeadsContent() {
             type="button"
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-colors',
+              'flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-colors relative',
               showFilters
                 ? 'bg-primary text-white border-primary'
                 : 'border-border text-foreground-secondary hover:bg-background-soft'
@@ -154,6 +204,14 @@ function LeadsContent() {
           >
             <Filter className="w-5 h-5" />
             <span>Filtros</span>
+            {activeFilterCount > 0 && (
+              <span className={cn(
+                'absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold',
+                showFilters ? 'bg-white text-primary' : 'bg-primary text-white'
+              )}>
+                {activeFilterCount}
+              </span>
+            )}
           </button>
           <button
             type="submit"
@@ -165,45 +223,118 @@ function LeadsContent() {
 
         {/* Filter options */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground-secondary mb-1">Status</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as StatusLead | '')}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
-              >
-                <option value="">Todos</option>
-                {Object.entries(statusLabels).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+          <div className="mt-4 pt-4 border-t border-border space-y-4">
+            {/* Row 1: Etapa, Status, Origem, Prioridade */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Etapa do Funil</label>
+                <select
+                  value={etapaFilter}
+                  onChange={(e) => setEtapaFilter(e.target.value as EtapaFunil | '')}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                >
+                  <option value="">Todas</option>
+                  {etapaOrdem.map((etapa) => (
+                    <option key={etapa} value={etapa}>{etapaLabels[etapa]}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as StatusLead | '')}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                >
+                  <option value="">Todos</option>
+                  {Object.entries(statusLabels).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Origem</label>
+                <select
+                  value={origemFilter}
+                  onChange={(e) => setOrigemFilter(e.target.value as OrigemLead | '')}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                >
+                  <option value="">Todas</option>
+                  {Object.entries(origemLabels).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Prioridade</label>
+                <select
+                  value={prioridadeFilter}
+                  onChange={(e) => setPrioridadeFilter(e.target.value as PrioridadeLead | '')}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                >
+                  <option value="">Todas</option>
+                  <option value="alta">Alta</option>
+                  <option value="media">Média</option>
+                  <option value="baixa">Baixa</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground-secondary mb-1">Prioridade</label>
-              <select
-                value={prioridadeFilter}
-                onChange={(e) => setPrioridadeFilter(e.target.value as PrioridadeLead | '')}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground"
-              >
-                <option value="">Todas</option>
-                <option value="alta">Alta</option>
-                <option value="media">Média</option>
-                <option value="baixa">Baixa</option>
-              </select>
+
+            {/* Row 2: Vendedor, Modelo, Data de/até */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Vendedor Responsável</label>
+                <input
+                  type="text"
+                  placeholder="Ex: João"
+                  value={vendedorFilter}
+                  onChange={(e) => setVendedorFilter(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Veículo / Modelo</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Porsche, Cayenne..."
+                  value={modeloFilter}
+                  onChange={(e) => setModeloFilter(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Criado após</label>
+                <input
+                  type="date"
+                  value={dateFromFilter}
+                  onChange={(e) => setDateFromFilter(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Criado até</label>
+                <input
+                  type="date"
+                  value={dateToFilter}
+                  onChange={(e) => setDateToFilter(e.target.value)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                />
+              </div>
             </div>
-            <div className="flex items-end">
-              <button
-                onClick={() => {
-                  setStatusFilter('')
-                  setPrioridadeFilter('')
-                  setSearch('')
-                }}
-                className="px-4 py-2 text-foreground-secondary hover:text-foreground transition-colors"
-              >
-                Limpar filtros
-              </button>
-            </div>
+
+            {/* Clear filters */}
+            {activeFilterCount > 0 && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-foreground-secondary hover:text-foreground transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Limpar {activeFilterCount} filtro{activeFilterCount > 1 ? 's' : ''}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -218,6 +349,14 @@ function LeadsContent() {
           <div className="flex flex-col items-center justify-center py-12 text-foreground-secondary">
             <AlertCircle className="w-12 h-12 mb-4" />
             <p>Nenhum lead encontrado</p>
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearFilters}
+                className="mt-2 text-sm text-primary hover:underline"
+              >
+                Limpar filtros
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -225,11 +364,13 @@ function LeadsContent() {
               <thead className="bg-background-soft border-b border-border">
                 <tr>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Lead</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Etapa</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Contato</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Interesse</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Status</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Próx. Contato</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Criado</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -241,12 +382,17 @@ function LeadsContent() {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className={cn('w-2 h-2 rounded-full', prioridadeColors[lead.prioridade])} />
+                        <div className={cn('w-2 h-2 rounded-full flex-shrink-0', prioridadeColors[lead.prioridade])} />
                         <div>
                           <p className="font-medium text-foreground">{lead.nome}</p>
-                          <p className="text-sm text-foreground-secondary">{lead.origem}</p>
+                          <p className="text-sm text-foreground-secondary">{origemLabels[lead.origem] ?? lead.origem}</p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={cn('px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap', etapaColors[lead.etapa_funil])}>
+                        {etapaLabels[lead.etapa_funil]}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
@@ -267,7 +413,7 @@ function LeadsContent() {
                     <td className="px-4 py-3">
                       <div>
                         <p className="text-sm text-foreground">
-                          {lead.marca_interesse} {lead.modelo_interesse}
+                          {[lead.marca_interesse, lead.modelo_interesse].filter(Boolean).join(' ') || '---'}
                         </p>
                         <p className="text-sm text-foreground-secondary">
                           {formatPrice(lead.faixa_preco_interesse_min)} - {formatPrice(lead.faixa_preco_interesse_max)}
@@ -291,6 +437,20 @@ function LeadsContent() {
                     </td>
                     <td className="px-4 py-3 text-sm text-foreground-secondary">
                       {formatDate(lead.criado_em)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {lead.telefone && (
+                        <a
+                          href={`https://wa.me/${formatWhatsApp(lead.telefone)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Abrir WhatsApp"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-500/10 text-green-600 hover:bg-green-500/20 transition-colors"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </a>
+                      )}
                     </td>
                   </tr>
                 ))}

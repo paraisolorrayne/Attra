@@ -18,10 +18,13 @@ import {
   Edit2,
   Plus,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  UserCheck,
+  ExternalLink
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Lead, Cliente, EventoLead, StatusLead, PrioridadeLead, EventoLeadTipo } from '@/types/database'
+import type { Lead, Cliente, EventoLead, StatusLead, PrioridadeLead, EventoLeadTipo, EtapaFunil, MotivoPerdaTipo } from '@/types/database'
+import { etapaLabels, etapaColors, etapaOrdem, motivoPerdaLabels } from '@/lib/crm/funil'
 
 const statusLabels: Record<StatusLead, string> = {
   novo: 'Novo',
@@ -52,25 +55,21 @@ const prioridadeColors: Record<PrioridadeLead, string> = {
 }
 
 const eventoLabels: Record<EventoLeadTipo, string> = {
-  primeiro_contato: 'Primeiro Contato',
+  criado: 'Criado',
   contato_realizado: 'Contato Realizado',
-  proposta_enviada: 'Proposta Enviada',
-  visita_agendada: 'Visita Agendada',
-  visita_realizada: 'Visita Realizada',
+  retorno_pendente: 'Retorno Pendente',
+  sem_resposta: 'Sem Resposta',
   ganho: 'Ganho',
-  perdido: 'Perdido',
-  observacao: 'Observação'
+  perdido: 'Perdido'
 }
 
 const eventoIcons: Record<EventoLeadTipo, React.ElementType> = {
-  primeiro_contato: MessageSquare,
+  criado: MessageSquare,
   contato_realizado: Phone,
-  proposta_enviada: DollarSign,
-  visita_agendada: Calendar,
-  visita_realizada: CheckCircle,
+  retorno_pendente: Clock,
+  sem_resposta: AlertCircle,
   ganho: CheckCircle,
-  perdido: XCircle,
-  observacao: Edit2
+  perdido: XCircle
 }
 
 interface LeadDetailResponse {
@@ -93,6 +92,16 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showEventModal, setShowEventModal] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  // Funil states
+  const [updatingEtapa, setUpdatingEtapa] = useState(false)
+  const [showMotivoPerdaModal, setShowMotivoPerdaModal] = useState(false)
+  const [motivoSelecionado, setMotivoSelecionado] = useState<MotivoPerdaTipo>('preco')
+  const [motivoTexto, setMotivoTexto] = useState('')
+
+  // Converter lead em contato
+  const [convertendo, setConvertendo] = useState(false)
+  const [showConverterModal, setShowConverterModal] = useState(false)
 
   // Event form
   const [newEvent, setNewEvent] = useState({
@@ -130,7 +139,6 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       })
-
       if (response.ok) {
         await fetchLead()
         setShowStatusModal(false)
@@ -139,6 +147,55 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       console.error('Failed to update status:', err)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleEtapaChange = async (novaEtapa: EtapaFunil) => {
+    if (novaEtapa === lead?.etapa_funil) return
+    if (novaEtapa === 'perdido') {
+      setMotivoSelecionado('preco')
+      setMotivoTexto('')
+      setShowMotivoPerdaModal(true)
+      return
+    }
+    // API limpa motivo_perda automaticamente ao sair de 'perdido'
+    setUpdatingEtapa(true)
+    try {
+      const response = await fetch(`/api/admin/crm/leads/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ etapa_funil: novaEtapa })
+      })
+      if (response.ok) await fetchLead()
+    } catch (err) {
+      console.error('Failed to update etapa:', err)
+    } finally {
+      setUpdatingEtapa(false)
+    }
+  }
+
+  const handleMotivoPerdaConfirm = async () => {
+    if (motivoSelecionado === 'outro' && !motivoTexto.trim()) return
+    setUpdatingEtapa(true)
+    try {
+      const response = await fetch(`/api/admin/crm/leads/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          etapa_funil: 'perdido',
+          motivo_perda: motivoSelecionado,
+          motivo_perda_texto: motivoSelecionado === 'outro' ? motivoTexto.trim() : null
+        })
+      })
+      if (response.ok) {
+        await fetchLead()
+        setShowMotivoPerdaModal(false)
+        setMotivoTexto('')
+      }
+    } catch (err) {
+      console.error('Failed to update etapa:', err)
+    } finally {
+      setUpdatingEtapa(false)
     }
   }
 
@@ -162,6 +219,28 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       console.error('Failed to create event:', err)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleConverter = async () => {
+    if (convertendo) return
+    setConvertendo(true)
+    try {
+      const response = await fetch(`/api/admin/crm/leads/${id}/converter`, {
+        method: 'POST'
+      })
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setShowConverterModal(false)
+        router.push(`/admin/crm/contatos/${data.cliente_id}`)
+      } else {
+        console.error('Falha na conversão:', data.error)
+      }
+    } catch (err) {
+      console.error('Erro ao converter lead:', err)
+    } finally {
+      setConvertendo(false)
     }
   }
 
@@ -222,6 +301,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <span className={cn('px-3 py-1.5 rounded-full text-sm font-medium', etapaColors[lead.etapa_funil])}>
+            {etapaLabels[lead.etapa_funil]}
+          </span>
           <span className={cn('px-3 py-1.5 rounded-full text-sm font-medium', prioridadeColors[lead.prioridade])}>
             {prioridadeLabels[lead.prioridade]}
           </span>
@@ -274,7 +356,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   </div>
                   <div>
                     <p className="text-sm text-foreground-secondary">Cliente Vinculado</p>
-                    <Link href={`/admin/crm/clientes/${lead.cliente.id}`} className="text-primary hover:underline">
+                    <Link href={`/admin/crm/contatos/${lead.cliente.id}`} className="text-primary hover:underline">
                       {lead.cliente.nome}
                     </Link>
                   </div>
@@ -419,6 +501,67 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
+          {/* Converter em Contato */}
+          {lead.etapa_funil === 'ganho' && (
+            <div className="bg-background-card rounded-xl border border-green-500/30 p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-1">Conversão</h2>
+              {lead.cliente_id ? (
+                <>
+                  <p className="text-sm text-foreground-secondary mb-3">Este lead já foi convertido em contato.</p>
+                  <Link
+                    href={`/admin/crm/contatos/${lead.cliente_id}`}
+                    className="flex items-center gap-2 w-full px-4 py-3 bg-green-500/10 text-green-600 rounded-lg hover:bg-green-500/20 transition-colors text-sm font-medium"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Ver Contato
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-foreground-secondary mb-3">Lead marcado como Fechado Ganho. Converta em contato para registrar no CRM.</p>
+                  <button
+                    onClick={() => setShowConverterModal(true)}
+                    className="flex items-center gap-2 w-full px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                    Converter em Contato
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Etapa do Funil */}
+          <div className="bg-background-card rounded-xl border border-border p-6">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Etapa do Funil</h2>
+            <div className="space-y-2">
+              {etapaOrdem.map((etapa) => (
+                <button
+                  key={etapa}
+                  onClick={() => handleEtapaChange(etapa)}
+                  disabled={lead.etapa_funil === etapa || updatingEtapa}
+                  className={cn(
+                    'w-full px-4 py-2 rounded-lg text-left transition-colors disabled:opacity-50',
+                    lead.etapa_funil === etapa
+                      ? etapaColors[etapa]
+                      : 'bg-background-soft text-foreground-secondary hover:bg-background hover:text-foreground'
+                  )}
+                >
+                  {etapaLabels[etapa]}
+                </button>
+              ))}
+            </div>
+            {lead.motivo_perda && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-sm text-foreground-secondary">Motivo da perda</p>
+                <p className="text-foreground mt-1">{motivoPerdaLabels[lead.motivo_perda]}</p>
+                {lead.motivo_perda_texto && (
+                  <p className="text-sm text-foreground-secondary mt-1 italic">{lead.motivo_perda_texto}</p>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Status Change */}
           <div className="bg-background-card rounded-xl border border-border p-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">Alterar Status</h2>
@@ -442,6 +585,119 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </div>
+
+{/* Motivo de Perda Modal */}
+      {showMotivoPerdaModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background-card rounded-xl border border-border p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold text-foreground mb-1">Motivo da Perda</h2>
+            <p className="text-sm text-foreground-secondary mb-4">Informe o motivo para marcar este lead como perdido.</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Motivo</label>
+                <select
+                  value={motivoSelecionado}
+                  onChange={(e) => setMotivoSelecionado(e.target.value as MotivoPerdaTipo)}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground"
+                >
+                  {Object.entries(motivoPerdaLabels).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              {motivoSelecionado === 'outro' && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground-secondary mb-1">
+                    Detalhes <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={motivoTexto}
+                    onChange={(e) => setMotivoTexto(e.target.value)}
+                    placeholder="Descreva o motivo..."
+                    rows={3}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground resize-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => { setShowMotivoPerdaModal(false); setMotivoTexto('') }}
+                className="px-4 py-2 text-foreground-secondary hover:text-foreground transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleMotivoPerdaConfirm}
+                disabled={updatingEtapa || (motivoSelecionado === 'outro' && !motivoTexto.trim())}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {updatingEtapa ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirmar Perda'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Converter em Contato */}
+      {showConverterModal && lead && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background-card rounded-xl border border-border p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold text-foreground mb-1">Converter em Contato</h2>
+            <p className="text-sm text-foreground-secondary mb-4">Os dados abaixo serão copiados do lead para o novo contato.</p>
+
+            <div className="bg-background rounded-lg p-4 space-y-2 mb-4 text-sm">
+              <div className="flex justify-between">
+                <span className="text-foreground-secondary">Nome</span>
+                <span className="text-foreground font-medium">{lead.nome}</span>
+              </div>
+              {lead.telefone && (
+                <div className="flex justify-between">
+                  <span className="text-foreground-secondary">Telefone</span>
+                  <span className="text-foreground">{lead.telefone}</span>
+                </div>
+              )}
+              {lead.email && (
+                <div className="flex justify-between">
+                  <span className="text-foreground-secondary">Email</span>
+                  <span className="text-foreground">{lead.email}</span>
+                </div>
+              )}
+              {lead.marca_interesse && (
+                <div className="flex justify-between">
+                  <span className="text-foreground-secondary">Marca preferida</span>
+                  <span className="text-foreground">{lead.marca_interesse}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg mb-6 text-xs text-yellow-700 dark:text-yellow-400">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>Ainda não há verificação de duplicatas por telefone ou e-mail. Certifique-se de que este contato ainda não existe em Contatos.</span>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowConverterModal(false)}
+                disabled={convertendo}
+                className="px-4 py-2 text-foreground-secondary hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConverter}
+                disabled={convertendo}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                {convertendo ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+                {convertendo ? 'Convertendo...' : 'Confirmar Conversão'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Event Modal */}
       {showEventModal && (

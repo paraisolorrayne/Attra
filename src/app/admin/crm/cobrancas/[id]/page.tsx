@@ -40,27 +40,21 @@ const statusColors: Record<StatusBoleto, string> = {
 }
 
 const eventoLabels: Record<EventoBoletoTipo, string> = {
-  envio: 'Envio',
-  lembrete: 'Lembrete',
-  cobranca: 'Cobrança',
-  promessa_pagamento: 'Promessa de Pagamento',
-  pagamento_parcial: 'Pagamento Parcial',
-  pagamento_total: 'Pagamento Total',
-  cancelamento: 'Cancelamento',
-  negociacao: 'Negociação',
-  observacao: 'Observação'
+  criado: 'Criado',
+  enviado: 'Enviado',
+  lembranca: 'Lembrete',
+  pago: 'Pago',
+  cancelado: 'Cancelado',
+  renegociado: 'Renegociado'
 }
 
 const eventoIcons: Record<EventoBoletoTipo, React.ElementType> = {
-  envio: Receipt,
-  lembrete: Clock,
-  cobranca: Phone,
-  promessa_pagamento: Calendar,
-  pagamento_parcial: CreditCard,
-  pagamento_total: CheckCircle,
-  cancelamento: AlertTriangle,
-  negociacao: MessageSquare,
-  observacao: MessageSquare
+  criado: Receipt,
+  enviado: Receipt,
+  lembranca: Clock,
+  pago: CheckCircle,
+  cancelado: AlertTriangle,
+  renegociado: MessageSquare
 }
 
 interface BoletoDetailResponse {
@@ -82,9 +76,8 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
   const [showEventModal, setShowEventModal] = useState(false)
 
   const [newEvent, setNewEvent] = useState({
-    tipo: 'lembrete' as EventoBoletoTipo,
-    descricao: '',
-    valor_negociado: ''
+    tipo: 'lembranca' as EventoBoletoTipo,
+    descricao: ''
   })
 
   useEffect(() => {
@@ -135,16 +128,13 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
       const response = await fetch(`/api/admin/crm/cobrancas/${id}/eventos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newEvent,
-          valor_negociado: newEvent.valor_negociado ? parseFloat(newEvent.valor_negociado) : null
-        })
+        body: JSON.stringify(newEvent)
       })
 
       if (response.ok) {
         await fetchBoleto()
         setShowEventModal(false)
-        setNewEvent({ tipo: 'lembrete', descricao: '', valor_negociado: '' })
+        setNewEvent({ tipo: 'lembranca', descricao: '' })
       }
     } catch (err) {
       console.error('Failed to create event:', err)
@@ -297,7 +287,7 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                   <div>
                     <p className="text-sm text-foreground-secondary">Cliente</p>
-                    <Link href={`/admin/crm/clientes/${boleto.cliente.id}`} className="text-primary hover:underline">
+                    <Link href={`/admin/crm/contatos/${boleto.cliente.id}`} className="text-primary hover:underline">
                       {boleto.cliente.nome}
                     </Link>
                   </div>
@@ -330,8 +320,8 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
                       <div className="flex flex-col items-center">
                         <div className={cn(
                           'w-10 h-10 rounded-full flex items-center justify-center',
-                          evento.tipo === 'pagamento_total' ? 'bg-green-100 text-green-600 dark:bg-green-900/30' :
-                          evento.tipo === 'cancelamento' ? 'bg-red-100 text-red-600 dark:bg-red-900/30' :
+                          evento.tipo === 'pago' ? 'bg-green-100 text-green-600 dark:bg-green-900/30' :
+                          evento.tipo === 'cancelado' ? 'bg-red-100 text-red-600 dark:bg-red-900/30' :
                           'bg-primary/10 text-primary'
                         )}>
                           <Icon className="w-5 h-5" />
@@ -345,17 +335,13 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
                           <div>
                             <p className="font-medium text-foreground">{eventoLabels[evento.tipo]}</p>
                             <p className="text-sm text-foreground-secondary">{evento.descricao}</p>
-                            {evento.valor_negociado && (
-                              <p className="text-sm text-primary mt-1">
-                                Valor negociado: {formatPrice(evento.valor_negociado)}
-                              </p>
-                            )}
+
                           </div>
                           <p className="text-xs text-foreground-secondary whitespace-nowrap ml-4">
                             {formatDateTime(evento.criado_em)}
                           </p>
                         </div>
-                        <p className="mt-1 text-xs text-foreground-secondary">por {evento.responsavel}</p>
+
                       </div>
                     </div>
                   )
@@ -456,18 +442,7 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
                 />
               </div>
 
-              {(newEvent.tipo === 'negociacao' || newEvent.tipo === 'promessa_pagamento') && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground-secondary mb-1">Valor Negociado</label>
-                  <input
-                    type="number"
-                    value={newEvent.valor_negociado}
-                    onChange={(e) => setNewEvent({ ...newEvent, valor_negociado: e.target.value })}
-                    placeholder="0.00"
-                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground"
-                  />
-                </div>
-              )}
+
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
