@@ -60,7 +60,11 @@ const eventoLabels: Record<EventoLeadTipo, string> = {
   retorno_pendente: 'Retorno Pendente',
   sem_resposta: 'Sem Resposta',
   ganho: 'Ganho',
-  perdido: 'Perdido'
+  perdido: 'Perdido',
+  ligacao: 'Ligação',
+  whatsapp: 'WhatsApp',
+  visita: 'Visita',
+  email: 'Email'
 }
 
 const eventoIcons: Record<EventoLeadTipo, React.ElementType> = {
@@ -69,7 +73,11 @@ const eventoIcons: Record<EventoLeadTipo, React.ElementType> = {
   retorno_pendente: Clock,
   sem_resposta: AlertCircle,
   ganho: CheckCircle,
-  perdido: XCircle
+  perdido: XCircle,
+  ligacao: Phone,
+  whatsapp: MessageSquare,
+  visita: CheckCircle,
+  email: MessageSquare
 }
 
 interface LeadDetailResponse {

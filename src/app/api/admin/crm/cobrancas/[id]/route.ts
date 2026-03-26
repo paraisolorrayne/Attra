@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase/server'
-import type { BoletoUpdate, EventoBoletoTipo } from '@/types/database'
+import type { EventoBoletoTipo } from '@/types/database'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -14,7 +14,7 @@ const statusToEventType: Record<string, EventoBoletoTipo> = {
   'em_negociacao': 'renegociado'
 }
 
-// PATCH /api/admin/crm/cobrancas/:id - Update boleto status
+// PATCH /api/admin/crm/cobrancas/:id - Update boleto status/fields
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const authenticated = await isAuthenticated()
@@ -29,24 +29,24 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     // Get current boleto to check status change
     const { data: currentBoleto, error: fetchError } = await supabase
-      .from('boletos')
+      .from('boletos' as any)
       .select('status')
       .eq('id', id)
-      .single()
+      .single() as { data: { status: string } | null; error: unknown }
 
     if (fetchError || !currentBoleto) {
       return NextResponse.json({ error: 'Boleto not found' }, { status: 404 })
     }
 
-    // Validate allowed fields
-    const allowedFields: (keyof BoletoUpdate)[] = [
-      'status', 'data_pagamento', 'descricao'
+    // Allowed update fields
+    const allowedFields = [
+      'status', 'data_pagamento', 'descricao', 'veiculo_descricao'
     ]
 
-    const updateData: BoletoUpdate = {}
+    const updateData: Record<string, unknown> = {}
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
-        (updateData as Record<string, unknown>)[field] = body[field]
+        updateData[field] = body[field]
       }
     }
 
@@ -60,23 +60,26 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Update boleto
-    const { data: boleto, error } = await supabase
+    const updateResult = await (supabase as any)
       .from('boletos')
       .update(updateData)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) {
-      console.error('Boleto update error:', error)
+    const boleto = updateResult.data as Record<string, unknown> | null
+    const updateError = updateResult.error as Error | null
+
+    if (updateError) {
+      console.error('Boleto update error:', updateError)
       return NextResponse.json({ error: 'Failed to update boleto' }, { status: 500 })
     }
 
     // Create event if status changed
     if (updateData.status && updateData.status !== currentBoleto.status) {
-      const eventType = statusToEventType[updateData.status]
+      const eventType = statusToEventType[updateData.status as string]
       if (eventType) {
-        await supabase
+        await (supabase as any)
           .from('eventos_boleto')
           .insert({
             boleto_id: id,
@@ -108,31 +111,52 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params
     const supabase = createAdminClient()
 
+    // Fetch boleto with plain select — no FK joins to avoid PGRST200
     const { data: boleto, error } = await supabase
-      .from('boletos')
-      .select(`
-        *,
-        cliente:clientes(*),
-        lead:leads(id, nome, status)
-      `)
+      .from('boletos' as any)
+      .select('*')
       .eq('id', id)
-      .single()
+      .single() as { data: Record<string, unknown> | null; error: unknown }
 
     if (error || !boleto) {
       return NextResponse.json({ error: 'Boleto not found' }, { status: 404 })
     }
 
-    // Get events
+    // Fetch cliente separately (no FK dependency)
+    let cliente = null
+    if (boleto.cliente_id) {
+      const { data } = await supabase
+        .from('clientes' as any)
+        .select('*')
+        .eq('id', boleto.cliente_id as string)
+        .single() as { data: Record<string, unknown> | null }
+      cliente = data
+    }
+
+    // Fetch lead separately
+    let lead = null
+    if (boleto.lead_id) {
+      const { data } = await supabase
+        .from('leads' as any)
+        .select('id, nome, status, etapa_funil')
+        .eq('id', boleto.lead_id as string)
+        .single() as { data: Record<string, unknown> | null }
+      lead = data
+    }
+
+    // Get boleto events
     const { data: eventos } = await supabase
-      .from('eventos_boleto')
+      .from('eventos_boleto' as any)
       .select('*')
       .eq('boleto_id', id)
-      .order('data_evento', { ascending: false })
+      .order('data_evento', { ascending: false }) as { data: unknown[] | null }
 
     return NextResponse.json({
       success: true,
       data: {
         ...boleto,
+        cliente,
+        lead,
         eventos: eventos || []
       }
     })
@@ -141,4 +165,3 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

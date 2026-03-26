@@ -18,10 +18,14 @@ import {
   CreditCard,
   Loader2,
   AlertCircle,
-  Plus
+  Plus,
+  Car,
+  Edit2,
+  X,
+  Check
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Boleto, Cliente, EventoBoleto, StatusBoleto, EventoBoletoTipo } from '@/types/database'
+import type { Boleto, Cliente, EventoBoleto, StatusBoleto, EventoBoletoTipo, Lead } from '@/types/database'
 
 const statusLabels: Record<StatusBoleto, string> = {
   pendente: 'Pendente',
@@ -61,6 +65,7 @@ interface BoletoDetailResponse {
   success: boolean
   data: Boleto & {
     cliente: Cliente | null
+    lead: Pick<Lead, 'id' | 'nome' | 'status' | 'etapa_funil'> | null
     eventos: EventoBoleto[]
   }
 }
@@ -74,6 +79,8 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [showEventModal, setShowEventModal] = useState(false)
+  const [editingVeiculo, setEditingVeiculo] = useState(false)
+  const [veiculoInput, setVeiculoInput] = useState('')
 
   const [newEvent, setNewEvent] = useState({
     tipo: 'lembranca' as EventoBoletoTipo,
@@ -91,6 +98,7 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
 
       if (data.success) {
         setBoleto(data.data)
+        setVeiculoInput(data.data.veiculo_descricao || '')
       } else {
         setError('Boleto não encontrado')
       }
@@ -115,6 +123,25 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
       }
     } catch (err) {
       console.error('Failed to update status:', err)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const saveVeiculo = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch(`/api/admin/crm/cobrancas/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ veiculo_descricao: veiculoInput.trim() || null })
+      })
+      if (response.ok) {
+        await fetchBoleto()
+        setEditingVeiculo(false)
+      }
+    } catch (err) {
+      console.error('Failed to save veiculo:', err)
     } finally {
       setSaving(false)
     }
@@ -286,13 +313,70 @@ export default function BoletoDetailPage({ params }: { params: Promise<{ id: str
                     <User className="w-5 h-5 text-foreground-secondary" />
                   </div>
                   <div>
-                    <p className="text-sm text-foreground-secondary">Cliente</p>
+                    <p className="text-sm text-foreground-secondary">Contato</p>
                     <Link href={`/admin/crm/contatos/${boleto.cliente.id}`} className="text-primary hover:underline">
                       {boleto.cliente.nome}
+                    </Link>
+                    {boleto.cliente.telefone && (
+                      <p className="text-xs text-foreground-secondary">{boleto.cliente.telefone}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {boleto.lead && (
+                <div className="flex items-center gap-3 sm:col-span-2">
+                  <div className="p-2 bg-background-soft rounded-lg">
+                    <Receipt className="w-5 h-5 text-foreground-secondary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-foreground-secondary">Oportunidade (Lead)</p>
+                    <Link href={`/admin/crm/leads/${boleto.lead.id}`} className="text-primary hover:underline">
+                      {boleto.lead.nome}
                     </Link>
                   </div>
                 </div>
               )}
+              <div className="flex items-start gap-3 sm:col-span-2">
+                <div className="p-2 bg-background-soft rounded-lg">
+                  <Car className="w-5 h-5 text-foreground-secondary" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-foreground-secondary">Veículo</p>
+                    {!editingVeiculo && (
+                      <button
+                        onClick={() => { setEditingVeiculo(true); setVeiculoInput(boleto.veiculo_descricao || '') }}
+                        className="text-foreground-secondary hover:text-primary transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  {editingVeiculo ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <input
+                        type="text"
+                        value={veiculoInput}
+                        onChange={e => setVeiculoInput(e.target.value)}
+                        placeholder="Ex: Honda Civic 2023"
+                        className="flex-1 px-2 py-1 text-sm bg-background border border-border rounded text-foreground"
+                        onKeyDown={e => { if (e.key === 'Enter') saveVeiculo(); if (e.key === 'Escape') setEditingVeiculo(false) }}
+                        autoFocus
+                      />
+                      <button onClick={saveVeiculo} disabled={saving} className="p-1 text-green-500 hover:text-green-400 disabled:opacity-50">
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setEditingVeiculo(false)} className="p-1 text-foreground-secondary hover:text-foreground">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-foreground">
+                      {boleto.veiculo_descricao || <span className="text-foreground-secondary italic">Não informado</span>}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

@@ -18,53 +18,74 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const supabase = createAdminClient()
 
     // Get cliente
-    const { data: cliente, error } = await supabase
+    const clienteResult = await (supabase as any)
       .from('clientes')
       .select('*')
       .eq('id', id)
       .single()
 
-    if (error || !cliente) {
+    const cliente = clienteResult.data as Record<string, unknown> | null
+    const clienteError = clienteResult.error
+
+    if (clienteError || !cliente) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
     }
 
     // Get purchase history
-    const { data: compras } = await supabase
+    const comprasResult = await (supabase as any)
       .from('historico_compras')
       .select('*')
       .eq('cliente_id', id)
       .order('data_compra', { ascending: false })
+    const compras = (comprasResult.data || []) as Record<string, unknown>[]
 
     // Get leads
-    const { data: leads } = await supabase
+    const leadsResult = await (supabase as any)
       .from('leads')
       .select('*')
       .eq('cliente_id', id)
       .order('criado_em', { ascending: false })
+    const leads = (leadsResult.data || []) as Record<string, unknown>[]
+
+    // Get eventos_lead for all leads of this contato (interações/follow-ups)
+    const leadIds = leads.map(l => l.id as string)
+    let eventos: Record<string, unknown>[] = []
+    if (leadIds.length > 0) {
+      const eventosResult = await (supabase as any)
+        .from('eventos_lead')
+        .select('*')
+        .in('lead_id', leadIds)
+        .order('criado_em', { ascending: false })
+      eventos = (eventosResult.data || []) as Record<string, unknown>[]
+    }
 
     // Get boletos
-    const { data: boletos } = await supabase
+    const boletosResult = await (supabase as any)
       .from('boletos')
       .select('*')
       .eq('cliente_id', id)
       .order('data_vencimento', { ascending: false })
+    const boletos = (boletosResult.data || []) as Record<string, unknown>[]
 
     // Calculate stats
-    const totalSpent = compras?.reduce((sum, c) => sum + (c.valor_compra || 0), 0) || 0
-    const pendingBoletos = boletos?.filter(b => ['pendente', 'vencido', 'em_negociacao'].includes(b.status)) || []
-    const totalPending = pendingBoletos.reduce((sum, b) => sum + (b.valor_total || 0), 0)
+    const totalSpent = compras.reduce((sum, c) => sum + ((c.valor_compra as number) || 0), 0)
+    const pendingBoletos = boletos.filter(b =>
+      ['pendente', 'vencido', 'em_negociacao'].includes(b.status as string)
+    )
+    const totalPending = pendingBoletos.reduce((sum, b) => sum + ((b.valor_total as number) || 0), 0)
 
     return NextResponse.json({
       success: true,
       data: {
         ...cliente,
-        historico_compras: compras || [],
-        leads: leads || [],
-        boletos: boletos || [],
+        historico_compras: compras,
+        leads,
+        boletos,
+        eventos,
         stats: {
-          total_compras: compras?.length || 0,
+          total_compras: compras.length,
           total_gasto: totalSpent,
-          total_leads: leads?.length || 0,
+          total_leads: leads.length,
           boletos_pendentes: pendingBoletos.length,
           valor_pendente: totalPending
         }
@@ -107,15 +128,18 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const supabase = createAdminClient()
 
-    const { data: cliente, error } = await supabase
+    const updateResult = await (supabase as any)
       .from('clientes')
       .update(updateData)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) {
-      console.error('Cliente update error:', error)
+    const cliente = updateResult.data as Record<string, unknown> | null
+    const updateError = updateResult.error as Error | null
+
+    if (updateError) {
+      console.error('Cliente update error:', updateError)
       return NextResponse.json({ error: 'Failed to update customer' }, { status: 500 })
     }
 
@@ -128,4 +152,3 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

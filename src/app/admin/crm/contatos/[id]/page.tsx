@@ -27,7 +27,7 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Cliente, Lead, HistoricoCompra, Boleto, StatusLead, StatusBoleto } from '@/types/database'
+import type { Cliente, Lead, HistoricoCompra, Boleto, StatusLead, StatusBoleto, EventoLead, EventoLeadTipo } from '@/types/database'
 
 const statusLeadLabels: Record<StatusLead, string> = {
   novo: 'Novo',
@@ -59,6 +59,7 @@ interface ClienteDetailResponse {
     historico_compras: HistoricoCompra[]
     leads: Lead[]
     boletos: Boleto[]
+    eventos: EventoLead[]
     stats: {
       total_compras: number
       total_gasto: number
@@ -210,7 +211,7 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
   const [cliente, setCliente] = useState<ClienteDetailResponse['data'] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'compras' | 'leads' | 'boletos'>('compras')
+  const [activeTab, setActiveTab] = useState<'compras' | 'leads' | 'boletos' | 'interacoes'>('compras')
   const [selectedPurchase, setSelectedPurchase] = useState<HistoricoCompra | null>(null)
 
   useEffect(() => {
@@ -391,20 +392,20 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Tabs */}
           <div className="bg-background-card rounded-xl border border-border overflow-hidden">
-            <div className="flex border-b border-border">
+            <div className="flex border-b border-border overflow-x-auto">
               <button
                 onClick={() => setActiveTab('compras')}
                 className={cn(
-                  'flex-1 px-4 py-3 text-sm font-medium transition-colors',
+                  'flex-1 min-w-max px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
                   activeTab === 'compras' ? 'bg-primary text-white' : 'text-foreground-secondary hover:text-foreground'
                 )}
               >
-                Histórico de Compras ({cliente.historico_compras.length})
+                Hist. Compras ({cliente.historico_compras.length})
               </button>
               <button
                 onClick={() => setActiveTab('leads')}
                 className={cn(
-                  'flex-1 px-4 py-3 text-sm font-medium transition-colors',
+                  'flex-1 min-w-max px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
                   activeTab === 'leads' ? 'bg-primary text-white' : 'text-foreground-secondary hover:text-foreground'
                 )}
               >
@@ -413,11 +414,20 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
               <button
                 onClick={() => setActiveTab('boletos')}
                 className={cn(
-                  'flex-1 px-4 py-3 text-sm font-medium transition-colors',
+                  'flex-1 min-w-max px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
                   activeTab === 'boletos' ? 'bg-primary text-white' : 'text-foreground-secondary hover:text-foreground'
                 )}
               >
-                Boletos ({cliente.boletos.length})
+                Cobranças ({cliente.boletos.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('interacoes')}
+                className={cn(
+                  'flex-1 min-w-max px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
+                  activeTab === 'interacoes' ? 'bg-primary text-white' : 'text-foreground-secondary hover:text-foreground'
+                )}
+              >
+                Interações ({cliente.eventos.length})
               </button>
             </div>
 
@@ -486,10 +496,10 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
                 )
               )}
 
-              {/* Boletos */}
+              {/* Boletos / Cobranças */}
               {activeTab === 'boletos' && (
                 cliente.boletos.length === 0 ? (
-                  <p className="text-center text-foreground-secondary py-8">Nenhum boleto registrado</p>
+                  <p className="text-center text-foreground-secondary py-8">Nenhuma cobrança registrada</p>
                 ) : (
                   <div className="space-y-3">
                     {cliente.boletos.map((boleto) => (
@@ -500,16 +510,70 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
                       >
                         <div>
                           <p className="font-medium text-foreground">{boleto.descricao || boleto.identificador_externo}</p>
-                          <p className="text-sm text-foreground-secondary">Vence em {formatDate(boleto.data_vencimento)}</p>
+                          <p className="text-sm text-foreground-secondary">
+                            Vence em {formatDate(boleto.data_vencimento)}
+                          </p>
+                          {boleto.data_pagamento && (
+                            <p className="text-sm text-green-500">
+                              Pago em {formatDate(boleto.data_pagamento)}
+                              {boleto.valor_pago ? ` • ${formatPrice(boleto.valor_pago)}` : ''}
+                            </p>
+                          )}
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-foreground">{formatPrice(boleto.valor_total)}</p>
                           <span className={cn('px-2 py-0.5 rounded-full text-xs font-medium', statusBoletoColors[boleto.status])}>
-                            {boleto.status}
+                            {boleto.status === 'pendente' ? 'Pendente' :
+                             boleto.status === 'pago' ? 'Pago' :
+                             boleto.status === 'vencido' ? 'Vencido' :
+                             boleto.status === 'cancelado' ? 'Cancelado' : 'Em Negociação'}
                           </span>
                         </div>
                       </Link>
                     ))}
+                  </div>
+                )
+              )}
+              {/* Interações / Follow-ups */}
+              {activeTab === 'interacoes' && (
+                cliente.eventos.length === 0 ? (
+                  <p className="text-center text-foreground-secondary py-8">Nenhuma interação registrada</p>
+                ) : (
+                  <div className="space-y-3">
+                    {cliente.eventos.map((evento) => {
+                      const tipoLabels: Record<EventoLeadTipo, string> = {
+                        criado: 'Lead criado',
+                        contato_realizado: 'Contato realizado',
+                        retorno_pendente: 'Retorno pendente',
+                        sem_resposta: 'Sem resposta',
+                        ganho: 'Fechado ganho',
+                        perdido: 'Fechado perdido',
+                        ligacao: 'Liga\u00e7\u00e3o',
+                        whatsapp: 'WhatsApp',
+                        visita: 'Visita',
+                        email: 'Email'
+                      }
+                      return (
+                        <div key={evento.id} className="flex items-start gap-3 p-3 bg-background-soft rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium text-foreground text-sm">{tipoLabels[evento.tipo] || evento.tipo}</p>
+                              <p className="text-xs text-foreground-secondary whitespace-nowrap ml-2">{formatDate(evento.criado_em)}</p>
+                            </div>
+                            {evento.descricao && (
+                              <p className="text-sm text-foreground-secondary mt-1">{evento.descricao}</p>
+                            )}
+                            {evento.proximo_contato_em && (
+                              <div className="flex items-center gap-1 mt-1 text-xs text-primary">
+                                <Clock className="w-3 h-3" />
+                                <span>Próximo contato: {formatDate(evento.proximo_contato_em)}</span>
+                              </div>
+                            )}
+                            <p className="text-xs text-foreground-secondary mt-1">por {evento.responsavel}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )
               )}
@@ -557,6 +621,32 @@ export default function ClienteDetailPage({ params }: { params: Promise<{ id: st
               )}
             </div>
           </div>
+
+          {/* Veículos de Interesse */}
+          {(() => {
+            const veiculosInteresse = cliente.leads
+              .filter((l: Lead) => l.marca_interesse || l.modelo_interesse)
+              .map((l: Lead) => ({ marca: l.marca_interesse, modelo: l.modelo_interesse }))
+              .filter((v, i, arr) =>
+                arr.findIndex(x => x.marca === v.marca && x.modelo === v.modelo) === i
+              )
+            if (veiculosInteresse.length === 0) return null
+            return (
+              <div className="bg-background-card rounded-xl border border-border p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Veículos de Interesse</h2>
+                <div className="space-y-2">
+                  {veiculosInteresse.map((v, i) => (
+                    <div key={i} className="flex items-center gap-2 p-2 bg-background-soft rounded-lg">
+                      <Car className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="text-sm text-foreground">
+                        {[v.marca, v.modelo].filter(Boolean).join(' ') || 'Interesse não especificado'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Quick Actions */}
           <div className="bg-background-card rounded-xl border border-border p-6">

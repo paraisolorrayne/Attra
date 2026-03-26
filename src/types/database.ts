@@ -292,6 +292,7 @@ export interface Database {
           telefone: string | null
           email: string | null
           cpf_cnpj: string | null
+          tipo: 'lead' | 'cliente' | 'ex_cliente'
           origem_principal: OrigemCliente
           faixa_valor_preferida_min: number | null
           faixa_valor_preferida_max: number | null
@@ -340,8 +341,10 @@ export interface Database {
           etapa_funil: EtapaFunil
           motivo_perda: MotivoPerdaTipo | null
           motivo_perda_texto: string | null
-          /** Provissório (text). Migrar para vendedor_responsavel_id (FK admin_users) em sprint futura. */
+          /** Provisório (text). Migrar para vendedor_responsavel_id (FK admin_users) em sprint futura. */
           vendedor_responsavel: string | null
+          valor_potencial: number | null
+          data_ultimo_contato: string | null
         }
         Insert: Omit<Database['public']['Tables']['leads']['Row'], 'id' | 'criado_em' | 'atualizado_em'>
         Update: Partial<Database['public']['Tables']['leads']['Insert']>
@@ -364,6 +367,7 @@ export interface Database {
         Row: {
           id: string
           cliente_id: string
+          lead_id: string | null
           veiculo_id_externo: string | null
           data_compra: string
           valor_compra: number
@@ -384,6 +388,7 @@ export interface Database {
           id: string
           cliente_id: string
           lead_id: string | null
+          venda_id: string | null
           identificador_externo: string | null
           nosso_numero: string | null
           linha_digitavel: string | null
@@ -393,6 +398,7 @@ export interface Database {
           data_vencimento: string
           data_pagamento: string | null
           valor_pago: number | null
+          veiculo_descricao: string | null
           status: StatusBoleto
           forma_cobranca: FormaCobranca
           origem: OrigemBoleto
@@ -524,7 +530,7 @@ export type OrigemLead = 'site_chat' | 'whatsapp_ia' | 'instagram_form' | 'crm_e
 export type InteresseTipo = 'comprar' | 'vender' | 'ambos'
 export type PrioridadeLead = 'baixa' | 'media' | 'alta'
 export type StatusLead = 'novo' | 'em_atendimento' | 'concluido' | 'perdido' | 'ganho'
-export type EventoLeadTipo = 'criado' | 'contato_realizado' | 'retorno_pendente' | 'sem_resposta' | 'ganho' | 'perdido'
+export type EventoLeadTipo = 'criado' | 'contato_realizado' | 'retorno_pendente' | 'sem_resposta' | 'ganho' | 'perdido' | 'ligacao' | 'whatsapp' | 'visita' | 'email'
 export type StatusCompra = 'ativo' | 'vendido' | 'trocado'
 export type StatusBoleto = 'pendente' | 'vencido' | 'pago' | 'cancelado' | 'em_negociacao'
 export type FormaCobranca = 'boleto' | 'pix_copia_cola' | 'link_pagamento'
