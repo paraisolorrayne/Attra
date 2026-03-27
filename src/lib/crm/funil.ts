@@ -26,6 +26,18 @@ export const etapaColors: Record<EtapaFunil, string> = {
   perdido:          'bg-red-100    text-red-700    dark:bg-red-900/30    dark:text-red-400',
 }
 
+/** Cores vivas para as bolinhas indicadoras (dropdown e lista) */
+export const etapaDotColors: Record<EtapaFunil, string> = {
+  novo_lead:        'bg-gray-400',
+  primeiro_contato: 'bg-blue-500',
+  visita_agendada:  'bg-purple-500',
+  visita_realizada: 'bg-indigo-500',
+  proposta_enviada: 'bg-yellow-400',
+  negociacao:       'bg-orange-500',
+  ganho:            'bg-green-500',
+  perdido:          'bg-red-500',
+}
+
 export const motivoPerdaLabels: Record<MotivoPerdaTipo, string> = {
   preco:               'Preço',
   credito_recusado:    'Crédito Recusado',

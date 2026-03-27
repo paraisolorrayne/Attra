@@ -101,6 +101,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         .eq('id', id)
     }
 
+    // Always update data_ultimo_contato to now
+    await (supabase as any)
+      .from('leads')
+      .update({ data_ultimo_contato: new Date().toISOString() })
+      .eq('id', id)
+
     return NextResponse.json({
       success: true,
       data: evento

@@ -24,11 +24,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('boletos')
-      .select(`
-        *,
-        cliente:clientes(id, nome, telefone, email),
-        lead:leads(id, nome, status)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
 
     if (status) query = query.eq('status', status)
     if (clienteId) query = query.eq('cliente_id', clienteId)
@@ -48,11 +44,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch boletos' }, { status: 500 })
     }
 
+    // Fetch clientes separately (no FK join)
+    const clienteIds = [...new Set((boletos || []).map((b: any) => b.cliente_id).filter(Boolean))]
+    const clienteMap: Record<string, any> = {}
+    if (clienteIds.length > 0) {
+      const { data: clientes } = await (supabase as any)
+        .from('clientes')
+        .select('id, nome, telefone, email')
+        .in('id', clienteIds)
+      for (const c of clientes || []) clienteMap[c.id] = c
+    }
+
     // Calculate days overdue
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const boletosWithDias: BoletoWithCliente[] = boletos?.map(boleto => {
+    const boletosWithDias: BoletoWithCliente[] = (boletos as any[])?.map(boleto => {
       const vencimento = new Date(boleto.data_vencimento)
       vencimento.setHours(0, 0, 0, 0)
       const diasEmAtraso = boleto.status !== 'pago' && vencimento < today 
@@ -61,6 +68,7 @@ export async function GET(request: NextRequest) {
 
       return {
         ...boleto,
+        cliente: clienteMap[boleto.cliente_id] || null,
         dias_em_atraso: diasEmAtraso
       }
     }) || []
@@ -80,4 +88,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

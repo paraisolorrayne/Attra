@@ -345,6 +345,8 @@ export interface Database {
           vendedor_responsavel: string | null
           valor_potencial: number | null
           data_ultimo_contato: string | null
+          probabilidade_fechamento: number | null
+          veiculo_placa: string | null
         }
         Insert: Omit<Database['public']['Tables']['leads']['Row'], 'id' | 'criado_em' | 'atualizado_em'>
         Update: Partial<Database['public']['Tables']['leads']['Insert']>

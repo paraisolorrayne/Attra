@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
     const dateTo = searchParams.get('dateTo')
     const search = searchParams.get('search')
     const etapaFunil = searchParams.get('etapa_funil') as EtapaFunil | null
+    const lastContactFrom = searchParams.get('lastContactFrom')
+    const lastContactTo = searchParams.get('lastContactTo')
 
     const supabase = createAdminClient()
 
@@ -44,9 +46,11 @@ export async function GET(request: NextRequest) {
     if (modelo) query = query.or(`modelo_interesse.ilike.%${modelo}%,marca_interesse.ilike.%${modelo}%`)
     if (dateFrom) query = query.gte('criado_em', dateFrom)
     if (dateTo) query = query.lte('criado_em', `${dateTo}T23:59:59`)
+    if (lastContactFrom) query = query.gte('data_ultimo_contato', lastContactFrom)
+    if (lastContactTo) query = query.lte('data_ultimo_contato', `${lastContactTo}T23:59:59`)
     if (search) {
       query = query.or(
-        `nome.ilike.%${search}%,telefone.ilike.%${search}%,email.ilike.%${search}%,marca_interesse.ilike.%${search}%,modelo_interesse.ilike.%${search}%`
+        `nome.ilike.%${search}%,telefone.ilike.%${search}%,email.ilike.%${search}%,marca_interesse.ilike.%${search}%,modelo_interesse.ilike.%${search}%,veiculo_placa.ilike.%${search}%`
       )
     }
 

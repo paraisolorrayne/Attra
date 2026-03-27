@@ -18,10 +18,7 @@ export async function GET() {
 
     const { data: boletos, error } = await supabase
       .from('boletos')
-      .select(`
-        *,
-        cliente:clientes(id, nome, telefone, email)
-      `)
+      .select('*')
       .lt('data_vencimento', todayStr)
       .in('status', ['pendente', 'vencido', 'em_negociacao'])
       .order('data_vencimento', { ascending: true })
@@ -31,18 +28,30 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch boletos' }, { status: 500 })
     }
 
+    // Fetch clientes separately (no FK join)
+    const clienteIds = [...new Set((boletos || []).map((b: any) => b.cliente_id).filter(Boolean))]
+    const clienteMap: Record<string, any> = {}
+    if (clienteIds.length > 0) {
+      const { data: clientes } = await (supabase as any)
+        .from('clientes')
+        .select('id, nome, telefone, email')
+        .in('id', clienteIds)
+      for (const c of clientes || []) clienteMap[c.id] = c
+    }
+
     // Format response for collection agent with days overdue
-    const formattedBoletos = boletos?.map(boleto => {
+    const formattedBoletos = (boletos as any[])?.map(boleto => {
       const vencimento = new Date(boleto.data_vencimento)
       vencimento.setHours(0, 0, 0, 0)
       const diasEmAtraso = Math.floor((today.getTime() - vencimento.getTime()) / (1000 * 60 * 60 * 24))
+      const cliente = clienteMap[boleto.cliente_id] || {}
 
       return {
         cliente: {
-          id: boleto.cliente?.id,
-          nome: boleto.cliente?.nome,
-          telefone: boleto.cliente?.telefone,
-          email: boleto.cliente?.email
+          id: cliente.id,
+          nome: cliente.nome,
+          telefone: cliente.telefone,
+          email: cliente.email
         },
         boleto: {
           id: boleto.id,
@@ -60,9 +69,9 @@ export async function GET() {
     }) || []
 
     // Sort by days overdue (most overdue first)
-    formattedBoletos.sort((a, b) => b.contexto.dias_em_atraso - a.contexto.dias_em_atraso)
+    formattedBoletos.sort((a: any, b: any) => b.contexto.dias_em_atraso - a.contexto.dias_em_atraso)
 
-    const totalValor = boletos?.reduce((sum, b) => sum + (b.valor_total || 0), 0) || 0
+    const totalValor = (boletos as any[])?.reduce((sum, b) => sum + (b.valor_total || 0), 0) || 0
 
     return NextResponse.json({
       success: true,
@@ -76,4 +85,3 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

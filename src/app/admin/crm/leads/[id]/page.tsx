@@ -549,10 +549,10 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   onClick={() => handleEtapaChange(etapa)}
                   disabled={lead.etapa_funil === etapa || updatingEtapa}
                   className={cn(
-                    'w-full px-4 py-2 rounded-lg text-left transition-colors disabled:opacity-50',
+                    'w-full px-4 py-2 rounded-lg text-left transition-colors font-medium',
                     lead.etapa_funil === etapa
-                      ? etapaColors[etapa]
-                      : 'bg-background-soft text-foreground-secondary hover:bg-background hover:text-foreground'
+                      ? cn(etapaColors[etapa], 'opacity-100')
+                      : 'bg-background-soft text-foreground-secondary hover:bg-background hover:text-foreground disabled:opacity-40'
                   )}
                 >
                   {etapaLabels[etapa]}
@@ -580,10 +580,10 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   onClick={() => updateStatus(status as StatusLead)}
                   disabled={lead.status === status || saving}
                   className={cn(
-                    'w-full px-4 py-2 rounded-lg text-left transition-colors disabled:opacity-50',
+                    'w-full px-4 py-2 rounded-lg text-left transition-colors font-medium',
                     lead.status === status
-                      ? statusColors[status as StatusLead]
-                      : 'bg-background-soft text-foreground-secondary hover:bg-background hover:text-foreground'
+                      ? cn(statusColors[status as StatusLead], 'opacity-100')
+                      : 'bg-background-soft text-foreground-secondary hover:bg-background hover:text-foreground disabled:opacity-40'
                   )}
                 >
                   {label}
