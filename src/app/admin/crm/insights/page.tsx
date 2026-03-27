@@ -14,6 +14,8 @@ import {
   Calendar
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { etapaLabels, etapaDotColors } from '@/lib/crm/funil'
+import type { EtapaFunil } from '@/types/database'
 
 type Periodo = 'mensal' | 'trimestral' | 'semestral' | 'anual'
 
@@ -80,9 +82,80 @@ interface ConversaoData {
   evolucao_mensal: { mes: string; total: number }[]
 }
 
+interface FunilEtapa {
+  etapa: string
+  quantidade: number
+  valor_potencial_total: number
+}
+
+interface TaxaConversao {
+  label: string
+  de: string
+  para: string
+  taxa: number
+  de_quantidade: number
+  para_quantidade: number
+}
+
+interface FunilData {
+  resumo: {
+    total_leads: number
+    leads_ganhos: number
+    taxa_global_conversao: number
+    valor_potencial_total: number
+  }
+  por_etapa: FunilEtapa[]
+  taxas_conversao: TaxaConversao[]
+}
+
+interface OrigemItem {
+  origem: string
+  label: string
+  total_leads: number
+  total_ganhos: number
+  taxa_conversao: number
+  valor_total_estimado: number
+  ticket_medio_estimado: number
+}
+
+interface OrigemData {
+  resumo: {
+    total_origens_ativas: number
+    top_origem: string
+    melhor_taxa_conversao: number
+    melhor_taxa_origem: string
+    maior_ticket_medio_estimado: number
+    maior_ticket_origem: string
+  }
+  por_origem: OrigemItem[]
+}
+
+interface VendedorItem {
+  vendedor: string
+  total_leads: number
+  em_andamento: number
+  total_ganhos: number
+  total_perdidos: number
+  taxa_conversao: number
+  valor_total_estimado: number
+  ticket_medio_estimado: number
+}
+
+interface VendedorData {
+  resumo: {
+    total_vendedores_ativos: number
+    top_vendedor: string
+    melhor_taxa_conversao: number
+    melhor_taxa_vendedor: string
+    maior_ticket_medio_estimado: number
+    maior_ticket_vendedor: string
+  }
+  por_vendedor: VendedorItem[]
+}
+
 export default function InsightsPage() {
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'leads' | 'vendas'>('vendas')
+  const [activeTab, setActiveTab] = useState<'funil' | 'canal' | 'vendedor' | 'leads' | 'vendas'>('funil')
   const [periodo, setPeriodo] = useState<Periodo>('anual')
   const [days, setDays] = useState(90)
 
@@ -103,6 +176,9 @@ export default function InsightsPage() {
   const [clientesQuentes, setClientesQuentes] = useState<ClienteQuente[]>([])
   const [vendasData, setVendasData] = useState<VendasData | null>(null)
   const [conversaoData, setConversaoData] = useState<ConversaoData | null>(null)
+  const [funilData, setFunilData] = useState<FunilData | null>(null)
+  const [origemData, setOrigemData] = useState<OrigemData | null>(null)
+  const [vendedorData, setVendedorData] = useState<VendedorData | null>(null)
 
   // Map periodo to days for legacy APIs
   useEffect(() => {
@@ -118,12 +194,15 @@ export default function InsightsPage() {
     const fetchInsights = async () => {
       setLoading(true)
       try {
-        const [faixas, catMarcas, quentes, vendas, conversao] = await Promise.all([
+        const [faixas, catMarcas, quentes, vendas, conversao, funil, origem, vendedor] = await Promise.all([
           fetch(`/api/admin/crm/insights/faixas-valor?days=${days}`).then(r => r.json()),
           fetch(`/api/admin/crm/insights/categorias-marcas?days=${days}`).then(r => r.json()),
           fetch('/api/admin/crm/insights/clientes-quentes?limit=10').then(r => r.json()),
           fetch(`/api/admin/crm/insights/vendas-vendedor?periodo=${periodo}`).then(r => r.json()),
-          fetch(`/api/admin/crm/insights/conversao-leads?periodo=${periodo}`).then(r => r.json())
+          fetch(`/api/admin/crm/insights/conversao-leads?periodo=${periodo}`).then(r => r.json()),
+          fetch(`/api/admin/crm/insights/funil-vendas?periodo=${periodo}`).then(r => r.json()),
+          fetch(`/api/admin/crm/insights/origem-leads?periodo=${periodo}`).then(r => r.json()),
+          fetch(`/api/admin/crm/insights/vendedor-leads?periodo=${periodo}`).then(r => r.json()),
         ])
 
         if (faixas.success) setFaixasValor(faixas.data)
@@ -131,6 +210,9 @@ export default function InsightsPage() {
         if (quentes.success) setClientesQuentes(quentes.data)
         if (vendas.success) setVendasData(vendas.data)
         if (conversao.success) setConversaoData(conversao.data)
+        if (funil.success) setFunilData(funil.data)
+        if (origem.success) setOrigemData(origem.data)
+        if (vendedor.success) setVendedorData(vendedor.data)
       } catch (error) {
         console.error('Failed to fetch insights:', error)
       } finally {
@@ -192,6 +274,42 @@ export default function InsightsPage() {
 
       {/* Tabs */}
       <div className="flex border-b border-border">
+        <button
+          onClick={() => setActiveTab('funil')}
+          className={cn(
+            "px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px",
+            activeTab === 'funil'
+              ? "border-primary text-primary"
+              : "border-transparent text-foreground-secondary hover:text-foreground"
+          )}
+        >
+          <BarChart3 className="w-4 h-4 inline-block mr-2" />
+          Funil de Vendas
+        </button>
+        <button
+          onClick={() => setActiveTab('canal')}
+          className={cn(
+            "px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px",
+            activeTab === 'canal'
+              ? "border-primary text-primary"
+              : "border-transparent text-foreground-secondary hover:text-foreground"
+          )}
+        >
+          <PieChart className="w-4 h-4 inline-block mr-2" />
+          Por Canal
+        </button>
+        <button
+          onClick={() => setActiveTab('vendedor')}
+          className={cn(
+            "px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px",
+            activeTab === 'vendedor'
+              ? "border-primary text-primary"
+              : "border-transparent text-foreground-secondary hover:text-foreground"
+          )}
+        >
+          <UserCheck className="w-4 h-4 inline-block mr-2" />
+          Por Vendedor
+        </button>
         <button
           onClick={() => setActiveTab('vendas')}
           className={cn(
@@ -376,6 +494,407 @@ export default function InsightsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Tab Content: Funil de Vendas */}
+      {activeTab === 'funil' && (
+        <>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Users className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Total no Funil</p>
+                  <p className="text-xl font-bold text-foreground">{funilData?.resumo.total_leads ?? 0}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <UserCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Leads Ganhos</p>
+                  <p className="text-xl font-bold text-foreground">{funilData?.resumo.leads_ganhos ?? 0}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Taxa de Conversão</p>
+                  <p className="text-xl font-bold text-foreground">{funilData?.resumo.taxa_global_conversao ?? 0}%</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Valor Potencial</p>
+                  <p className="text-xl font-bold text-foreground">{formatPrice(funilData?.resumo.valor_potencial_total ?? 0)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Barras por Etapa */}
+            <div className="bg-background-card rounded-xl border border-border p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Leads por Etapa</h2>
+              </div>
+              <div className="space-y-3">
+                {(funilData?.por_etapa ?? []).map((item) => {
+                  const total = funilData?.resumo.total_leads || 1
+                  const perc = total > 0 ? Math.round((item.quantidade / total) * 100) : 0
+                  const dotColor = etapaDotColors[item.etapa as EtapaFunil] ?? 'bg-gray-400'
+                  return (
+                    <div key={item.etapa}>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', dotColor)} />
+                          <span className="text-foreground">{etapaLabels[item.etapa as EtapaFunil] ?? item.etapa}</span>
+                        </div>
+                        <span className="text-foreground-secondary">{item.quantidade} ({perc}%)</span>
+                      </div>
+                      <div className="h-2 bg-background-soft rounded-full overflow-hidden">
+                        <div
+                          className={cn('h-full rounded-full transition-all', dotColor)}
+                          style={{ width: `${perc}%` }}
+                        />
+                      </div>
+                      {item.valor_potencial_total > 0 && (
+                        <p className="text-xs text-foreground-secondary mt-0.5 text-right">{formatPrice(item.valor_potencial_total)}</p>
+                      )}
+                    </div>
+                  )
+                })}
+                {!funilData && (
+                  <p className="text-center text-foreground-secondary py-4">Carregando...</p>
+                )}
+              </div>
+            </div>
+
+            {/* Taxas de Conversão */}
+            <div className="bg-background-card rounded-xl border border-border p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Taxas de Conversão</h2>
+              </div>
+              <div className="space-y-6">
+                {(funilData?.taxas_conversao ?? []).map((tc, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-foreground font-medium">{tc.label}</span>
+                      <span className={cn(
+                        'px-2.5 py-0.5 rounded-full text-sm font-semibold',
+                        tc.taxa >= 50
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          : tc.taxa >= 20
+                          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      )}>{tc.taxa}%</span>
+                    </div>
+                    <div className="h-3 bg-background-soft rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all',
+                          tc.taxa >= 50 ? 'bg-green-500' : tc.taxa >= 20 ? 'bg-yellow-400' : 'bg-red-500'
+                        )}
+                        style={{ width: `${Math.min(tc.taxa, 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-foreground-secondary">
+                      {tc.de_quantidade} → {tc.para_quantidade} leads
+                    </p>
+                  </div>
+                ))}
+                {!funilData?.taxas_conversao?.length && (
+                  <p className="text-center text-foreground-secondary py-4">Sem dados suficientes</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Tab Content: Por Canal */}
+      {activeTab === 'canal' && (
+        <>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <PieChart className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Canais Ativos</p>
+                  <p className="text-xl font-bold text-foreground">{origemData?.resumo.total_origens_ativas ?? 0}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Canal com mais leads</p>
+                  <p className="text-xl font-bold text-foreground">{origemData?.resumo.top_origem ?? '—'}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Melhor conversão</p>
+                  <p className="text-lg font-bold text-foreground">{origemData?.resumo.melhor_taxa_conversao ?? 0}% — {origemData?.resumo.melhor_taxa_origem ?? '—'}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Maior ticket estimado</p>
+                  <p className="text-xl font-bold text-foreground">{formatPrice(origemData?.resumo.maior_ticket_medio_estimado ?? 0)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Barras por canal */}
+            <div className="bg-background-card rounded-xl border border-border p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Leads por Canal</h2>
+              </div>
+              <div className="space-y-4">
+                {(origemData?.por_origem ?? []).map((item) => {
+                  const maxLeads = Math.max(...(origemData?.por_origem ?? []).map(o => o.total_leads), 1)
+                  const perc = maxLeads > 0 ? Math.round((item.total_leads / maxLeads) * 100) : 0
+                  const canalColors: Record<string, string> = {
+                    site_chat:      'bg-blue-500',
+                    whatsapp_ia:    'bg-green-500',
+                    instagram_form: 'bg-pink-500',
+                    crm_externo:    'bg-purple-500',
+                  }
+                  const barColor = canalColors[item.origem] ?? 'bg-gray-400'
+                  return (
+                    <div key={item.origem}>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', barColor)} />
+                          <span className="text-foreground">{item.label}</span>
+                        </div>
+                        <span className="text-foreground-secondary">{item.total_leads} leads</span>
+                      </div>
+                      <div className="h-2 bg-background-soft rounded-full overflow-hidden">
+                        <div className={cn('h-full rounded-full transition-all', barColor)} style={{ width: `${perc}%` }} />
+                      </div>
+                    </div>
+                  )
+                })}
+                {!origemData && (
+                  <p className="text-center text-foreground-secondary py-4">Carregando...</p>
+                )}
+              </div>
+            </div>
+
+            {/* Tabela de conversão + ticket */}
+            <div className="bg-background-card rounded-xl border border-border p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Conversão por Canal</h2>
+              </div>
+              <div>
+                <div className="grid grid-cols-4 gap-2 text-xs text-foreground-secondary font-medium uppercase tracking-wide mb-2 px-2">
+                  <span>Canal</span>
+                  <span className="text-center">Leads</span>
+                  <span className="text-center">Ganhos</span>
+                  <span className="text-center">Conversão</span>
+                </div>
+                {(origemData?.por_origem ?? []).map((item, i) => (
+                  <div key={item.origem} className={cn('grid grid-cols-4 gap-2 py-2.5 px-2 rounded-lg text-sm',
+                    i % 2 === 0 ? 'bg-background-soft' : ''
+                  )}>
+                    <span className="text-foreground font-medium truncate">{item.label}</span>
+                    <span className="text-center text-foreground-secondary">{item.total_leads}</span>
+                    <span className="text-center text-green-600 dark:text-green-400">{item.total_ganhos}</span>
+                    <span className={cn('text-center font-semibold',
+                      item.taxa_conversao >= 30 ? 'text-green-600 dark:text-green-400' :
+                      item.taxa_conversao >= 10 ? 'text-yellow-600 dark:text-yellow-400' :
+                      'text-foreground-secondary'
+                    )}>{item.taxa_conversao}%</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-xs text-foreground-secondary mb-2 font-medium uppercase tracking-wide">Ticket médio estimado por canal</p>
+                {(origemData?.por_origem ?? []).filter(o => o.total_ganhos > 0).map((item) => (
+                  <div key={item.origem} className="flex justify-between items-center py-1.5 text-sm">
+                    <span className="text-foreground-secondary">{item.label}</span>
+                    <span className="font-semibold text-foreground">{formatPrice(item.ticket_medio_estimado)}</span>
+                  </div>
+                ))}
+                {!(origemData?.por_origem ?? []).some(o => o.total_ganhos > 0) && (
+                  <p className="text-foreground-secondary text-sm py-2">Nenhum lead ganho no período</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Tab Content: Por Vendedor */}
+      {activeTab === 'vendedor' && (
+        <>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <UserCheck className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Vendedores Ativos</p>
+                  <p className="text-xl font-bold text-foreground">{vendedorData?.resumo.total_vendedores_ativos ?? 0}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Mais leads recebidos</p>
+                  <p className="text-xl font-bold text-foreground">{vendedorData?.resumo.top_vendedor ?? '—'}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Melhor conversão</p>
+                  <p className="text-lg font-bold text-foreground">{vendedorData?.resumo.melhor_taxa_conversao ?? 0}% — {vendedorData?.resumo.melhor_taxa_vendedor ?? '—'}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Maior ticket estimado</p>
+                  <p className="text-xl font-bold text-foreground">{formatPrice(vendedorData?.resumo.maior_ticket_medio_estimado ?? 0)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Barras por vendedor */}
+            <div className="bg-background-card rounded-xl border border-border p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Leads por Vendedor</h2>
+              </div>
+              <div className="space-y-4">
+                {(vendedorData?.por_vendedor ?? []).map((item) => {
+                  const maxLeads = Math.max(...(vendedorData?.por_vendedor ?? []).map(v => v.total_leads), 1)
+                  const perc = maxLeads > 0 ? Math.round((item.total_leads / maxLeads) * 100) : 0
+                  return (
+                    <div key={item.vendedor}>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-primary" />
+                          <span className="text-foreground">{item.vendedor}</span>
+                        </div>
+                        <span className="text-foreground-secondary">{item.total_leads} leads</span>
+                      </div>
+                      <div className="h-2 bg-background-soft rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${perc}%` }} />
+                      </div>
+                      <div className="flex gap-3 text-xs text-foreground-secondary mt-1">
+                        <span className="text-green-600 dark:text-green-400">{item.total_ganhos} ganhos</span>
+                        <span>{item.em_andamento} em and.</span>
+                        <span className="text-red-500">{item.total_perdidos} perdidos</span>
+                      </div>
+                    </div>
+                  )
+                })}
+                {!vendedorData && (
+                  <p className="text-center text-foreground-secondary py-4">Carregando...</p>
+                )}
+              </div>
+            </div>
+
+            {/* Tabela por vendedor */}
+            <div className="bg-background-card rounded-xl border border-border p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Conversão por Vendedor</h2>
+              </div>
+              <div>
+                <div className="grid grid-cols-4 gap-2 text-xs text-foreground-secondary font-medium uppercase tracking-wide mb-2 px-2">
+                  <span>Vendedor</span>
+                  <span className="text-center">Leads</span>
+                  <span className="text-center">Ganhos</span>
+                  <span className="text-center">Conversão</span>
+                </div>
+                {(vendedorData?.por_vendedor ?? []).map((item, i) => (
+                  <div key={item.vendedor} className={cn('grid grid-cols-4 gap-2 py-2.5 px-2 rounded-lg text-sm',
+                    i % 2 === 0 ? 'bg-background-soft' : ''
+                  )}>
+                    <span className="text-foreground font-medium truncate" title={item.vendedor}>{item.vendedor}</span>
+                    <span className="text-center text-foreground-secondary">{item.total_leads}</span>
+                    <span className="text-center text-green-600 dark:text-green-400">{item.total_ganhos}</span>
+                    <span className={cn('text-center font-semibold',
+                      item.taxa_conversao >= 30 ? 'text-green-600 dark:text-green-400' :
+                      item.taxa_conversao >= 10 ? 'text-yellow-600 dark:text-yellow-400' :
+                      'text-foreground-secondary'
+                    )}>{item.taxa_conversao}%</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-xs text-foreground-secondary mb-2 font-medium uppercase tracking-wide">Ticket médio estimado por vendedor</p>
+                {(vendedorData?.por_vendedor ?? []).filter(v => v.total_ganhos > 0).map((item) => (
+                  <div key={item.vendedor} className="flex justify-between items-center py-1.5 text-sm">
+                    <span className="text-foreground-secondary truncate">{item.vendedor}</span>
+                    <span className="font-semibold text-foreground ml-2">{formatPrice(item.ticket_medio_estimado)}</span>
+                  </div>
+                ))}
+                {!(vendedorData?.por_vendedor ?? []).some(v => v.total_ganhos > 0) && (
+                  <p className="text-foreground-secondary text-sm py-2">Nenhum lead ganho no período</p>
+                )}
               </div>
             </div>
           </div>
