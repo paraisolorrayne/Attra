@@ -19,6 +19,20 @@ import {
 import { cn } from '@/lib/utils'
 import type { ClienteWithStats } from '@/types/database'
 
+type TipoContato = 'lead' | 'cliente' | 'ex_cliente'
+
+const TIPO_LABELS: Record<TipoContato, string> = {
+  lead: 'Lead',
+  cliente: 'Cliente',
+  ex_cliente: 'Ex-cliente'
+}
+
+const TIPO_COLORS: Record<TipoContato, string> = {
+  lead: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  cliente: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  ex_cliente: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400'
+}
+
 interface ClientesResponse {
   success: boolean
   data: ClienteWithStats[]
@@ -31,6 +45,7 @@ interface ClientesResponse {
 }
 
 interface Filters {
+  tipo: string
   origem: string
   faixaValorMin: string
   faixaValorMax: string
@@ -71,6 +86,7 @@ export default function ClientesPage() {
   const [search, setSearch] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState<Filters>({
+    tipo: '',
     origem: '',
     faixaValorMin: '',
     faixaValorMax: '',
@@ -88,6 +104,7 @@ export default function ClientesPage() {
       params.set('page', pagination.page.toString())
       params.set('limit', pagination.limit.toString())
       if (search) params.set('search', search)
+      if (filters.tipo) params.set('tipo', filters.tipo)
       if (filters.origem) params.set('origem', filters.origem)
       if (filters.faixaValorMin) params.set('faixa_valor_min', filters.faixaValorMin)
       if (filters.faixaValorMax) params.set('faixa_valor_max', filters.faixaValorMax)
@@ -144,6 +161,7 @@ export default function ClientesPage() {
 
   const clearFilters = () => {
     setFilters({
+      tipo: '',
       origem: '',
       faixaValorMin: '',
       faixaValorMax: '',
@@ -181,13 +199,36 @@ export default function ClientesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Contatos</h1>
-          <p className="text-foreground-secondary">Base de contatos e histórico de compras</p>
+          <p className="text-foreground-secondary">Leads, clientes e ex-clientes</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-foreground-secondary">
             {pagination.total} contatos
           </span>
         </div>
+      </div>
+
+      {/* Quick type filter tabs */}
+      <div className="flex gap-2 flex-wrap">
+        {([
+          { value: '', label: 'Todos' },
+          { value: 'lead', label: 'Leads' },
+          { value: 'cliente', label: 'Clientes' },
+          { value: 'ex_cliente', label: 'Ex-clientes' },
+        ] as { value: string; label: string }[]).map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => { handleFilterChange('tipo', tab.value); setPagination(prev => ({ ...prev, page: 1 })) }}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
+              filters.tipo === tab.value
+                ? 'bg-primary text-white border-primary'
+                : 'border-border text-foreground-secondary hover:bg-background-soft hover:text-foreground'
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Search and Filters */}
@@ -245,6 +286,24 @@ export default function ClientesPage() {
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Tipo de Contato */}
+              <div>
+                <label className="block text-sm text-foreground-secondary mb-1.5">Tipo de Contato</label>
+                <div className="relative">
+                  <select
+                    value={filters.tipo}
+                    onChange={(e) => handleFilterChange('tipo', e.target.value)}
+                    className="w-full px-3 py-2.5 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground appearance-none cursor-pointer"
+                  >
+                    <option value="">Todos os tipos</option>
+                    <option value="lead">Lead</option>
+                    <option value="cliente">Cliente</option>
+                    <option value="ex_cliente">Ex-cliente</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-secondary pointer-events-none" />
+                </div>
+              </div>
+
               {/* Origem */}
               <div>
                 <label className="block text-sm text-foreground-secondary mb-1.5">Origem</label>
@@ -344,11 +403,16 @@ export default function ClientesPage() {
                   <h3 className="font-semibold text-foreground">{cliente.nome}</h3>
                   <p className="text-sm text-foreground-secondary">{cliente.origem_principal || 'Origem não definida'}</p>
                 </div>
-                {(cliente.lead_count ?? 0) > 0 && (
-                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
-                    {cliente.lead_count} leads
+                <div className="flex flex-col items-end gap-1">
+                  <span className={cn('px-2 py-0.5 text-xs font-medium rounded-full', TIPO_COLORS[cliente.tipo as TipoContato] ?? 'bg-gray-100 text-gray-600')}>
+                    {TIPO_LABELS[cliente.tipo as TipoContato] ?? cliente.tipo}
                   </span>
-                )}
+                  {(cliente.lead_count ?? 0) > 0 && (
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">
+                      {cliente.lead_count} leads
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2 mb-4">

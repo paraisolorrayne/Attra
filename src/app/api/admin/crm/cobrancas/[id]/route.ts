@@ -40,7 +40,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     // Allowed update fields
     const allowedFields = [
-      'status', 'data_pagamento', 'descricao', 'veiculo_descricao'
+      'status', 'data_pagamento', 'descricao', 'veiculo_descricao', 'lead_id', 'venda_id'
     ]
 
     const updateData: Record<string, unknown> = {}

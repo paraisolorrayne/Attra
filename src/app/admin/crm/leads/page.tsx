@@ -640,6 +640,7 @@ function LeadsContent() {
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Etapa</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Contato</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Interesse</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Vendedor</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Status</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Prob. (%)</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Próx. Contato</th>
@@ -707,6 +708,13 @@ function LeadsContent() {
                             : `${formatPrice(lead.faixa_preco_interesse_min)} - ${formatPrice(lead.faixa_preco_interesse_max)}`}
                         </p>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {lead.vendedor_responsavel ? (
+                        <span className="text-sm text-foreground">{lead.vendedor_responsavel}</span>
+                      ) : (
+                        <span className="text-sm text-foreground-secondary">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={cn('px-2 py-1 rounded-full text-xs font-medium', statusColors[lead.status])}>

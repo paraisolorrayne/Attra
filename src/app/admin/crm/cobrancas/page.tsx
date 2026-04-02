@@ -13,7 +13,9 @@ import {
   ChevronRight,
   Loader2,
   Calendar,
-  DollarSign
+  DollarSign,
+  Car,
+  Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { BoletoWithCliente, StatusBoleto } from '@/types/database'
@@ -232,6 +234,7 @@ export default function CobrancasPage() {
                 <tr>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Cliente</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Descrição</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Vínculos</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Valor</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Vencimento</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Status</th>
@@ -253,6 +256,25 @@ export default function CobrancasPage() {
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-sm text-foreground">{boleto.descricao || boleto.identificador_externo}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col gap-1">
+                          {(boleto as any).lead && (
+                            <span className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
+                              <Users className="w-3 h-3" />
+                              {(boleto as any).lead.nome}
+                            </span>
+                          )}
+                          {boleto.veiculo_descricao && (
+                            <span className="inline-flex items-center gap-1 text-xs text-foreground-secondary">
+                              <Car className="w-3 h-3" />
+                              {boleto.veiculo_descricao}
+                            </span>
+                          )}
+                          {!(boleto as any).lead && !boleto.veiculo_descricao && (
+                            <span className="text-xs text-foreground-secondary">-</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-foreground">{formatPrice(boleto.valor_total)}</p>

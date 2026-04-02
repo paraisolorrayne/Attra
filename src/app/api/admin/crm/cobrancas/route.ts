@@ -55,6 +55,17 @@ export async function GET(request: NextRequest) {
       for (const c of clientes || []) clienteMap[c.id] = c
     }
 
+    // Fetch leads separately for boletos with lead_id
+    const leadIds = [...new Set((boletos || []).map((b: any) => b.lead_id).filter(Boolean))]
+    const leadMap: Record<string, any> = {}
+    if (leadIds.length > 0) {
+      const { data: leads } = await (supabase as any)
+        .from('leads')
+        .select('id, nome, etapa_funil')
+        .in('id', leadIds)
+      for (const l of leads || []) leadMap[l.id] = l
+    }
+
     // Calculate days overdue
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -69,6 +80,7 @@ export async function GET(request: NextRequest) {
       return {
         ...boleto,
         cliente: clienteMap[boleto.cliente_id] || null,
+        lead: boleto.lead_id ? (leadMap[boleto.lead_id] || null) : null,
         dias_em_atraso: diasEmAtraso
       }
     }) || []

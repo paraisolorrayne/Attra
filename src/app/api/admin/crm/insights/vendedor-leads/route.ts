@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 
     const { data: leads, error } = await supabase
       .from('leads')
-      .select('vendedor_responsavel, etapa_funil, valor_potencial')
+      .select('vendedor_responsavel, etapa_funil, valor_potencial, criado_em, atualizado_em')
       .gte('criado_em', startDateStr)
       .lte('criado_em', endDateStr)
 
@@ -52,12 +52,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 })
     }
 
-    // Aggregate in JS — null vendedor → 'Não atribuído', null valor → 0
+    const ETAPAS = ['novo_lead','primeiro_contato','visita_agendada','visita_realizada','proposta_enviada','negociacao','ganho','perdido']
+
+    // Aggregate in JS
     const totaisMap: Record<string, number> = {}
-    const ganhosMap: Record<string, number> = {}
-    const perdidosMap: Record<string, number> = {}
-    const emAndamentoMap: Record<string, number> = {}
     const valorEstimadoMap: Record<string, number> = {}
+    const etapaMap: Record<string, Record<string, number>> = {}
+    const tempoFechamentoMap: Record<string, number[]> = {}
 
     for (const lead of leads || []) {
       const l = lead as any
@@ -66,34 +67,45 @@ export async function GET(request: Request) {
       const valor: number = l.valor_potencial ?? 0
 
       totaisMap[vendedor] = (totaisMap[vendedor] ?? 0) + 1
+      if (!etapaMap[vendedor]) etapaMap[vendedor] = {}
+      etapaMap[vendedor][etapa] = (etapaMap[vendedor][etapa] ?? 0) + 1
 
       if (etapa === 'ganho') {
-        ganhosMap[vendedor] = (ganhosMap[vendedor] ?? 0) + 1
         valorEstimadoMap[vendedor] = (valorEstimadoMap[vendedor] ?? 0) + valor
-      } else if (etapa === 'perdido') {
-        perdidosMap[vendedor] = (perdidosMap[vendedor] ?? 0) + 1
-      } else {
-        emAndamentoMap[vendedor] = (emAndamentoMap[vendedor] ?? 0) + 1
+        // Tempo médio: criado_em → atualizado_em (proxy for close date)
+        if (l.criado_em && l.atualizado_em) {
+          const dias = Math.round(
+            (new Date(l.atualizado_em).getTime() - new Date(l.criado_em).getTime()) / (1000 * 60 * 60 * 24)
+          )
+          if (!tempoFechamentoMap[vendedor]) tempoFechamentoMap[vendedor] = []
+          tempoFechamentoMap[vendedor].push(dias)
+        }
       }
     }
 
     // Build array with all vendedores
     const por_vendedor = Object.keys(totaisMap)
       .map(vendedor => {
-        const total   = totaisMap[vendedor] ?? 0
-        const ganhos  = ganhosMap[vendedor] ?? 0
-        const perdidos = perdidosMap[vendedor] ?? 0
-        const emAndamento = emAndamentoMap[vendedor] ?? 0
-        const valor   = valorEstimadoMap[vendedor] ?? 0
+        const total    = totaisMap[vendedor] ?? 0
+        const etapas   = etapaMap[vendedor] ?? {}
+        const ganhos   = etapas['ganho'] ?? 0
+        const perdidos = etapas['perdido'] ?? 0
+        const emAndamento = total - ganhos - perdidos
+        const valor    = valorEstimadoMap[vendedor] ?? 0
+        const tempos   = tempoFechamentoMap[vendedor] ?? []
+        const tempoMedio = tempos.length > 0 ? Math.round(tempos.reduce((a, b) => a + b, 0) / tempos.length) : null
+        const por_etapa = ETAPAS.reduce((acc, e) => ({ ...acc, [e]: etapas[e] ?? 0 }), {} as Record<string, number>)
         return {
           vendedor,
-          total_leads:           total,
-          em_andamento:          emAndamento,
-          total_ganhos:          ganhos,
-          total_perdidos:        perdidos,
-          taxa_conversao:        total  > 0 ? Math.round((ganhos / total) * 100) : 0,
-          valor_total_estimado:  valor,
-          ticket_medio_estimado: ganhos > 0 ? Math.round(valor / ganhos) : 0,
+          total_leads:            total,
+          em_andamento:           emAndamento,
+          total_ganhos:           ganhos,
+          total_perdidos:         perdidos,
+          taxa_conversao:         total > 0 ? Math.round((ganhos / total) * 100) : 0,
+          valor_total_estimado:   valor,
+          ticket_medio_estimado:  ganhos > 0 ? Math.round(valor / ganhos) : 0,
+          tempo_medio_fechamento: tempoMedio,
+          por_etapa,
         }
       })
       // Sort: total_leads DESC, ties by vendedor ASC

@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 
     const { data: leads, error } = await supabase
       .from('leads')
-      .select('etapa_funil, valor_potencial')
+      .select('etapa_funil, valor_potencial, criado_em, atualizado_em')
       .gte('criado_em', startDateStr)
       .lte('criado_em', endDateStr)
 
@@ -74,6 +74,8 @@ export async function GET(request: Request) {
       valorMap[etapa] = 0
     }
 
+    const temposFechamento: number[] = []
+
     for (const lead of leads || []) {
       const l = lead as any
       const etapa = l.etapa_funil as string
@@ -81,7 +83,17 @@ export async function GET(request: Request) {
         countMap[etapa]++
         valorMap[etapa] += l.valor_potencial ?? 0
       }
+      if (etapa === 'ganho' && l.criado_em && l.atualizado_em) {
+        const dias = Math.round(
+          (new Date(l.atualizado_em).getTime() - new Date(l.criado_em).getTime()) / (1000 * 60 * 60 * 24)
+        )
+        if (dias >= 0) temposFechamento.push(dias)
+      }
     }
+
+    const tempo_medio_fechamento = temposFechamento.length > 0
+      ? Math.round(temposFechamento.reduce((a, b) => a + b, 0) / temposFechamento.length)
+      : null
 
     const totalLeads = (leads || []).length
     const ganhos = countMap['ganho'] ?? 0
@@ -137,6 +149,7 @@ export async function GET(request: Request) {
           leads_ganhos: ganhos,
           taxa_global_conversao: taxaGlobalConversao,
           valor_potencial_total: valorPotencialTotal,
+          tempo_medio_fechamento,
         },
         por_etapa,
         taxas_conversao,

@@ -11,7 +11,8 @@ import {
   PieChart,
   UserCheck,
   Target,
-  Calendar
+  Calendar,
+  Clock
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { etapaLabels, etapaDotColors } from '@/lib/crm/funil'
@@ -103,6 +104,7 @@ interface FunilData {
     leads_ganhos: number
     taxa_global_conversao: number
     valor_potencial_total: number
+    tempo_medio_fechamento: number | null
   }
   por_etapa: FunilEtapa[]
   taxas_conversao: TaxaConversao[]
@@ -139,6 +141,8 @@ interface VendedorItem {
   taxa_conversao: number
   valor_total_estimado: number
   ticket_medio_estimado: number
+  tempo_medio_fechamento: number | null
+  por_etapa: Record<string, number>
 }
 
 interface VendedorData {
@@ -504,7 +508,7 @@ export default function InsightsPage() {
       {activeTab === 'funil' && (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="bg-background-card rounded-xl border border-border p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -546,6 +550,21 @@ export default function InsightsPage() {
                 <div>
                   <p className="text-sm text-foreground-secondary">Valor Potencial</p>
                   <p className="text-xl font-bold text-foreground">{formatPrice(funilData?.resumo.valor_potencial_total ?? 0)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl border border-border p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                  <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground-secondary">Tempo Médio Fechamento</p>
+                  <p className="text-xl font-bold text-foreground">
+                    {funilData?.resumo.tempo_medio_fechamento != null
+                      ? `${funilData.resumo.tempo_medio_fechamento} dias`
+                      : '—'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -819,84 +838,75 @@ export default function InsightsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Barras por vendedor */}
-            <div className="bg-background-card rounded-xl border border-border p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Leads por Vendedor</h2>
-              </div>
-              <div className="space-y-4">
-                {(vendedorData?.por_vendedor ?? []).map((item) => {
-                  const maxLeads = Math.max(...(vendedorData?.por_vendedor ?? []).map(v => v.total_leads), 1)
-                  const perc = maxLeads > 0 ? Math.round((item.total_leads / maxLeads) * 100) : 0
-                  return (
-                    <div key={item.vendedor}>
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-primary" />
-                          <span className="text-foreground">{item.vendedor}</span>
-                        </div>
-                        <span className="text-foreground-secondary">{item.total_leads} leads</span>
-                      </div>
-                      <div className="h-2 bg-background-soft rounded-full overflow-hidden">
-                        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${perc}%` }} />
-                      </div>
-                      <div className="flex gap-3 text-xs text-foreground-secondary mt-1">
-                        <span className="text-green-600 dark:text-green-400">{item.total_ganhos} ganhos</span>
-                        <span>{item.em_andamento} em and.</span>
-                        <span className="text-red-500">{item.total_perdidos} perdidos</span>
-                      </div>
+          <div className="space-y-6">
+            {/* Breakdown completo por vendedor */}
+            {(vendedorData?.por_vendedor ?? []).map((item, i) => (
+              <div key={item.vendedor} className="bg-background-card rounded-xl border border-border p-6">
+                {/* Header do vendedor */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+                      {i + 1}
                     </div>
-                  )
-                })}
-                {!vendedorData && (
-                  <p className="text-center text-foreground-secondary py-4">Carregando...</p>
-                )}
-              </div>
-            </div>
-
-            {/* Tabela por vendedor */}
-            <div className="bg-background-card rounded-xl border border-border p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Target className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Conversão por Vendedor</h2>
-              </div>
-              <div>
-                <div className="grid grid-cols-4 gap-2 text-xs text-foreground-secondary font-medium uppercase tracking-wide mb-2 px-2">
-                  <span>Vendedor</span>
-                  <span className="text-center">Leads</span>
-                  <span className="text-center">Ganhos</span>
-                  <span className="text-center">Conversão</span>
+                    <div>
+                      <p className="font-semibold text-foreground">{item.vendedor}</p>
+                      <p className="text-xs text-foreground-secondary">{item.total_leads} leads recebidos</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-3 text-sm">
+                    <span className="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full font-medium">
+                      {item.total_ganhos} ganhos
+                    </span>
+                    <span className="px-2.5 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full font-medium">
+                      {item.total_perdidos} perdidos
+                    </span>
+                    <span className={cn('px-2.5 py-1 rounded-full font-semibold',
+                      item.taxa_conversao >= 30 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                      item.taxa_conversao >= 10 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                      'bg-gray-100 dark:bg-gray-900/30 text-foreground-secondary'
+                    )}>
+                      {item.taxa_conversao}% conversão
+                    </span>
+                    {item.ticket_medio_estimado > 0 && (
+                      <span className="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full font-medium">
+                        {formatPrice(item.ticket_medio_estimado)} ticket
+                      </span>
+                    )}
+                    {item.tempo_medio_fechamento != null && (
+                      <span className="px-2.5 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full font-medium">
+                        {item.tempo_medio_fechamento}d fechamento
+                      </span>
+                    )}
+                  </div>
                 </div>
-                {(vendedorData?.por_vendedor ?? []).map((item, i) => (
-                  <div key={item.vendedor} className={cn('grid grid-cols-4 gap-2 py-2.5 px-2 rounded-lg text-sm',
-                    i % 2 === 0 ? 'bg-background-soft' : ''
-                  )}>
-                    <span className="text-foreground font-medium truncate" title={item.vendedor}>{item.vendedor}</span>
-                    <span className="text-center text-foreground-secondary">{item.total_leads}</span>
-                    <span className="text-center text-green-600 dark:text-green-400">{item.total_ganhos}</span>
-                    <span className={cn('text-center font-semibold',
-                      item.taxa_conversao >= 30 ? 'text-green-600 dark:text-green-400' :
-                      item.taxa_conversao >= 10 ? 'text-yellow-600 dark:text-yellow-400' :
-                      'text-foreground-secondary'
-                    )}>{item.taxa_conversao}%</span>
-                  </div>
-                ))}
+
+                {/* Pipeline por etapa */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+                  {([
+                    { key: 'novo_lead',        label: 'Novo',        color: 'bg-gray-400' },
+                    { key: 'primeiro_contato', label: '1º Contato',  color: 'bg-blue-500' },
+                    { key: 'visita_agendada',  label: 'Vis. Agend.', color: 'bg-purple-500' },
+                    { key: 'visita_realizada', label: 'Vis. Real.',  color: 'bg-indigo-500' },
+                    { key: 'proposta_enviada', label: 'Proposta',    color: 'bg-yellow-400' },
+                    { key: 'negociacao',       label: 'Negociação',  color: 'bg-orange-500' },
+                    { key: 'ganho',            label: 'Ganho',       color: 'bg-green-500' },
+                    { key: 'perdido',          label: 'Perdido',     color: 'bg-red-500' },
+                  ] as { key: string; label: string; color: string }[]).map(({ key, label, color }) => (
+                    <div key={key} className="flex flex-col items-center p-2 rounded-lg bg-background-soft text-center">
+                      <span className={cn('w-2 h-2 rounded-full mb-1', color)} />
+                      <span className="text-lg font-bold text-foreground">{(item.por_etapa ?? {})[key] ?? 0}</span>
+                      <span className="text-xs text-foreground-secondary leading-tight">{label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-border">
-                <p className="text-xs text-foreground-secondary mb-2 font-medium uppercase tracking-wide">Ticket médio estimado por vendedor</p>
-                {(vendedorData?.por_vendedor ?? []).filter(v => v.total_ganhos > 0).map((item) => (
-                  <div key={item.vendedor} className="flex justify-between items-center py-1.5 text-sm">
-                    <span className="text-foreground-secondary truncate">{item.vendedor}</span>
-                    <span className="font-semibold text-foreground ml-2">{formatPrice(item.ticket_medio_estimado)}</span>
-                  </div>
-                ))}
-                {!(vendedorData?.por_vendedor ?? []).some(v => v.total_ganhos > 0) && (
-                  <p className="text-foreground-secondary text-sm py-2">Nenhum lead ganho no período</p>
-                )}
-              </div>
-            </div>
+            ))}
+            {!vendedorData && (
+              <p className="text-center text-foreground-secondary py-8">Carregando...</p>
+            )}
+            {vendedorData && vendedorData.por_vendedor.length === 0 && (
+              <p className="text-center text-foreground-secondary py-8">Nenhum vendedor com leads no período</p>
+            )}
           </div>
         </>
       )}

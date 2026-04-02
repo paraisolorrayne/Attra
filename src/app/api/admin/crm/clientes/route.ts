@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search')
     const origem = searchParams.get('origem')
+    const tipo = searchParams.get('tipo') as 'lead' | 'cliente' | 'ex_cliente' | null
     const faixaValorMin = searchParams.get('faixa_valor_min')
     const faixaValorMax = searchParams.get('faixa_valor_max')
     const totalGastoMin = searchParams.get('total_gasto_min')
@@ -37,6 +38,9 @@ export async function GET(request: NextRequest) {
     }
     if (origem) {
       query = query.eq('origem_principal', origem)
+    }
+    if (tipo) {
+      query = query.eq('tipo', tipo)
     }
 
     // Filter by preferred price range
