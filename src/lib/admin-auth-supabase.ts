@@ -79,20 +79,7 @@ export async function signOut(): Promise<void> {
  * Get current authenticated admin user
  */
 export async function getCurrentAdmin(): Promise<AdminUser | null> {
-  // TEMPORARY BYPASS: Permitir acesso livre ao admin local sem login
-  return {
-    id: 'dev-admin-bypass',
-    email: 'dev@localhost',
-    role: 'admin',
-    name: 'Dev Admin',
-    is_active: true,
-    last_login_at: new Date().toISOString(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }
-
-  /*
-  // DEV BYPASS: Return a fake admin user on localhost for local testing
+  // DEV BYPASS: only active when explicitly enabled in local development
   if (process.env.NODE_ENV === 'development' && process.env.ADMIN_AUTH_BYPASS === 'true') {
     return {
       id: 'dev-admin-bypass',
@@ -110,9 +97,7 @@ export async function getCurrentAdmin(): Promise<AdminUser | null> {
 
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-  console.log('[getCurrentAdmin] User from session:', user?.id, 'Error:', userError?.message)
-
-  if (!user) return null
+  if (userError || !user) return null
 
   const { data: adminUser, error: adminError } = await supabase
     .from('admin_users')
@@ -121,10 +106,9 @@ export async function getCurrentAdmin(): Promise<AdminUser | null> {
     .eq('is_active', true)
     .single()
 
-  console.log('[getCurrentAdmin] Admin user lookup result:', adminUser?.email, 'Error:', adminError?.message)
+  if (adminError || !adminUser) return null
 
   return adminUser as AdminUser | null
-  */
 }
 
 /**

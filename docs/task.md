@@ -171,7 +171,3 @@ Segue uma lista objetiva de tarefas para passar ao dev, organizada por área.
   - status (em aberto, pago, vencido, etc.)  
   - data_vencimento  
   - data_pagamento (opcional)
-
-Supabase
-attraveiculosudi@gmail.com
-P1WdkaHGo5dGrkz!
