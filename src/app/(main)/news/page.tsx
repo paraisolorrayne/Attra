@@ -7,6 +7,9 @@ import { Calendar, Newspaper, Trophy, Car, BookOpen, Search } from 'lucide-react
 import { EDITORIAL_SECTION } from '@/lib/constants'
 import { createClient } from '@/lib/supabase/server'
 
+// Revalidate every hour so new weekly articles appear within 1h of the cron job running
+export const revalidate = 3600
+
 export const metadata: Metadata = {
   title: 'Notícias | Mercado Automotivo Premium e Formula 1',
   description: 'Acompanhe as últimas notícias do mercado automotivo de luxo, supercarros e Formula 1. Curadoria semanal da Attra Veículos.',
