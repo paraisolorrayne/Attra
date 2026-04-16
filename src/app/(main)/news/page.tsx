@@ -5,7 +5,7 @@ import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Calendar, Newspaper, Trophy, Car, BookOpen, Search } from 'lucide-react'
 import { EDITORIAL_SECTION } from '@/lib/constants'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 
 // Revalidate every hour so new weekly articles appear within 1h of the cron job running
 export const revalidate = 3600
@@ -44,10 +44,15 @@ interface NewsData {
 
 async function getNews(): Promise<NewsData> {
   try {
-    const supabase = await createClient()
+    // Use plain anon client (no cookies) so ISR revalidation works correctly.
+    // This is a public page — no auth cookies are needed.
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
-    // Get active cycle directly from Supabase (no fetch cache issues)
-    const { data: cycle, error: cycleError } = await supabase
+    // Get the most recently created active cycle
+    const { data: cycleRaw, error: cycleError } = await supabase
       .from('news_cycles')
       .select('*')
       .eq('is_active', true)
@@ -55,12 +60,14 @@ async function getNews(): Promise<NewsData> {
       .limit(1)
       .single()
 
-    if (cycleError || !cycle) {
+    if (cycleError || !cycleRaw) {
       return { cycle: null, featured: [], formula1: [], premiumMarket: [] }
     }
 
+    const cycle = cycleRaw as unknown as { id: string; week_start: string; week_end: string }
+
     // Get featured articles
-    const { data: featured } = await supabase
+    const { data: featuredRaw } = await supabase
       .from('news_articles')
       .select('*')
       .eq('news_cycle_id', cycle.id)
@@ -69,7 +76,7 @@ async function getNews(): Promise<NewsData> {
       .limit(3)
 
     // Get Formula 1 articles (category_id = 2)
-    const { data: formula1 } = await supabase
+    const { data: formula1Raw } = await supabase
       .from('news_articles')
       .select('*')
       .eq('news_cycle_id', cycle.id)
@@ -78,7 +85,7 @@ async function getNews(): Promise<NewsData> {
       .limit(9)
 
     // Get Premium Market articles (category_id = 3)
-    const { data: premiumMarket } = await supabase
+    const { data: premiumMarketRaw } = await supabase
       .from('news_articles')
       .select('*')
       .eq('news_cycle_id', cycle.id)
@@ -92,9 +99,9 @@ async function getNews(): Promise<NewsData> {
         week_start: cycle.week_start,
         week_end: cycle.week_end,
       },
-      featured: featured || [],
-      formula1: formula1 || [],
-      premiumMarket: premiumMarket || [],
+      featured: (featuredRaw as unknown as NewsArticle[]) || [],
+      formula1: (formula1Raw as unknown as NewsArticle[]) || [],
+      premiumMarket: (premiumMarketRaw as unknown as NewsArticle[]) || [],
     }
   } catch {
     return { cycle: null, featured: [], formula1: [], premiumMarket: [] }
