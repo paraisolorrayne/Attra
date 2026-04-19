@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { MessageCircle, Car, MapPin, Instagram, Youtube, ChevronRight, ArrowRight } from 'lucide-react'
+import { MessageCircle, Car, MapPin, Instagram, Youtube, ChevronRight, ArrowRight, Star } from 'lucide-react'
 import { getWhatsAppUrl, SITE_URL } from '@/lib/constants'
 import { getVehicles } from '@/lib/autoconf-api'
 import { formatPrice, formatMileage } from '@/lib/utils'
@@ -54,12 +54,9 @@ export default async function LinksPage() {
       </div>
 
       {/* Headline */}
-      <h1 className="text-gray-900 dark:text-white text-xl sm:text-2xl font-bold text-center leading-snug max-w-xs mb-2">
-        Para quem não compra carro por impulso.
+      <h1 className="text-gray-900 dark:text-white text-xl sm:text-2xl font-bold text-center leading-snug max-w-xs mb-8">
+        Em qualquer lugar do Brasil, orientação segura para quem não compra carro por impulso.
       </h1>
-      <p className="text-gray-500 dark:text-gray-400 text-sm text-center max-w-[280px] mb-8">
-        Curadoria e orientação para escolher com segurança em qualquer lugar do Brasil.
-      </p>
 
       {/* Main CTAs */}
       <div className="w-full max-w-sm flex flex-col gap-3 mb-8">
@@ -97,26 +94,6 @@ export default async function LinksPage() {
           <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600" />
         </a>
       </div>
-
-      {/* Como Trabalhamos */}
-      <div className="w-full max-w-sm border border-gray-200 dark:border-gray-800 rounded-xl p-5 mb-6">
-        <h2 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-4">Como trabalhamos</h2>
-        <ul className="space-y-3">
-          <li className="flex items-start gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">Seleção baseada em histórico, procedência e configuração</span>
-          </li>
-          <li className="flex items-start gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">Atendimento direto até a entrega, sem intermediários</span>
-          </li>
-          <li className="flex items-start gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-            <span className="text-sm text-gray-700 dark:text-gray-300">Redução de risco na escolha, não pressão comercial</span>
-          </li>
-        </ul>
-      </div>
-
 
       {/* Exemplo Recente de Curadoria */}
       {featuredVehicle && (
@@ -163,11 +140,11 @@ export default async function LinksPage() {
         </div>
       )}
 
-      {/* Retirada ou Visita Agendada */}
+      {/* Endereço e orientações de chegada */}
       <div className="w-full max-w-sm border border-gray-200 dark:border-gray-800 rounded-xl p-5 mb-6">
-        <h2 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Retirada ou visita agendada</h2>
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Endereço e orientações de chegada</h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Clientes de outras cidades recebem orientação completa de chegada após a confirmação do veículo.
+          Vem de outra cidade? Encontre aqui todas as instruções necessárias para você nos encontrar com facilidade.
         </p>
         <a
           href="https://maps.google.com/?q=Attra+Veiculos+Uberlandia"
@@ -181,6 +158,33 @@ export default async function LinksPage() {
           </div>
           <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600" />
         </a>
+      </div>
+
+      {/* Avaliar experiência com a Attra */}
+      <div className="w-full max-w-sm mb-6">
+        <a
+          href="https://tr.ee/n5fjde6ENs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 text-gray-900 dark:text-white rounded-xl px-5 py-4 transition-colors active:scale-[0.98]"
+        >
+          <div className="flex items-center gap-3">
+            <Star className="w-5 h-5 text-yellow-500" />
+            <div>
+              <span className="font-semibold text-sm block">Avaliar minha experiência com a Attra</span>
+              <span className="text-xs text-gray-400">Seu feedback nos ajuda a evoluir</span>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600" />
+        </a>
+      </div>
+
+      {/* Como Trabalhamos */}
+      <div className="w-full max-w-sm border border-gray-200 dark:border-gray-800 rounded-xl p-5 mb-6">
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">Como trabalhamos</h2>
+        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          Curadoria documentada, atendimento direto e um ambiente consultivo que reduz riscos na sua escolha.
+        </p>
       </div>
 
       {/* Social icons */}
