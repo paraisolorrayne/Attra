@@ -1,5 +1,4 @@
 import {
-  CinematicHero,
   FeaturedSupercars,
   ExperienceSection,
   LocationSection,
@@ -8,100 +7,55 @@ import {
   ProofOfSolidity,
   FeaturedEditorial,
   JourneyPreview,
+  HeroSearchWidget,
 } from '@/components/home'
+import { FeaturedVehicleHero } from '@/components/vehicles'
 import { FAQSchema } from '@/components/seo'
 import { homepageFAQs } from '@/lib/faq-data'
-import { getVehicles, getHomeSlides, HeroSlideData } from '@/lib/autoconf-api'
-import { createAdminClient } from '@/lib/supabase/server'
+import { getVehicles } from '@/lib/autoconf-api'
 import { Vehicle } from '@/types'
 
-/**
- * Fetch banners from Supabase site_banners table.
- * Returns HeroSlideData[] for compatibility with CinematicHero component.
- */
-async function getSupabaseBanners(deviceType: 'desktop' | 'mobile'): Promise<HeroSlideData[]> {
-  try {
-    const supabase = createAdminClient()
-    const now = new Date().toISOString()
-
-    const { data, error } = await supabase
-      .from('site_banners')
-      .select('*')
-      .eq('is_active', true)
-      .or(`start_date.is.null,start_date.lte.${now}`)
-      .or(`end_date.is.null,end_date.gte.${now}`)
-      .in('device_type', ['all', deviceType])
-      .order('display_order', { ascending: true })
-      .limit(10)
-
-    if (error || !data || data.length === 0) {
-      return []
-    }
-
-    return data.map((banner) => ({
-      type: 'banner' as const,
-      image: deviceType === 'mobile' && banner.image_mobile_url ? banner.image_mobile_url : banner.image_url,
-      targetUrl: banner.target_url || '/',
-      ordem: banner.display_order,
-    }))
-  } catch {
-    return []
-  }
-}
-
 export default async function Home() {
-  // Fetch hero slides: Supabase banners first, then AutoConf as fallback
-  let desktopSlides: HeroSlideData[] = []
-  let mobileSlides: HeroSlideData[] = []
-
-  try {
-    // Try Supabase banners first
-    const [supabaseDesktop, supabaseMobile] = await Promise.all([
-      getSupabaseBanners('desktop'),
-      getSupabaseBanners('mobile'),
-    ])
-
-    if (supabaseDesktop.length > 0) {
-      desktopSlides = supabaseDesktop
-    }
-    if (supabaseMobile.length > 0) {
-      mobileSlides = supabaseMobile
-    }
-
-    // Fallback to AutoConf if no Supabase banners
-    if (desktopSlides.length === 0 || mobileSlides.length === 0) {
-      const [autoconfDesktop, autoconfMobile] = await Promise.all([
-        desktopSlides.length === 0 ? getHomeSlides(4, 'desktop') : Promise.resolve([]),
-        mobileSlides.length === 0 ? getHomeSlides(4, 'mobile') : Promise.resolve([]),
-      ])
-      if (desktopSlides.length === 0) desktopSlides = autoconfDesktop
-      if (mobileSlides.length === 0) mobileSlides = autoconfMobile
-    }
-  } catch (error) {
-    console.error('Failed to fetch home slides:', error)
-  }
-
   // Fetch featured vehicles for the supercars section
-  // Only show premium vehicles (R$ 1M+) ordered by highest price
+  // Only show premium vehicles (R$ 500k+) ordered by highest price
   let featuredVehicles: Vehicle[] = []
+  let featuredVehicle: Vehicle | null = null
   try {
     const result = await getVehicles({
       tipo: 'carros',
-      registros_por_pagina: 20,  // Increased to get more variety
+      registros_por_pagina: 20,
       ordenar: 'preco',
       ordem: 'desc',
-      preco_de: 500000  // Filtro: apenas veículos acima de R$ 500 mil
+      preco_de: 500000
     })
-    // Filtro client-side para garantir que nenhum veículo abaixo de R$ 500k apareça
     featuredVehicles = result.vehicles.filter(v => v.price >= 500000)
+
+    // Mirror /veiculos hero pick: deterministic rotation across the top 3 by day of month
+    if (featuredVehicles.length > 0) {
+      const top3 = [...featuredVehicles]
+        .sort((a, b) => b.price - a.price)
+        .slice(0, Math.min(3, featuredVehicles.length))
+      const dayIndex = new Date().getDate() % top3.length
+      featuredVehicle = top3[dayIndex]
+    }
   } catch (error) {
     console.error('Failed to fetch featured vehicles:', error)
   }
 
   return (
     <>
-      {/* Hero - Full-screen cinematic with search widget */}
-      <CinematicHero desktopSlides={desktopSlides} mobileSlides={mobileSlides} />
+      {/* Hero - Featured vehicle (top 3 by price, daily rotation) */}
+      {/* pt-20 md:pt-24 clears the fixed header (h-20) on the home, since /veiculos relies on the breadcrumb for that */}
+      {featuredVehicle && (
+        <div className="pt-20 md:pt-24">
+          <FeaturedVehicleHero vehicle={featuredVehicle} />
+        </div>
+      )}
+
+      {/* Search widget (CTA + busca + filtros), antes embutido no CinematicHero */}
+      <section className="px-4 mb-8 md:mb-12">
+        <HeroSearchWidget />
+      </section>
 
       {/* 3. Destaques do Estoque - Featured supercar inventory */}
       <FeaturedSupercars vehicles={featuredVehicles} />
