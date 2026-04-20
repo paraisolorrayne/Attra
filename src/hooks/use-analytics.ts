@@ -84,6 +84,12 @@ export interface VisitorContext {
     utmCampaign?: string
     utmContent?: string
     utmTerm?: string
+    utmId?: string       // GA4 Campaign ID (utm_id)
+    adsetId?: string     // Meta adset_id / Google ad_group_id
+    adId?: string        // Meta ad_id / Google creative_id
+    gclid?: string
+    fbclid?: string
+    ttclid?: string
     referrer?: string
     landingPage?: string
   }

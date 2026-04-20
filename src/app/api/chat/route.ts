@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, getClientIP, RATE_LIMIT_PRESETS } from '@/lib/rate-limit'
+import { sendNotification } from '@/lib/notifications'
 
 // N8N Webhook URL for AI chat
 const LEADSTER_AI_CHAT_URL = process.env.NEXT_PUBLIC_LEADSTER_AI_WEBHOOK_URL ||
@@ -17,6 +18,8 @@ interface ChatRequest {
   context?: {
     sourcePage?: string
     vehicleInfo?: string
+    user?: { name?: string; email?: string; phone?: string }
+    traffic?: Record<string, string | null | undefined>
   }
 }
 
@@ -58,6 +61,30 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[Chat API] Sending to N8N:', { sessionId, messageLength: message.length })
+
+    // Nova conversa (primeira mensagem da sessão) → dispara notificação
+    // admin (email + WhatsApp) para que o time saiba que alguém iniciou
+    // um atendimento. Não bloqueia a resposta do chat.
+    if (history.length === 0) {
+      const identified = context.user
+      sendNotification({
+        type: 'general_inquiry',
+        senderName:  identified?.name  || 'Visitante anônimo',
+        senderEmail: identified?.email || 'sem-email@chat.attra',
+        senderPhone: identified?.phone,
+        subject: 'Nova conversa no chat IA',
+        message: message.trim(),
+        sourcePage: context.sourcePage || 'chat_ia',
+        metadata: {
+          channel: 'leadster_ia',
+          sessionId,
+          vehicleInfo: context.vehicleInfo,
+          traffic: context.traffic,
+        },
+      }).catch(err => {
+        console.error('[Chat API] Notification dispatch error:', err)
+      })
+    }
 
     // Send to N8N webhook
     const response = await fetch(LEADSTER_AI_CHAT_URL, {

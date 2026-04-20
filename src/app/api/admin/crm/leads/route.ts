@@ -1,7 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase/server'
+import { classifyLeadSource, type FonteLead } from '@/lib/crm/lead-source'
 import type { LeadWithCliente, StatusLead, PrioridadeLead, OrigemLead, EtapaFunil } from '@/types/database'
+
+const FONTES_VALIDAS: FonteLead[] = [
+  'google_ads', 'meta_ads', 'tiktok_ads',
+  'organico_busca', 'organico_social', 'referral', 'direto', 'outro',
+]
+
+// Traduz um filtro `fonte` em condições SQL via .or() do PostgREST.
+// Mantemos a classificação em TypeScript como fonte da verdade; este mapa
+// serve só para narrow server-side (count e pagination corretos).
+function fonteToPostgrestOr(fonte: FonteLead): string | null {
+  switch (fonte) {
+    case 'google_ads':
+      return 'gclid.not.is.null,and(utm_medium.in.(cpc,ppc,paid,paidsocial,paid-social,paid_social,display,retargeting,remarketing,ads),utm_source.ilike.%google%)'
+    case 'meta_ads':
+      return 'fbclid.not.is.null,and(utm_medium.in.(cpc,ppc,paid,paidsocial,paid-social,paid_social,display,retargeting,remarketing,ads),or(utm_source.ilike.%facebook%,utm_source.ilike.%meta%,utm_source.ilike.%instagram%))'
+    case 'tiktok_ads':
+      return 'ttclid.not.is.null,and(utm_medium.in.(cpc,ppc,paid,paidsocial,paid-social,paid_social,display,retargeting,remarketing,ads),utm_source.ilike.%tiktok%)'
+    case 'organico_busca':
+    case 'organico_social':
+    case 'referral':
+    case 'direto':
+    case 'outro':
+      // Casos "negativos" — caem em post-filter por simplicidade. Retornar null
+      // sinaliza ao caller para filtrar em JS.
+      return null
+  }
+}
 
 // GET /api/admin/crm/leads - List leads with filters
 export async function GET(request: NextRequest) {
@@ -29,6 +57,10 @@ export async function GET(request: NextRequest) {
     const etapaFunil = searchParams.get('etapa_funil') as EtapaFunil | null
     const lastContactFrom = searchParams.get('lastContactFrom')
     const lastContactTo = searchParams.get('lastContactTo')
+    const fonteParam = searchParams.get('fonte')
+    const fonte = (fonteParam && (FONTES_VALIDAS as string[]).includes(fonteParam))
+      ? (fonteParam as FonteLead)
+      : null
 
     const supabase = createAdminClient()
 
@@ -52,6 +84,15 @@ export async function GET(request: NextRequest) {
       query = query.or(
         `nome.ilike.%${search}%,telefone.ilike.%${search}%,email.ilike.%${search}%,marca_interesse.ilike.%${search}%,modelo_interesse.ilike.%${search}%,veiculo_placa.ilike.%${search}%`
       )
+    }
+
+    // Filtro de fonte: narrow server-side quando possível (casos "pago" têm
+    // condições afirmativas); casos "negativos" (orgânico/direto/outro) são
+    // filtrados em memória após o fetch.
+    const fonteNeedsPostFilter = fonte !== null && fonteToPostgrestOr(fonte) === null
+    if (fonte && !fonteNeedsPostFilter) {
+      const orExpr = fonteToPostgrestOr(fonte)
+      if (orExpr) query = query.or(orExpr)
     }
 
     // Get next contact for each lead (subquery simulation)
@@ -97,14 +138,36 @@ export async function GET(request: NextRequest) {
       })) || []
     }
 
+    // Classifica fonte de cada lead e aplica post-filter para categorias
+    // sem tradução direta em PostgREST (orgânico/direto/referral/outro).
+    const withFonte = leadsWithContacts.map(lead => ({
+      ...lead,
+      fonte: classifyLeadSource({
+        utm_source: (lead as any).utm_source,
+        utm_medium: (lead as any).utm_medium,
+        gclid:      (lead as any).gclid,
+        fbclid:     (lead as any).fbclid,
+        ttclid:     (lead as any).ttclid,
+        referrer:   (lead as any).referrer,
+      }),
+    }))
+
+    const finalData = fonteNeedsPostFilter
+      ? withFonte.filter(l => l.fonte === fonte)
+      : withFonte
+
+    // Quando há post-filter, o count do Supabase reflete a query pré-filtro.
+    // Melhor expor o count efetivo da página filtrada para a UI não mentir.
+    const effectiveTotal = fonteNeedsPostFilter ? finalData.length : (count || 0)
+
     return NextResponse.json({
       success: true,
-      data: leadsWithContacts,
+      data: finalData,
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit)
+        total: effectiveTotal,
+        totalPages: Math.ceil(effectiveTotal / limit)
       }
     })
   } catch (error) {

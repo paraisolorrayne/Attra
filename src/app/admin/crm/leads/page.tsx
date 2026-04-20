@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { LeadWithCliente, StatusLead, PrioridadeLead, EtapaFunil, OrigemLead, EventoLeadTipo } from '@/types/database'
 import { etapaLabels, etapaColors, etapaOrdem, etapaDotColors } from '@/lib/crm/funil'
+import { fonteLabels, fonteColors, fonteOrdem, type FonteLead } from '@/lib/crm/lead-source'
 
 const statusLabels: Record<StatusLead, string> = {
   novo: 'Novo',
@@ -130,9 +131,11 @@ function TipoDropdown({
   )
 }
 
+type LeadWithFonte = LeadWithCliente & { fonte?: FonteLead }
+
 interface LeadsResponse {
   success: boolean
-  data: LeadWithCliente[]
+  data: LeadWithFonte[]
   pagination: {
     page: number
     limit: number
@@ -226,7 +229,7 @@ function EtapaDropdown({
 function LeadsContent() {
   const router = useRouter()
 
-  const [leads, setLeads] = useState<LeadWithCliente[]>([])
+  const [leads, setLeads] = useState<LeadWithFonte[]>([])
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 })
 
@@ -236,6 +239,7 @@ function LeadsContent() {
   const [prioridadeFilter, setPrioridadeFilter] = useState<PrioridadeLead | ''>('')
   const [etapaFilter, setEtapaFilter] = useState<EtapaFunil | ''>('')
   const [origemFilter, setOrigemFilter] = useState<OrigemLead | ''>('')
+  const [fonteFilter, setFonteFilter] = useState<FonteLead | ''>('')
   const [vendedorFilter, setVendedorFilter] = useState('')
   const [modeloFilter, setModeloFilter] = useState('')
   const [dateFromFilter, setDateFromFilter] = useState('')
@@ -263,7 +267,7 @@ function LeadsContent() {
   const [converting, setConverting] = useState<string | null>(null)
 
   const activeFilterCount = [
-    statusFilter, prioridadeFilter, etapaFilter, origemFilter,
+    statusFilter, prioridadeFilter, etapaFilter, origemFilter, fonteFilter,
     vendedorFilter, modeloFilter, dateFromFilter, dateToFilter,
     lastContactFrom, lastContactTo
   ].filter(Boolean).length
@@ -279,6 +283,7 @@ function LeadsContent() {
       if (prioridadeFilter) params.set('prioridade', prioridadeFilter)
       if (etapaFilter) params.set('etapa_funil', etapaFilter)
       if (origemFilter) params.set('origem', origemFilter)
+      if (fonteFilter) params.set('fonte', fonteFilter)
       if (vendedorFilter) params.set('vendedor', vendedorFilter)
       if (modeloFilter) params.set('modelo', modeloFilter)
       if (dateFromFilter) params.set('dateFrom', dateFromFilter)
@@ -301,7 +306,7 @@ function LeadsContent() {
   }, [
     pagination.page, pagination.limit, search,
     statusFilter, prioridadeFilter, etapaFilter,
-    origemFilter, vendedorFilter, modeloFilter,
+    origemFilter, fonteFilter, vendedorFilter, modeloFilter,
     dateFromFilter, dateToFilter, lastContactFrom, lastContactTo
   ])
 
@@ -320,6 +325,7 @@ function LeadsContent() {
     setPrioridadeFilter('')
     setEtapaFilter('')
     setOrigemFilter('')
+    setFonteFilter('')
     setVendedorFilter('')
     setModeloFilter('')
     setDateFromFilter('')
@@ -531,6 +537,23 @@ function LeadsContent() {
               </div>
             </div>
 
+            {/* Row 1b: Fonte (Google/Meta/Orgânico/...) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground-secondary mb-1">Fonte (Mídia)</label>
+                <select
+                  value={fonteFilter}
+                  onChange={(e) => setFonteFilter(e.target.value as FonteLead | '')}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground text-sm"
+                >
+                  <option value="">Todas</option>
+                  {fonteOrdem.map((f) => (
+                    <option key={f} value={f}>{fonteLabels[f]}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Row 2: Vendedor, Modelo, Criado de/até */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
@@ -638,6 +661,7 @@ function LeadsContent() {
                 <tr>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Lead</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Etapa</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Fonte</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Contato</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Interesse</th>
                   <th className="text-left px-4 py-3 text-sm font-medium text-foreground-secondary">Vendedor</th>
@@ -680,6 +704,15 @@ function LeadsContent() {
                           }).finally(() => setChangingEtapa(null))
                         }}
                       />
+                    </td>
+                    <td className="px-4 py-3">
+                      {lead.fonte ? (
+                        <span className={cn('inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium', fonteColors[lead.fonte])}>
+                          {fonteLabels[lead.fonte]}
+                        </span>
+                      ) : (
+                        <span className="text-foreground-secondary text-sm">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">

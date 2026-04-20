@@ -5,6 +5,7 @@ import {
   getSessionDbId,
   collectClickIds,
   collectUTMParams,
+  getIdentifiedContact,
 } from '@/lib/visitor-tracking'
 
 // N8N Webhook URL (environment variable with fallback)
@@ -118,12 +119,37 @@ export async function sendWhatsAppWebhook(
       geoLocation
     )
 
+    // Atribuição coletada no browser (snake_case nos helpers; convertemos
+    // aqui para camelCase porque é o formato aceito pelo Zod de
+    // /api/webhook/whatsapp — assim o N8N pode forwardar context verbatim.
+    const utm = collectUTMParams()
+    const cids = collectClickIds()
+    const attributionInContext = {
+      sessionId,
+      sessionDbId:     typeof window !== 'undefined' ? sessionStorage.getItem('attra_session_db_id') || undefined : undefined,
+      fingerprintDbId: typeof window !== 'undefined' ? localStorage.getItem('attra_fingerprint_db_id') || undefined : undefined,
+      utmSource:   utm.utm_source   || undefined,
+      utmMedium:   utm.utm_medium   || undefined,
+      utmCampaign: utm.utm_campaign || undefined,
+      utmContent:  utm.utm_content  || undefined,
+      utmTerm:     utm.utm_term     || undefined,
+      utmId:       utm.utm_id       || undefined,
+      adsetId:     utm.adset_id     || undefined,
+      adId:        utm.ad_id        || undefined,
+      gclid:       cids.gclid       || undefined,
+      fbclid:      cids.fbclid      || undefined,
+      ttclid:      cids.ttclid      || undefined,
+      referrer:    typeof document !== 'undefined' ? document.referrer || undefined : undefined,
+      landingPage: typeof window !== 'undefined' ? window.location.href : undefined,
+    }
+
     // Enhanced payload with additional context for N8N agent
     const enhancedPayload: WhatsAppWebhookPayload = {
       ...payload,
       context: {
         ...payload.context,
         userMessage: formattedMessage, // Override with formatted message
+        ...attributionInContext,
       },
       sessionId,
       timestamp: now.toISOString(),
@@ -131,7 +157,16 @@ export async function sendWhatsAppWebhook(
       pageUrl: typeof window !== 'undefined' ? window.location.href : '',
       userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
       geoLocation: geoLocation || undefined,
-    }
+      // Mantém traffic (snake_case) para compat com templates de mensagem já em uso
+      traffic: {
+        ...utm,
+        ...cids,
+        referrer: typeof document !== 'undefined' ? document.referrer || null : null,
+        landingPage: typeof window !== 'undefined' ? window.location.href : null,
+      },
+      // Contato identificado em formulário anterior (se houver)
+      user: getIdentifiedContact() || undefined,
+    } as WhatsAppWebhookPayload & { traffic: Record<string, string | null>; user?: { name?: string; email?: string; phone?: string } }
 
     console.log('[Webhook] Sending to N8N:', enhancedPayload.eventType, enhancedPayload.sourcePage)
     console.log('[Webhook] Message:', formattedMessage)
@@ -317,6 +352,20 @@ export async function sendChatMessage(
 
     console.log('[Chat] Sending message:', message.substring(0, 50))
 
+    // Anexa atribuição de mídia (UTM + click IDs) ao contexto do chat
+    // para o N8N correlacionar o lead com a campanha de origem
+    const traffic = {
+      ...collectUTMParams(),
+      ...collectClickIds(),
+      referrer: typeof document !== 'undefined' ? document.referrer || null : null,
+      landingPage: typeof window !== 'undefined' ? window.location.href : null,
+    }
+
+    // Se o visitante já foi identificado por algum formulário na sessão,
+    // reaproveitamos nome/email/telefone para o agente IA não precisar
+    // perguntar de novo (e garantir telefone no lead final).
+    const identifiedContact = getIdentifiedContact()
+
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
@@ -326,7 +375,11 @@ export async function sendChatMessage(
         message,
         sessionId,
         history,
-        context,
+        context: {
+          ...context,
+          traffic,
+          user: identifiedContact || undefined,
+        },
       }),
     })
 

@@ -19,6 +19,7 @@ import {
   recordPageVisit,
   updateLastPageDwell,
   getAndIncrementVisitCount,
+  setIdentifiedContact,
   type InteractionType,
   type ClickIds,
 } from '@/lib/visitor-tracking'
@@ -160,6 +161,8 @@ export function VisitorTrackingProvider({ children }: Props) {
           if (data.session_db_id) {
             setSessionDbId(data.session_db_id)
             sessionDbIdRef.current = data.session_db_id
+            // Drena interações enfileiradas antes da sessão existir
+            flushPendingInteractions()
           }
         } else {
           const errorData = await response.json().catch(() => ({}))
@@ -404,18 +407,48 @@ export function VisitorTrackingProvider({ children }: Props) {
         utmCampaign: utmParams?.utm_campaign || undefined,
         utmContent: utmParams?.utm_content || undefined,
         utmTerm: utmParams?.utm_term || undefined,
+        utmId: utmParams?.utm_id || undefined,
+        adsetId: utmParams?.adset_id || undefined,
+        adId: utmParams?.ad_id || undefined,
+        gclid: clickIds?.gclid || undefined,
+        fbclid: clickIds?.fbclid || undefined,
+        ttclid: clickIds?.ttclid || undefined,
         referrer: referrerRef.current || undefined,
         landingPage: landingPageRef.current || undefined,
       },
     }
-  }, [geolocation, deviceData, utmParams])
+  }, [geolocation, deviceData, utmParams, clickIds])
+
+  // Fila para interações disparadas antes da sessão estar pronta (corrida
+  // entre init /api/tracking/session e o primeiro clique do usuário).
+  // Drena quando session_db_id fica disponível.
+  const pendingInteractionsRef = useRef<Array<{ type: InteractionType; metadata?: Record<string, unknown>; page_path: string }>>([])
+
+  const flushPendingInteractions = useCallback(() => {
+    if (!fingerprintDbIdRef.current || !sessionDbIdRef.current) return
+    const queued = pendingInteractionsRef.current
+    if (queued.length === 0) return
+    pendingInteractionsRef.current = []
+    for (const ev of queued) {
+      fetch('/api/tracking/interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fingerprint_db_id: fingerprintDbIdRef.current,
+          session_db_id: sessionDbIdRef.current,
+          type: ev.type,
+          page_path: ev.page_path,
+          metadata: ev.metadata,
+        }),
+      }).catch(() => {})
+    }
+  }, [])
 
   // Track interactions (WhatsApp clicks, form submits, etc.)
   // Also pushes to dataLayer for analytics sync
   const trackInteraction = useCallback((type: InteractionType, metadata?: Record<string, unknown>) => {
-    if (!fingerprintDbIdRef.current || !sessionDbIdRef.current) return
-
-    // Mark conversions to suppress abandoned lead webhook
+    // Mark conversions to suppress abandoned lead webhook — independente da
+    // sessão estar pronta
     if (type === 'form_submit' || type === 'form_click') {
       hasFilledFormRef.current = true
     }
@@ -423,18 +456,25 @@ export function VisitorTrackingProvider({ children }: Props) {
       hasClickedWhatsAppRef.current = true
     }
 
-    // Send to internal tracking API
-    fetch('/api/tracking/interaction', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fingerprint_db_id: fingerprintDbIdRef.current,
-        session_db_id: sessionDbIdRef.current,
-        type,
-        page_path: pathname,
-        metadata,
-      }),
-    }).catch(() => {})
+    // Se a sessão ainda não foi inicializada, enfileira pra enviar depois
+    if (!fingerprintDbIdRef.current || !sessionDbIdRef.current) {
+      pendingInteractionsRef.current.push({ type, metadata, page_path: pathname })
+      console.warn('[VisitorTracking] Interaction queued (session not ready):', type)
+      // Cai no dataLayer mesmo assim para GA4 não perder
+    } else {
+      // Send to internal tracking API
+      fetch('/api/tracking/interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fingerprint_db_id: fingerprintDbIdRef.current,
+          session_db_id: sessionDbIdRef.current,
+          type,
+          page_path: pathname,
+          metadata,
+        }),
+      }).catch(() => {})
+    }
 
     // Map interaction type to analytics event and push to dataLayer
     // This syncs visitor tracking with GTM/GA4
@@ -470,6 +510,42 @@ export function VisitorTrackingProvider({ children }: Props) {
     }
   }, [pathname, geolocation])
 
+  // Captura global de cliques em CTAs de contato (WhatsApp/Tel/Email).
+  // Em vez de instrumentar cada <a>, escutamos no document e detectamos o
+  // tipo pelo href. Isso cobre links existentes e futuros sem mudanças locais.
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null
+      if (!target) return
+      const anchor = target.closest('a') as HTMLAnchorElement | null
+      if (!anchor) return
+      const href = anchor.getAttribute('href') || ''
+      if (!href) return
+
+      let interactionType: InteractionType | null = null
+      if (/^https?:\/\/(?:api\.)?wa\.me\//i.test(href) || /^https?:\/\/(?:www\.)?whatsapp\.com/i.test(href)) {
+        interactionType = 'whatsapp_click'
+      } else if (href.startsWith('tel:')) {
+        interactionType = 'phone_click'
+      } else if (href.startsWith('mailto:')) {
+        // Não há tipo dedicado para email; reaproveitamos form_click como "contato"
+        interactionType = 'form_click'
+      }
+
+      if (!interactionType) return
+
+      // Rastreia sem bloquear a navegação (track é fire-and-forget)
+      trackInteraction(interactionType, {
+        href,
+        anchor_text: (anchor.textContent || '').trim().slice(0, 80),
+        page_path: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      })
+    }
+
+    document.addEventListener('click', handleGlobalClick, { capture: true })
+    return () => document.removeEventListener('click', handleGlobalClick, { capture: true })
+  }, [trackInteraction])
+
   // Identify visitor with email/phone - integrates with GA4 and Clarity
   const identifyVisitor = useCallback((data: { email?: string; phone?: string; name?: string }) => {
     console.log('[VisitorTracking] identifyVisitor called', {
@@ -478,6 +554,10 @@ export function VisitorTrackingProvider({ children }: Props) {
       hasPhone: !!data.phone,
       hasName: !!data.name,
     })
+
+    // Persiste em localStorage para que fluxos subsequentes (ex.: chat IA)
+    // possam enriquecer o payload com nome/email/telefone já conhecidos.
+    setIdentifiedContact({ name: data.name, email: data.email, phone: data.phone })
 
     // Mark as converted (form identification = conversion)
     hasFilledFormRef.current = true

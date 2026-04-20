@@ -43,14 +43,14 @@ export function ContactForm() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
     try {
+      const visitorContext = getVisitorContext()
       await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, sourcePage: '/contato' }),
+        body: JSON.stringify({ ...data, sourcePage: '/contato', traffic: visitorContext.traffic }),
       })
 
       // Track form submission in analytics with visitor context (includes geolocation)
-      const visitorContext = getVisitorContext()
       trackFormSubmission({
         formName: 'contact_form',
         formLocation: '/contato',

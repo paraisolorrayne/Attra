@@ -104,7 +104,7 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
   const pathname = usePathname()
   const { vehicle } = useVehicleContext()
   const { trackWhatsAppClick } = useAnalytics()
-  const { getVisitorContext } = useVisitorTracking()
+  const { getVisitorContext, trackInteraction } = useVisitorTracking()
   const [isOpen, setIsOpen] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -207,6 +207,16 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
       brand: vehicleBrand || '',
       price: 0, // Price not available in context
     } : undefined, visitorContext)
+
+    // Rastreia também no banco interno (visitor_page_views.whatsapp_clicked)
+    // já que o redirect é feito via window.open e não por âncora
+    trackInteraction('whatsapp_click', {
+      page_path: currentPage,
+      vehicle_id: vehicleId,
+      vehicle_brand: vehicleBrand,
+      vehicle_model: vehicleModel,
+      page_behavior: pageBehavior,
+    })
 
     const basePayload = {
       eventType: vehicleId ? 'vehicle_inquiry' : 'chat_request' as const,

@@ -27,6 +27,8 @@ const whatsappEventSchema = z.object({
     userEmail: z.string().optional(),
     // Tracking / attribution
     sessionId: z.string().optional(),
+    sessionDbId: z.string().uuid().optional(),       // UUID de visitor_sessions.id (se conhecido)
+    fingerprintDbId: z.string().uuid().optional(),
     ipAddress: z.string().optional(),
     landingPage: z.string().optional(),
     referrer: z.string().optional(),
@@ -35,6 +37,9 @@ const whatsappEventSchema = z.object({
     utmCampaign: z.string().optional(),
     utmContent: z.string().optional(),
     utmTerm: z.string().optional(),
+    utmId: z.string().optional(),      // GA4 Campaign ID
+    adsetId: z.string().optional(),    // Meta adset / Google ad_group
+    adId: z.string().optional(),       // Meta ad / Google creative
     fbclid: z.string().optional(),
     gclid: z.string().optional(),
     ttclid: z.string().optional(),
@@ -148,6 +153,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Resolve visitor_session_db_id (UUID) — se não veio explícito, tentamos
+    // achar pela chave textual session_id. Assim garantimos o elo lead→jornada.
+    let visitorSessionDbId: string | null = context.sessionDbId || null
+    if (!visitorSessionDbId && context.sessionId) {
+      const { data: sess } = await supabase
+        .from('visitor_sessions')
+        .select('id')
+        .eq('session_id', context.sessionId)
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (sess?.id) visitorSessionDbId = sess.id
+    }
+
     // Create lead
     const leadData: LeadInsert = {
       nome: userName,
@@ -165,6 +184,7 @@ export async function POST(request: NextRequest) {
       faixa_preco_interesse_max: context.vehiclePrice ? context.vehiclePrice * 1.2 : null,
       // Tracking / attribution
       session_id: context.sessionId || null,
+      visitor_session_db_id: visitorSessionDbId,
       ip_address: context.ipAddress || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
       landing_page: context.landingPage || data.sourcePage || null,
       referrer: context.referrer || request.headers.get('referer') || null,
@@ -173,11 +193,14 @@ export async function POST(request: NextRequest) {
       utm_campaign: context.utmCampaign || null,
       utm_content: context.utmContent || null,
       utm_term: context.utmTerm || null,
+      utm_id: context.utmId || null,
+      adset_id: context.adsetId || null,
+      ad_id: context.adId || null,
       fbclid: context.fbclid || null,
       gclid: context.gclid || null,
       ttclid: context.ttclid || null,
       payload_bruto: body,
-    }
+    } as LeadInsert
 
     const { data: newLead, error: leadError } = await supabase
       .from('leads')

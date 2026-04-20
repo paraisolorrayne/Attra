@@ -37,14 +37,14 @@ export function VehicleRequestForm() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
     try {
+      const visitorContext = getVisitorContext()
       await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, subject: 'Solicitação de Veículo', sourcePage: '/solicitar-veiculo' }),
+        body: JSON.stringify({ ...data, subject: 'Solicitação de Veículo', sourcePage: '/solicitar-veiculo', traffic: visitorContext.traffic }),
       })
 
       // Track form submission in analytics with visitor context (includes geolocation)
-      const visitorContext = getVisitorContext()
       trackFormSubmission({
         formName: 'vehicle_request_form',
         formLocation: '/veiculos',

@@ -88,14 +88,14 @@ export function FinancingForm() {
       const downPayment = parseValue(data.downPayment || '')
       const installments = parseInt(data.installments) || 48
 
+      const visitorContext = getVisitorContext()
       await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, subject: 'Simulação de Financiamento', sourcePage: '/financiamento' }),
+        body: JSON.stringify({ ...data, subject: 'Simulação de Financiamento', sourcePage: '/financiamento', traffic: visitorContext.traffic }),
       })
 
       // Track financing calculation in analytics with visitor context (includes geolocation)
-      const visitorContext = getVisitorContext()
       trackFinancingCalculation({
         vehiclePrice,
         downPayment,

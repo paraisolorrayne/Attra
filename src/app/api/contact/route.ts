@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { sendNotification, logNotificationEvent, NotificationType } from '@/lib/notifications'
 import { checkRateLimit, getClientIP, RATE_LIMIT_PRESETS } from '@/lib/rate-limit'
+import { classifyLeadSource } from '@/lib/crm/lead-source'
+
+const trafficSchema = z.object({
+  utmSource:   z.string().optional(),
+  utmMedium:   z.string().optional(),
+  utmCampaign: z.string().optional(),
+  utmContent:  z.string().optional(),
+  utmTerm:     z.string().optional(),
+  utmId:       z.string().optional(),  // GA4 Campaign ID (utm_id)
+  adsetId:     z.string().optional(),  // Meta adset / Google ad_group
+  adId:        z.string().optional(),  // Meta ad / Google creative
+  gclid:       z.string().optional(),
+  fbclid:      z.string().optional(),
+  ttclid:      z.string().optional(),
+  referrer:    z.string().optional(),
+  landingPage: z.string().optional(),
+}).partial().optional()
 
 const contactSchema = z.object({
   name: z.string().min(3),
@@ -11,6 +28,8 @@ const contactSchema = z.object({
   message: z.string().optional(),
   sourcePage: z.string().optional(),
   formType: z.string().optional(), // To specify the type of form
+  // Atribuição de mídia (UTM + click IDs)
+  traffic: trafficSchema,
   // Additional fields for specific forms
   vehicleValue: z.string().optional(),
   downPayment: z.string().optional(),
@@ -118,6 +137,16 @@ export async function POST(request: NextRequest) {
       sourcePage: data.sourcePage,
     })
 
+    // Classificação de fonte (Google Ads / Meta Ads / Orgânico / ...) a partir do traffic
+    const fonte = classifyLeadSource({
+      utm_source: data.traffic?.utmSource,
+      utm_medium: data.traffic?.utmMedium,
+      gclid:      data.traffic?.gclid,
+      fbclid:     data.traffic?.fbclid,
+      ttclid:     data.traffic?.ttclid,
+      referrer:   data.traffic?.referrer,
+    })
+
     // Also send to CRM webhook if configured
     const crmWebhookUrl = process.env.CRM_WEBHOOK_URL
     if (crmWebhookUrl) {
@@ -129,6 +158,7 @@ export async function POST(request: NextRequest) {
             type: notificationType,
             data: {
               ...data,
+              fonte,
               timestamp: new Date().toISOString(),
               source: 'website',
             },

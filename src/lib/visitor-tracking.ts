@@ -8,6 +8,41 @@ const VISITOR_ID_KEY = 'attra_visitor_id'
 const SESSION_ID_KEY = 'attra_session_id'
 const FINGERPRINT_DB_ID_KEY = 'attra_fingerprint_db_id'
 const SESSION_DB_ID_KEY = 'attra_session_db_id'
+const IDENTIFIED_CONTACT_KEY = 'attra_identified_contact'
+
+// Contato identificado (nome/email/telefone) — preenchido quando o usuário
+// submete qualquer formulário no site. Persistido para que fluxos posteriores
+// (ex.: chat IA) possam enviar esses dados junto do payload.
+export interface IdentifiedContact {
+  name?: string
+  email?: string
+  phone?: string
+}
+
+export function setIdentifiedContact(data: IdentifiedContact): void {
+  if (typeof window === 'undefined') return
+  const existing = getIdentifiedContact() || {}
+  const merged: IdentifiedContact = {
+    name:  data.name  || existing.name,
+    email: data.email || existing.email,
+    phone: data.phone || existing.phone,
+  }
+  try {
+    localStorage.setItem(IDENTIFIED_CONTACT_KEY, JSON.stringify(merged))
+  } catch {
+    // localStorage pode estar indisponível (quota/modo privado) — silencioso
+  }
+}
+
+export function getIdentifiedContact(): IdentifiedContact | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(IDENTIFIED_CONTACT_KEY)
+    return raw ? (JSON.parse(raw) as IdentifiedContact) : null
+  } catch {
+    return null
+  }
+}
 
 // Generate unique IDs
 function generateId(): string {
@@ -143,6 +178,21 @@ export function collectClickIds(): ClickIds {
 
 const UTM_COOKIE_DAYS = 30
 
+// Aliases para o ID de campanha de cada plataforma. GA4 padrão é utm_id;
+// Google Ads URL template usa {campaignid} → geralmente plumbado como
+// campaignid/campaign_id; Meta usa campaign_id.
+const CAMPAIGN_ID_ALIASES = ['utm_id', 'campaign_id', 'campaignid'] as const
+const ADSET_ID_ALIASES = ['adset_id', 'adsetid', 'ad_group_id', 'adgroupid'] as const
+const AD_ID_ALIASES = ['ad_id', 'adid', 'creative_id'] as const
+
+function firstParam(params: URLSearchParams, keys: readonly string[]): string | null {
+  for (const k of keys) {
+    const v = params.get(k)
+    if (v) return v
+  }
+  return null
+}
+
 // Collect UTM parameters from URL and persist in cookies for SPA propagation
 // First visit: captures from URL query params and stores in cookies
 // Subsequent navigations: reads from cookies (URL params are gone in SPA)
@@ -165,6 +215,32 @@ export function collectUTMParams(): Record<string, string | null> {
       // Fallback to stored cookie
       result[key] = getCookie(cookieName)
     }
+  }
+
+  // ID de campanha (utm_id GA4 / campaign_id Meta / campaignid Google Ads)
+  // Guardamos sob a chave canônica utm_id; campaign_id/adset/ad ficam à parte.
+  const utmIdFromUrl = firstParam(params, CAMPAIGN_ID_ALIASES)
+  if (utmIdFromUrl) {
+    setCookie('attra_utm_id', utmIdFromUrl, UTM_COOKIE_DAYS)
+    result.utm_id = utmIdFromUrl
+  } else {
+    result.utm_id = getCookie('attra_utm_id')
+  }
+
+  const adsetFromUrl = firstParam(params, ADSET_ID_ALIASES)
+  if (adsetFromUrl) {
+    setCookie('attra_adset_id', adsetFromUrl, UTM_COOKIE_DAYS)
+    result.adset_id = adsetFromUrl
+  } else {
+    result.adset_id = getCookie('attra_adset_id')
+  }
+
+  const adFromUrl = firstParam(params, AD_ID_ALIASES)
+  if (adFromUrl) {
+    setCookie('attra_ad_id', adFromUrl, UTM_COOKIE_DAYS)
+    result.ad_id = adFromUrl
+  } else {
+    result.ad_id = getCookie('attra_ad_id')
   }
 
   return result

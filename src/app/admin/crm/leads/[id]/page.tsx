@@ -25,6 +25,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { Lead, Cliente, EventoLead, StatusLead, PrioridadeLead, EventoLeadTipo, EtapaFunil, MotivoPerdaTipo } from '@/types/database'
 import { etapaLabels, etapaColors, etapaOrdem, motivoPerdaLabels } from '@/lib/crm/funil'
+import { classifyLeadSource, fonteLabels, fonteColors } from '@/lib/crm/lead-source'
 
 const statusLabels: Record<StatusLead, string> = {
   novo: 'Novo',
@@ -417,6 +418,56 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               )}
             </div>
           </div>
+
+          {/* Atribuição de Mídia */}
+          {(() => {
+            const l = lead as unknown as Record<string, string | null | undefined>
+            const hasAny = Boolean(
+              l.utm_source || l.utm_medium || l.utm_campaign || l.utm_content || l.utm_term ||
+              l.utm_id || l.adset_id || l.ad_id || l.gclid || l.fbclid || l.ttclid ||
+              l.referrer || l.landing_page
+            )
+            if (!hasAny) return null
+            const fonte = classifyLeadSource({
+              utm_source: l.utm_source,
+              utm_medium: l.utm_medium,
+              gclid:      l.gclid,
+              fbclid:     l.fbclid,
+              ttclid:     l.ttclid,
+              referrer:   l.referrer,
+            })
+            const row = (label: string, value: string | null | undefined) => value ? (
+              <div>
+                <p className="text-sm text-foreground-secondary">{label}</p>
+                <p className="text-foreground break-all">{value}</p>
+              </div>
+            ) : null
+            return (
+              <div className="bg-background-card rounded-xl border border-border p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Atribuição de Mídia</h2>
+                  <span className={cn('inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium', fonteColors[fonte])}>
+                    {fonteLabels[fonte]}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {row('Campanha (nome)',   l.utm_campaign)}
+                  {row('Campaign ID',       l.utm_id)}
+                  {row('Adset / Ad Group',  l.adset_id)}
+                  {row('Ad / Creative',     l.ad_id)}
+                  {row('UTM Source',        l.utm_source)}
+                  {row('UTM Medium',        l.utm_medium)}
+                  {row('UTM Content',       l.utm_content)}
+                  {row('UTM Term',          l.utm_term)}
+                  {row('gclid',             l.gclid)}
+                  {row('fbclid',            l.fbclid)}
+                  {row('ttclid',            l.ttclid)}
+                  {row('Landing page',      l.landing_page)}
+                  {row('Referrer',          l.referrer)}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Timeline */}
           <div className="bg-background-card rounded-xl border border-border p-6">

@@ -23,6 +23,17 @@ const WHATSAPP_NOTIFICATION_WEBHOOK_URL = process.env.WHATSAPP_NOTIFICATION_WEBH
   process.env.NEXT_PUBLIC_LEADSTER_SDR_WEBHOOK_URL ||
   'https://webhook.dexidigital.com.br/webhook/leadster_sdr_attra'
 
+// Lista de destinos para notificação de novos leads via WhatsApp.
+// Configurável via env ADMIN_WHATSAPP_NUMBERS (csv, somente dígitos com DDI).
+// Default: número comercial + número pessoal do responsável.
+const ADMIN_WHATSAPP_NUMBERS: string[] = (() => {
+  const envList = process.env.ADMIN_WHATSAPP_NUMBERS
+  if (envList) {
+    return envList.split(',').map(n => n.trim()).filter(Boolean)
+  }
+  return [WHATSAPP_NUMBER, '5534991304735']
+})()
+
 // Email notification types
 export type NotificationType = 
   | 'contact_form'
@@ -271,11 +282,10 @@ export async function sendWhatsAppNotification(data: NotificationData): Promise<
       general_inquiry: 'Consulta Geral',
     }
 
-    const payload = {
+    const basePayload = {
       eventType: 'email_notification',
       notificationType: data.type,
       notificationLabel: typeLabels[data.type] || data.type,
-      whatsappNumber: WHATSAPP_NUMBER,
       sourcePage: data.sourcePage || 'site',
       timestamp,
       localTimestamp,
@@ -289,24 +299,42 @@ export async function sendWhatsAppNotification(data: NotificationData): Promise<
       metadata: data.metadata,
     }
 
-    console.log(`[WhatsApp] Sending notification for ${data.type}`)
+    console.log(`[WhatsApp] Sending notification for ${data.type} to ${ADMIN_WHATSAPP_NUMBERS.length} number(s)`)
 
-    const response = await fetch(WHATSAPP_NOTIFICATION_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Webhook-Secret': process.env.WEBHOOK_SECRET || '',
-      },
-      body: JSON.stringify(payload),
-    })
+    // Dispara em paralelo para todos os números configurados. O lead é
+    // considerado notificado se ao menos um POST der certo.
+    const results = await Promise.all(
+      ADMIN_WHATSAPP_NUMBERS.map(async (whatsappNumber) => {
+        try {
+          const response = await fetch(WHATSAPP_NOTIFICATION_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Webhook-Secret': process.env.WEBHOOK_SECRET || '',
+            },
+            body: JSON.stringify({ ...basePayload, whatsappNumber }),
+          })
+          if (!response.ok) {
+            const errorText = await response.text().catch(() => 'Unknown error')
+            console.error(`[WhatsApp] Webhook error for ${whatsappNumber}:`, response.status, errorText)
+            return { number: whatsappNumber, ok: false, error: `${response.status}` }
+          }
+          return { number: whatsappNumber, ok: true }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Unknown error'
+          console.error(`[WhatsApp] Fetch error for ${whatsappNumber}:`, msg)
+          return { number: whatsappNumber, ok: false, error: msg }
+        }
+      })
+    )
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'Unknown error')
-      console.error('[WhatsApp] Webhook error:', response.status, errorText)
-      return { success: false, error: `Webhook failed: ${response.status}` }
+    const anySuccess = results.some(r => r.ok)
+    if (!anySuccess) {
+      const errs = results.map(r => `${r.number}:${r.error || 'fail'}`).join(', ')
+      return { success: false, error: `All destinations failed — ${errs}` }
     }
 
-    console.log('[WhatsApp] Successfully sent notification')
+    console.log('[WhatsApp] Notification dispatched. Results:', results)
     return { success: true }
 
   } catch (error) {
