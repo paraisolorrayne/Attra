@@ -167,7 +167,7 @@ export function EditorialSelection({ vehicles = [] }: EditorialSelectionProps) {
             </Link>
             <Link
               href="/veiculos"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-foreground hover:bg-foreground/90 rounded-lg px-5 py-3 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-background bg-foreground hover:bg-foreground/90 rounded-lg px-5 py-3 transition-colors"
             >
               Ver todo o acervo
               <ArrowRight className="w-4 h-4" />

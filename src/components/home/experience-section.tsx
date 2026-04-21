@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Search, UserCheck, Cpu, HeartHandshake } from 'lucide-react'
+import { ArrowRight, Search, HeartHandshake, MapPin, Users } from 'lucide-react'
 import { Container } from '@/components/ui/container'
 import { Button } from '@/components/ui/button'
 import { SectionKicker, SectionHeading } from '@/components/ui/brand'
@@ -14,19 +14,19 @@ const pillars = [
     description: 'Cada veículo passa por seleção e análise criteriosa antes de integrar o acervo.',
   },
   {
-    icon: UserCheck,
-    title: 'Experiência personalizada',
-    description: 'O atendimento considera o carro desejado e o momento do cliente.',
-  },
-  {
-    icon: Cpu,
-    title: 'Tecnologia aplicada ao relacionamento',
-    description: 'Um ecossistema de atendimento próprio conecta cada etapa — do primeiro contato ao pós-entrega — com agilidade e proximidade.',
-  },
-  {
     icon: HeartHandshake,
-    title: 'Acompanhamento contínuo',
-    description: 'A relação continua depois da entrega.',
+    title: 'Relacionamento contínuo',
+    description: 'Um relacionamento de longo prazo conecta cada etapa — da escolha ao pós-entrega — para que você tenha sempre alguém ao lado nas grandes decisões.',
+  },
+  {
+    icon: MapPin,
+    title: 'Alcance nacional estruturado',
+    description: 'De Uberlândia para o Brasil: operação própria, logística especializada, seguro total e histórico de entregas em 27 estados — incluindo a entrega de um veículo em Manaus.',
+  },
+  {
+    icon: Users,
+    title: 'Família Attra ao seu lado',
+    description: 'Da primeira conversa à troca do próximo carro, a família Attra mantém um atendimento caloroso, ético e transparente, cuidando da sua família com a mesma atenção que cuida da própria.',
   },
 ]
 
@@ -62,10 +62,10 @@ export function ExperienceSection() {
             Um novo jeito de operar
           </SectionHeading>
           <p className="text-foreground-secondary text-lg max-w-3xl mx-auto">
-            Com o tempo, a Attra evoluiu. O que começou como uma visão clara sobre curadoria passou a
-            incorporar tecnologia, inteligência de dados e novos modelos de relacionamento. Hoje, a empresa
-            combina sensibilidade automotiva com eficiência operacional — ampliando atendimento sem perder
-            proximidade, confiança e atenção aos detalhes.
+            Com o tempo, a Attra evoluiu. O que começou como uma visão clara sobre curadoria cresceu para
+            uma operação própria de atendimento, relacionamento contínuo com o cliente e alcance nacional
+            estruturado. Hoje, a empresa combina sensibilidade automotiva com uma operação robusta —
+            ampliando atendimento em todo o país sem perder proximidade, confiança e atenção aos detalhes.
           </p>
         </div>
 
