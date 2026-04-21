@@ -1,42 +1,40 @@
 import {
-  FeaturedSupercars,
   ExperienceSection,
   LocationSection,
   FAQSection,
-  AboutSectionExpanded,
-  ProofOfSolidity,
   FeaturedEditorial,
   JourneyPreview,
-  HeroSearchWidget,
+  AboutSectionExpanded,
+  HomeHero,
+  LeadCaptureSection,
+  TrustStrip,
+  EditorialSelection,
 } from '@/components/home'
-import { FeaturedVehicleHero } from '@/components/vehicles'
 import { FAQSchema } from '@/components/seo'
 import { homepageFAQs } from '@/lib/faq-data'
 import { getVehicles } from '@/lib/autoconf-api'
 import { Vehicle } from '@/types'
 
 export default async function Home() {
-  // Fetch featured vehicles for the supercars section
-  // Only show premium vehicles (R$ 500k+) ordered by highest price
-  let featuredVehicles: Vehicle[] = []
-  let featuredVehicle: Vehicle | null = null
+  // Featured vehicles for the editorial selection (top 3 premium, rotates daily)
+  let editorialVehicles: Vehicle[] = []
+  let heroVehicle: Vehicle | null = null
   try {
     const result = await getVehicles({
       tipo: 'carros',
       registros_por_pagina: 20,
       ordenar: 'preco',
       ordem: 'desc',
-      preco_de: 500000
+      preco_de: 500000,
     })
-    featuredVehicles = result.vehicles.filter(v => v.price >= 500000)
+    const premium = result.vehicles.filter((v) => v.price >= 500000)
+    const sorted = [...premium].sort((a, b) => b.price - a.price)
 
-    // Mirror /veiculos hero pick: deterministic rotation across the top 3 by day of month
-    if (featuredVehicles.length > 0) {
-      const top3 = [...featuredVehicles]
-        .sort((a, b) => b.price - a.price)
-        .slice(0, Math.min(3, featuredVehicles.length))
-      const dayIndex = new Date().getDate() % top3.length
-      featuredVehicle = top3[dayIndex]
+    if (sorted.length > 0) {
+      // Hero sempre mostra o veículo mais caro do estoque — estável, sem
+      // competir com a Seleção Editorial logo abaixo (que já traz o top 3).
+      heroVehicle = sorted[0]
+      editorialVehicles = sorted.slice(0, 3)
     }
   } catch (error) {
     console.error('Failed to fetch featured vehicles:', error)
@@ -44,42 +42,36 @@ export default async function Home() {
 
   return (
     <>
-      {/* Hero - Featured vehicle (top 3 by price, daily rotation) */}
-      {/* pt-20 md:pt-24 clears the fixed header (h-20) on the home, since /veiculos relies on the breadcrumb for that */}
-      {featuredVehicle && (
-        <div className="pt-20 md:pt-24">
-          <FeaturedVehicleHero vehicle={featuredVehicle} />
-        </div>
-      )}
+      {/* 1. Hero — premium positioning + 2 CTAs + trust chips */}
+      <HomeHero vehicle={heroVehicle} />
 
-      {/* Search widget (CTA + busca + filtros), antes embutido no CinematicHero */}
-      <section className="px-4 mb-8 md:mb-12">
-        <HeroSearchWidget />
-      </section>
+      {/* 2. Captação imediata — formulário curto + fallback WhatsApp */}
+      <LeadCaptureSection />
 
-      {/* 3. Destaques do Estoque - Featured supercar inventory */}
-      <FeaturedSupercars vehicles={featuredVehicles} />
+      {/* 3. Prova de confiança compacta */}
+      <TrustStrip />
 
-      {/* 1. Proposta Institucional - Expanded About Section */}
+      {/* 4. Seleção editorial curada — substitui a antiga grade "Destaques" */}
+      <EditorialSelection vehicles={editorialVehicles} />
+
+      {/* 5. Posicionamento — rosto da marca (Thiago) + pilares narrativos.
+             Também carrega os números de autoridade (16+ / 500 / 27 / 5.0). */}
       <AboutSectionExpanded />
 
-      {/* 2. Prova de Solidez - Numbers and pillars (NEW) */}
-      <ProofOfSolidity />
-
-      {/* 4. Frentes de Atuação - Attra experience showcase */}
+      {/* 6. Diferenciais da operação */}
       <ExperienceSection />
 
-      {/* 5. Jornada Attra - Journey preview (NEW) */}
+      {/* 7. Jornada Attra */}
       <JourneyPreview />
 
-      {/* 6. Conteúdo - Featured editorial highlights (NEW) */}
+      {/* 8. Conteúdo editorial */}
       <FeaturedEditorial />
 
-      {/* 7. FAQ Section with Schema */}
+      {/* 9. FAQ */}
       <FAQSection faqs={homepageFAQs} />
       <FAQSchema faqs={homepageFAQs} />
 
-      {/* 8. Contato - Locations */}
+      {/* 10. Localização e contato */}
       <LocationSection />
 
       {/* Organization JSON-LD */}
@@ -90,7 +82,8 @@ export default async function Home() {
             '@context': 'https://schema.org',
             '@type': 'AutoDealer',
             name: 'Attra Veículos',
-            description: 'Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.',
+            description:
+              'Curadoria e comercialização de veículos nacionais, importados, esportivos e supercarros, com operação em Uberlândia e atendimento em todo o Brasil.',
             url: 'https://attraveiculos.com.br',
             telephone: '+55-34-3014-3232',
             address: {

@@ -21,7 +21,7 @@ const pillars = [
   {
     icon: Cpu,
     title: 'Tecnologia aplicada ao relacionamento',
-    description: 'IA e sistemas próprios tornam o atendimento mais ágil, eficiente e conectado.',
+    description: 'Um ecossistema de atendimento próprio conecta cada etapa — do primeiro contato ao pós-entrega — com agilidade e proximidade.',
   },
   {
     icon: HeartHandshake,

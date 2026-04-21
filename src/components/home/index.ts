@@ -20,3 +20,9 @@ export * from './featured-editorial'
 export * from './journey-preview'
 export * from './floating-cta-bar'
 
+// New home redesign — conversion-first
+export * from './home-hero'
+export * from './lead-capture-section'
+export * from './trust-strip'
+export * from './editorial-selection'
+
