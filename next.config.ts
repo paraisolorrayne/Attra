@@ -83,6 +83,12 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  // Strip console.log/info/debug in production builds (keep error/warn for monitoring)
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production'
+      ? { exclude: ['error', 'warn'] }
+      : false,
+  },
   // Disable source maps in production for security
   productionBrowserSourceMaps: false,
   // Powered by header removal

@@ -148,16 +148,12 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
   const context = getContextMessage(currentPage, pageBehavior, vehicleBrand, vehicleModel)
   const IconComponent = context.icon
 
-  // Debug: log current behavior
-  console.log('[WhatsAppButton] pathname:', pathname, 'channelBehavior:', channelBehavior, 'pageBehavior:', pageBehavior, 'vehicle:', vehicleBrand, vehicleModel)
-
   // Fetch geolocation on mount (only once)
   useEffect(() => {
     const fetchGeoLocation = async () => {
       const location = await getGeoLocation()
       if (location) {
         setGeoLocation(location)
-        console.log('[WhatsAppButton] GeoLocation loaded:', location.city, location.region)
       }
     }
     fetchGeoLocation()
