@@ -238,7 +238,21 @@ export function Header() {
             </div>
 
             {/* Mobile menu button - enhanced visibility and touch target */}
-            <div className="flex lg:hidden items-center gap-3">
+            <div className="flex lg:hidden items-center gap-2">
+              {/* Always-visible "Estoque" pill — zero-scroll access to inventory */}
+              <Link
+                href="/veiculos"
+                className={cn(
+                  'inline-flex items-center h-11 px-3 sm:px-4 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                  isScrolled && isLightMode
+                    ? 'bg-gray-900 hover:bg-gray-800 text-white border border-gray-900'
+                    : 'bg-white text-gray-900 hover:bg-white/90 border border-white/80 shadow-sm'
+                )}
+                aria-label="Ver estoque de veículos"
+              >
+                Estoque
+              </Link>
               <ThemeToggle
                 className={cn(
                   'transition-all duration-300 w-11 h-11 flex items-center justify-center',
