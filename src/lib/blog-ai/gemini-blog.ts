@@ -16,7 +16,6 @@ import type {
   BlogPostSEO,
   EducativoFields,
 } from '@/types'
-import { formatPrice } from '@/lib/utils'
 
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
@@ -115,6 +114,14 @@ tração, acabamento. Nunca invente dados que não estão no briefing.
 
 SEO: use heading hierarchy (h2, h3). Parágrafos curtos. Cite a Attra Veículos
 naturalmente. Inclua uma CTA para o estoque no final do texto.
+
+REGRA CRÍTICA — PREÇOS PROIBIDOS: nunca, em hipótese alguma, mencione valores
+monetários, preços, faixas de preço, cifras em reais, "R$", "milhões", "mil
+reais", "a partir de", "ticket", "investimento de X", ou qualquer equivalente.
+Campanhas comerciais alteram preços dinamicamente e a Attra não pode correr o
+risco de um cliente ver um valor desatualizado no blog. Quando precisar falar
+do aspecto comercial, use sempre "sob consulta", "condições exclusivas na
+Attra", "fale com nosso time" ou formulações equivalentes SEM cifras.
 `.trim()
 
 const JSON_SCHEMA_REVIEW = `
@@ -163,6 +170,32 @@ Retorne APENAS JSON válido, sem markdown, sem \`\`\`. Campos obrigatórios:
 // Utility: replace IMAGEM_N placeholders with real URLs
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Utility: strip any monetary references the model might have slipped in.
+// Precos mudam dinamicamente em campanhas — blog nunca pode cravar valor.
+// ---------------------------------------------------------------------------
+
+const PRICE_PATTERNS: RegExp[] = [
+  // R$ 1.234.567,89 / R$1,2 milhões / R$ 500 mil
+  /R\$\s*\d[\d.,]*\s*(?:mil(?:h[õã]o|h[õã]es|h[aã]o)?)?/gi,
+  // "1,2 milhão de reais" / "500 mil reais" / "dois milhões de reais"
+  /\b[\d.,]+\s*(?:mil|milh[õã]o|milh[õã]es)\s*(?:de\s+)?reais?\b/gi,
+  /\b(?:um|dois|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez)\s+milh[õã]es?\s*(?:de\s+)?reais?\b/gi,
+  // "por R$..." já coberto acima, mas "a partir de R$" também
+  /a\s+partir\s+de\s+R\$\s*[\d.,]+/gi,
+]
+
+export function sanitizePrices(html: string): string {
+  let out = html
+  for (const re of PRICE_PATTERNS) {
+    out = out.replace(re, 'valor sob consulta')
+  }
+  // Clean-up em construções como "por valor sob consulta" que ficaram feias
+  out = out.replace(/\bpor\s+valor\s+sob\s+consulta\b/gi, 'sob consulta')
+  out = out.replace(/\bde\s+valor\s+sob\s+consulta\b/gi, 'sob consulta')
+  return out
+}
+
 function injectImages(html: string, images: string[]): string {
   if (images.length === 0) return html.replace(/<img[^>]*src=['"]IMAGEM_\d+['"][^>]*>/g, '')
   return html.replace(/<img([^>]*)src=['"]IMAGEM_(\d+)['"]([^>]*)>/g, (_match, pre, idx, post) => {
@@ -198,7 +231,6 @@ function toSeo(r: GeminiJsonResponse): BlogPostSEO {
 
 export async function generateReview(vehicle: Vehicle): Promise<GeneratedBlog> {
   const images = vehicle.photos ?? []
-  const price = vehicle.price > 0 ? formatPrice(vehicle.price) : 'Sob consulta'
 
   const prompt = `
 ${BRAND_VOICE}
@@ -226,7 +258,7 @@ DADOS DO VEÍCULO:
 - Câmbio: ${vehicle.transmission}
 - Potência: ${vehicle.horsepower ? vehicle.horsepower + ' cv' : 'não informada'}
 - Categoria: ${vehicle.category}
-- Preço: ${price}
+- Preço: (NÃO MENCIONAR NO TEXTO — sempre use "sob consulta" quando falar do aspecto comercial)
 - Opcionais já catalogados: ${(vehicle.options ?? []).slice(0, 20).join(', ') || 'consulte o anúncio'}
 - URL do veículo no site: https://attraveiculos.com.br/veiculo/${vehicle.slug}
 
@@ -238,7 +270,7 @@ ${JSON_SCHEMA_REVIEW}
 `.trim()
 
   const raw = await callGemini(prompt)
-  const content = injectImages(raw.content_html, images)
+  const content = sanitizePrices(injectImages(raw.content_html, images))
 
   const carReview: CarReviewFields = {
     vehicle_id: vehicle.id,
@@ -261,7 +293,7 @@ ${JSON_SCHEMA_REVIEW}
     gallery_images: images,
     availability: {
       in_stock: vehicle.status === 'available',
-      price,
+      // price propositalmente omitido — campanhas alteram valores dinamicamente
       stock_url: `/veiculo/${vehicle.slug}`,
     },
     faq: raw.faq,
@@ -301,7 +333,6 @@ function vehicleBriefing(v: Vehicle): string {
     `- Ano: ${v.year_manufacture}/${v.year_model}`,
     `- Potência: ${v.horsepower ? v.horsepower + ' cv' : 'não informada'}`,
     `- Câmbio: ${v.transmission}`,
-    `- Preço: ${formatPrice(v.price)}`,
     `- URL: https://attraveiculos.com.br/veiculo/${v.slug}`,
   ].join('\n')
 }
@@ -353,7 +384,7 @@ ${JSON_SCHEMA_EDUCATIVO}
 `.trim()
 
   const raw = await callGemini(prompt)
-  const content = injectImages(raw.content_html, images)
+  const content = sanitizePrices(injectImages(raw.content_html, images))
 
   const educativo: EducativoFields = {
     category: 'Curadoria',
@@ -433,7 +464,7 @@ ${hasVehicle ? JSON_SCHEMA_REVIEW : JSON_SCHEMA_EDUCATIVO}
 `.trim()
 
   const raw = await callGemini(prompt)
-  const content = injectImages(raw.content_html, images)
+  const content = sanitizePrices(injectImages(raw.content_html, images))
 
   if (hasVehicle && input.vehicle) {
     const v = input.vehicle
@@ -457,7 +488,7 @@ ${hasVehicle ? JSON_SCHEMA_REVIEW : JSON_SCHEMA_EDUCATIVO}
       gallery_images: images,
       availability: {
         in_stock: v.status === 'available',
-        price: v.price > 0 ? formatPrice(v.price) : 'Sob consulta',
+        // price propositalmente omitido — campanhas alteram valores dinamicamente
         stock_url: `/veiculo/${v.slug}`,
       },
       faq: raw.faq,

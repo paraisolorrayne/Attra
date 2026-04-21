@@ -32,7 +32,7 @@ export default async function LinksPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center px-5 py-10 sm:py-14">
       {/* Logo — light: black, dark: white */}
-      <div className="mb-8 relative h-10">
+      <div className="mb-8 h-10">
         <Image
           src="/images/logo-black.png"
           alt="Attra Veículos"
@@ -85,13 +85,13 @@ export default async function LinksPage() {
           className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 text-gray-900 dark:text-white rounded-xl px-5 py-4 transition-colors active:scale-[0.98]"
         >
           <div className="flex items-center gap-3">
-            <Car className="w-5 h-5 text-gray-400" />
+            <Car className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             <div>
               <span className="font-semibold text-sm block">Consultar veículos disponíveis</span>
-              <span className="text-xs text-gray-400">Apenas visualização do acervo</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Apenas visualização do acervo</span>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600" />
+          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
         </a>
       </div>
 
@@ -122,10 +122,10 @@ export default async function LinksPage() {
                 <p className="text-white font-bold text-lg tracking-wide">
                   {featuredVehicle.brand.toUpperCase()} {featuredVehicle.model.toUpperCase()}
                 </p>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-white/70 text-xs">{featuredVehicle.year_model}</span>
-                  <span className="text-white/70 text-xs">{featuredVehicle.mileage === 0 ? '0 km' : formatMileage(featuredVehicle.mileage)}</span>
-                  <span className="text-white/70 text-xs">{formatPrice(featuredVehicle.price)}</span>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                  <span className="text-white/80 text-xs">{featuredVehicle.year_model}</span>
+                  <span className="text-white/80 text-xs">{featuredVehicle.mileage === 0 ? '0 km' : formatMileage(featuredVehicle.mileage)}</span>
+                  <span className="text-white/80 text-xs">{formatPrice(featuredVehicle.price)}</span>
                 </div>
               </div>
             </div>
@@ -153,17 +153,17 @@ export default async function LinksPage() {
           className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 rounded-xl px-4 py-3 transition-colors"
         >
           <div className="flex items-center gap-2.5">
-            <MapPin className="w-4 h-4 text-gray-400" />
+            <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             <span className="text-sm font-medium text-gray-900 dark:text-white">Abrir localização da unidade</span>
           </div>
-          <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600" />
+          <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
         </a>
       </div>
 
       {/* Avaliar experiência com a Attra */}
       <div className="w-full max-w-sm mb-6">
         <a
-          href="https://tr.ee/n5fjde6ENs"
+          href="https://g.page/r/CQHb-QTnsh8hEBM/review"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 text-gray-900 dark:text-white rounded-xl px-5 py-4 transition-colors active:scale-[0.98]"
@@ -172,10 +172,10 @@ export default async function LinksPage() {
             <Star className="w-5 h-5 text-yellow-500" />
             <div>
               <span className="font-semibold text-sm block">Avaliar minha experiência com a Attra</span>
-              <span className="text-xs text-gray-400">Seu feedback nos ajuda a evoluir</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Seu feedback nos ajuda a evoluir</span>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-300 dark:text-gray-600" />
+          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />
         </a>
       </div>
 
