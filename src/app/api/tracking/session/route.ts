@@ -8,6 +8,33 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Insert a session, or return the existing row's id when the session_id
+// already exists (page reload within the same sessionStorage lifetime).
+async function getOrCreateSession(
+  row: Record<string, unknown> & { session_id: string },
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('visitor_sessions')
+    .insert(row)
+    .select('id')
+    .single()
+
+  if (!error) return data?.id ?? null
+
+  // 23505 = duplicate key — session already created on a previous request.
+  if (error.code === '23505') {
+    const { data: existing } = await supabase
+      .from('visitor_sessions')
+      .select('id')
+      .eq('session_id', row.session_id)
+      .single()
+    return existing?.id ?? null
+  }
+
+  console.error('[Tracking] Session insert error:', error)
+  return null
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
@@ -92,39 +119,9 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', existingFp.id)
       
-      // Create session with existing fingerprint
-      const { data: session } = await supabase
-        .from('visitor_sessions')
-        .insert({
-          fingerprint_id: existingFp.id,
-          session_id,
-          referrer_url,
-          referrer_domain,
-          utm_source: utm_params?.utm_source || null,
-          utm_medium: utm_params?.utm_medium || null,
-          utm_campaign: utm_params?.utm_campaign || null,
-          utm_content: utm_params?.utm_content || null,
-          utm_term: utm_params?.utm_term || null,
-          gclid: click_ids?.gclid || null,
-          fbclid: click_ids?.fbclid || null,
-          ttclid: click_ids?.ttclid || null,
-          ip_address: ip,
-        })
-        .select('id')
-        .single()
-
-      return NextResponse.json({
-        success: true,
-        fingerprint_db_id: existingFp.id,
-        session_db_id: session?.id || null,
-      })
-    }
-
-    // Create session with new fingerprint
-    const { data: session, error: sessError } = await supabase
-      .from('visitor_sessions')
-      .insert({
-        fingerprint_id: fingerprint.id,
+      // Create session with existing fingerprint (returns existing on conflict)
+      const sessionId = await getOrCreateSession({
+        fingerprint_id: existingFp.id,
         session_id,
         referrer_url,
         referrer_domain,
@@ -141,17 +138,38 @@ export async function POST(request: NextRequest) {
         ttclid: click_ids?.ttclid || null,
         ip_address: ip,
       })
-      .select('id')
-      .single()
 
-    if (sessError) {
-      console.error('[Tracking] Session insert error:', sessError)
+      return NextResponse.json({
+        success: true,
+        fingerprint_db_id: existingFp.id,
+        session_db_id: sessionId,
+      })
     }
+
+    // Create session with new fingerprint (returns existing on conflict)
+    const sessionId = await getOrCreateSession({
+      fingerprint_id: fingerprint.id,
+      session_id,
+      referrer_url,
+      referrer_domain,
+      utm_source: utm_params?.utm_source || null,
+      utm_medium: utm_params?.utm_medium || null,
+      utm_campaign: utm_params?.utm_campaign || null,
+      utm_content: utm_params?.utm_content || null,
+      utm_term: utm_params?.utm_term || null,
+      utm_id:   utm_params?.utm_id   || null,
+      adset_id: utm_params?.adset_id || null,
+      ad_id:    utm_params?.ad_id    || null,
+      gclid: click_ids?.gclid || null,
+      fbclid: click_ids?.fbclid || null,
+      ttclid: click_ids?.ttclid || null,
+      ip_address: ip,
+    })
 
     return NextResponse.json({
       success: true,
       fingerprint_db_id: fingerprint.id,
-      session_db_id: session?.id || null,
+      session_db_id: sessionId,
     })
 
   } catch (error) {
