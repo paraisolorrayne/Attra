@@ -89,14 +89,29 @@ WEBHOOK_SECRET=seu_webhook_secret
 
 ### Opção 1: Deploy com Node.js (Recomendado)
 
+> ⚠️ Este projeto usa `output: 'standalone'` em `next.config.ts`. O `next build`
+> gera um bundle minimalista em `.next/standalone/` com apenas o `node_modules`
+> necessário, e o servidor deve ser iniciado com `node .next/standalone/server.js`.
+> **Não use `next start` com esta configuração** — o Next.js 16 emite um aviso
+> explícito (`"next start" does not work with "output: standalone"`), e pode
+> ocorrer o cenário em que a home carrega mas rotas subsequentes falham porque
+> `.next/static` não está disponível ao lado do `server.js`.
+>
+> O script `npm run build` executa automaticamente `scripts/prepare-standalone.mjs`
+> como `postbuild`, copiando `.next/static/` e `public/` para dentro de
+> `.next/standalone/`. Assim o bundle fica auto-contido e pronto para subir.
+
 #### Build de Produção
 
 ```bash
-# Gere o build de produção
+# Gere o build de produção (inclui o postbuild de standalone)
 npm run build
 
-# Execute o servidor de produção
-npm run start
+# Execute o servidor de produção (recomendado)
+npm run start                       # node .next/standalone/server.js
+
+# Alternativa legada (não recomendada com output: 'standalone'):
+# npm run start:next                # next start
 ```
 
 O servidor iniciará na porta 3000 por padrão. Use `PORT=8080` para outra porta.
@@ -105,20 +120,28 @@ O servidor iniciará na porta 3000 por padrão. Use `PORT=8080` para outra porta
 
 1. **Instale Node.js 18+** no servidor
 2. **Clone o repositório** e instale dependências
-3. **Configure variáveis de ambiente** em `.env.production`
-4. **Use PM2** para gerenciamento de processos:
+3. **Configure variáveis de ambiente** em `.env.production` (ou exporte antes do PM2)
+4. **Use PM2** apontando diretamente para o `server.js` standalone:
 
 ```bash
 # Instale PM2 globalmente
 npm install -g pm2
 
-# Inicie a aplicação
-pm2 start npm --name "attra" -- start
+# Build (gera .next/standalone já com .next/static + public copiados)
+npm ci
+npm run build
+
+# Inicie a aplicação usando o server.js standalone
+pm2 start .next/standalone/server.js --name attra --update-env \
+  --time --cwd "$(pwd)"
 
 # Configure para iniciar no boot
 pm2 startup
 pm2 save
 ```
+
+> Caso já exista um processo `attra` rodando com `pm2 start npm -- start`,
+> apague-o antes: `pm2 delete attra` — ele continuaria servindo o bundle antigo.
 
 ### Opção 2: Deploy com Docker
 
@@ -259,8 +282,9 @@ npm run build
 ```bash
 npm install -g pm2
 
-# Inicie a aplicação
-pm2 start npm --name "attra" -- start
+# Inicie a aplicação (server.js do build standalone — ver nota na Opção 1)
+pm2 start .next/standalone/server.js --name attra --update-env \
+  --time --cwd /var/www/attra
 pm2 startup
 pm2 save
 
@@ -324,8 +348,8 @@ NEXT_PUBLIC_SITE_URL=https://seudominio.com.br
 
 Reconstrua e reinicie:
 ```bash
-npm run build
-pm2 restart attra
+npm run build            # gera .next/standalone com .next/static e public copiados
+pm2 restart attra --update-env
 ```
 
 ---
@@ -356,9 +380,10 @@ jobs:
           script: |
             cd /var/www/attra
             git pull origin master
-            npm install
+            npm ci
             npm run build
-            pm2 restart attra
+            pm2 restart attra --update-env || \
+              pm2 start .next/standalone/server.js --name attra --update-env --time --cwd /var/www/attra
 ```
 
 Configure os secrets no GitHub:
@@ -373,8 +398,9 @@ Configure os secrets no GitHub:
 ```bash
 # Desenvolvimento
 npm run dev         # Servidor de desenvolvimento
-npm run build       # Build de produção
-npm run start       # Servidor de produção
+npm run build       # Build de produção + postbuild (.next/standalone preparado)
+npm run start       # Servidor de produção (node .next/standalone/server.js)
+npm run start:next  # Servidor legado via `next start` (apenas para debug local)
 npm run lint        # Verificar linting
 
 # PM2 (produção)
