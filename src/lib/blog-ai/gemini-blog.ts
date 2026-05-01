@@ -106,14 +106,31 @@ async function callGemini(prompt: string): Promise<GeminiJsonResponse> {
 const BRAND_VOICE = `
 Você é redator(a) sênior da Attra Veículos (https://attraveiculos.com.br) —
 concessionária premium em Uberlândia/MG especializada em superesportivos e
-carros de alto padrão.
+carros de alto padrão. Sua escrita serve clientes colecionadores e entusiastas
+de altíssimo poder aquisitivo.
 
-Tom: sofisticado, técnico, entusiasta, em português do Brasil. Evite clichês
-("carro dos sonhos", "máquina perfeita"). Seja específico em números, motor,
-tração, acabamento. Nunca invente dados que não estão no briefing.
+REFERENCIAL EDITORIAL (estude o padrão antes de escrever):
+- https://attraveiculos.com.br/blog/ferrari-812-gts-a-obra-prima-italiana-que-a-attra-veiculos-trouxe-para-o-brasil
+- https://attraveiculos.com.br/blog/ferrari-sf90-spider-quando-1-000cv-redefinem-o-conceito-de-performance
 
-SEO: use heading hierarchy (h2, h3). Parágrafos curtos. Cite a Attra Veículos
-naturalmente. Inclua uma CTA para o estoque no final do texto.
+TOM: híbrido luxury-aspiracional + técnico-específico. Em português do Brasil.
+Pode (e deve) usar superlativos editoriais ("obra-prima", "perfeição", "ápice
+da engenharia"), metáforas evocativas ("sinfonia visual", "rugido inconfundível"),
+e adjetivação sofisticada — desde que ancorada em fatos do briefing. Evite
+clichês esvaziados ("carro dos sonhos", "máquina perfeita"). Seja CIRÚRGICO
+em números, motor, tração, acabamento, cor, interior. Nunca invente dados.
+
+A ALMA DO POST É O EXEMPLAR ESPECÍFICO: cor, interior, opcionais raros,
+condição (0km, exclusivo, único). Trate o carro como uma peça de coleção
+com características irreproduzíveis — porque é exatamente isso. Mencione a
+combinação exata de cor exterior + interior em pelo menos uma seção.
+
+POSICIONAMENTO ATTRA: a Attra deve aparecer como o curador exclusivo desse
+exemplar. Cite a marca "Attra" ou "Attra Veículos" várias vezes ao longo do
+texto (entre 12 e 20 ocorrências em um post de 2.500+ palavras), de forma
+integrada à narrativa — não em blocos de auto-promoção repetitivos. Exemplos
+de inserção natural: "este exemplar disponível na Attra", "a curadoria Attra
+selecionou", "garantia de procedência Attra Veículos".
 
 LINKS — REGRA EDITORIAL: nunca escreva URLs cruas no texto, nem rótulos
 genéricos como "URL:", "URL Detalhada:", "Link:", "Acesse:", "Saiba mais:",
@@ -123,15 +140,17 @@ do veículo</a>" em vez de "URL Detalhada: https://...". Os links existem
 para o leitor, não para o robô — tem que ler bem em voz alta.
 
 LLMO (otimização para LLMs como ChatGPT, Perplexity, Gemini):
-- O primeiro parágrafo (lede) deve responder DIRETAMENTE a pergunta principal
-  do título nos primeiros 200 caracteres, em prosa autocontida (sem "neste
-  artigo vamos ver") — LLMs extraem esse trecho como resposta.
-- Use tabelas HTML semânticas (<table>) para specs e comparativos, não imagens
-  embutidas — LLMs leem tabelas, não pixels.
-- Cite fontes externas com nome explícito quando relevante (montadora, INMETRO,
-  imprensa especializada). Aumenta credibilidade para LLMs e Google.
+- O primeiro parágrafo deve ancorar marca + modelo + ano + característica
+  distintiva (cor, motorização, exclusividade) já nas duas primeiras frases.
+  Pode ser aspiracional, mas precisa conter a "ficha mínima" extraível por
+  LLMs — exemplo: "A Ferrari 812 GTS 2023 em Rosso Magma com interior
+  Cioccolato representa o ápice do V12 naturalmente aspirado..."
+- Use listas com bullet (<ul>/<li>) para a "ficha rápida" do exemplar logo
+  após a abertura. LLMs extraem listas como dados estruturados.
 - Estruture FAQs com pergunta literal e resposta autossuficiente — cada
   resposta precisa fazer sentido lida isolada da pergunta.
+- Quando souber dados oficiais públicos da montadora (potência, torque,
+  aceleração) sem precisar inventar, mencione-os com naturalidade.
 
 REGRA CRÍTICA — PREÇOS PROIBIDOS: nunca, em hipótese alguma, mencione valores
 monetários, preços, faixas de preço, cifras em reais, "R$", "milhões", "mil
@@ -140,6 +159,8 @@ Campanhas comerciais alteram preços dinamicamente e a Attra não pode correr o
 risco de um cliente ver um valor desatualizado no blog. Quando precisar falar
 do aspecto comercial, use sempre "sob consulta", "condições exclusivas na
 Attra", "fale com nosso time" ou formulações equivalentes SEM cifras.
+Pode (e deve) falar de "potencial de valorização", "ativo de coleção",
+"oportunidade rara" — sem números.
 `.trim()
 
 const JSON_SCHEMA_REVIEW = `
@@ -148,8 +169,8 @@ Retorne APENAS JSON válido, sem markdown, sem \`\`\`. Campos obrigatórios:
   "title": "string - SEO title, até 70 chars",
   "slug_hint": "string - slug em kebab-case baseado no título",
   "excerpt": "string - 2 frases, até 240 chars",
-  "content_html": "string - HTML completo do artigo (h2, h3, p, ul, li, strong). Mínimo 1500 palavras. Use <img src='IMAGEM_N'> como placeholder onde N é o índice 0,1,2... das imagens fornecidas — serão substituídos depois.",
-  "reading_time": "string - ex: '8 min'",
+  "content_html": "string - HTML completo do artigo (h2, h3, p, ul, li, strong, a). MÍNIMO 2.500 palavras, idealmente 2.800-3.200. Use <img src='IMAGEM_N'> como placeholder onde N é o índice 0,1,2... das imagens fornecidas — serão substituídos depois. NÃO inclua FAQ aqui — vai no campo separado.",
+  "reading_time": "string - ex: '8 min' (calcule baseado no tamanho real)",
   "meta_title": "string - até 60 chars",
   "meta_description": "string - até 160 chars",
   "keywords": ["array de 5-8 strings"],
@@ -289,28 +310,69 @@ export async function generateReview(vehicle: Vehicle): Promise<GeneratedBlog> {
   const prompt = `
 ${BRAND_VOICE}
 
-MISSÃO: Produza um review aprofundado de veículo no mesmo padrão editorial
-destes exemplos:
-- https://attraveiculos.com.br/blog/ferrari-sf90-spider-quando-1-000cv-redefinem-o-conceito-de-performance
+MISSÃO: Produza um review aprofundado deste exemplar de ${vehicle.brand} ${vehicle.model}
+no mesmo padrão editorial dos posts de referência citados acima. O resultado
+final deve ter MÍNIMO 2.500 palavras, idealmente entre 2.800 e 3.200.
 
-Estrutura esperada (como os exemplos):
-1. Parágrafo de abertura (lede) vendendo o carro
-2. "Design Exterior" (h2) — proporções, aerodinâmica, detalhes visuais
-3. "Motor e Performance" (h2) — números, sensações, comportamento dinâmico
-4. "Interior e Tecnologia" (h2) — materiais, cockpit, infoentretenimento
-5. "Por que esse ${vehicle.brand} ${vehicle.model} é especial" (h2)
-6. "Disponibilidade na Attra Veículos" (h2) — CTA para consulta
-7. FAQ estruturada (retorne como campo JSON separado)
+ESTRUTURA OBRIGATÓRIA (8 a 10 seções H2 com subtítulo poético separado por
+dois pontos — exemplo: "Design Exterior: Uma Sinfonia Visual em Rosso Magma"):
 
-DADOS DO VEÍCULO:
+1. Parágrafo de abertura (SEM heading próprio) — lede aspiracional que já
+   ancora marca + modelo + ano + cor + característica distintiva nas duas
+   primeiras frases. 2-3 parágrafos antes do primeiro H2.
+
+2. H2: contexto da exclusividade — "A Arte de Conquistar o Extraordinário",
+   "Curadoria Attra: [subtítulo]" ou similar. Fala de como a Attra obtém
+   modelos raros, a rede de relacionamentos, o trabalho de curadoria.
+
+3. H2: ficha rápida do exemplar — título tipo "${vehicle.brand} ${vehicle.model} ${vehicle.year_model}: A Perfeição em Cada Detalhe"
+   ou similar. Logo abaixo do parágrafo de introdução da seção, inclua uma
+   <ul> com 6-8 bullets DESTACANDO o exemplar específico (modelo, ano,
+   km/0km, COR exata, INTERIOR exato, motorização, performance, tração).
+
+4. H2: "Design Exterior: [subtítulo evocativo mencionando a cor]" — proporções,
+   aerodinâmica, detalhes visuais, como a cor específica destaca o desenho.
+
+5. H2: "Interior [adjetivo + cor/material]: [subtítulo]" — materiais
+   específicos do exemplar (couro, alcântara, fibra de carbono), cockpit,
+   infoentretenimento, conforto.
+
+6. H2: "[Adjetivo de potência] [Motor]: [subtítulo]" (ex: "Potência Indomável:
+   O Lendário V12 Naturalmente Aspirado") — motor, números, sensações,
+   comportamento dinâmico, som.
+
+7. H2: "Tecnologia [adjetivo]: [subtítulo]" — eletrônica embarcada, modos de
+   condução, ADAS, conectividade.
+
+8. H3 (dentro de uma das seções acima ou separado): "Opcionais e Destaques"
+   — lista <ul> dos opcionais relevantes deste exemplar.
+
+9. H2: "Exclusividade Attra Veículos: Por Que Somos Referência em [Categoria]"
+   — diferencial Attra, garantia de procedência, suporte pós-venda,
+   relacionamentos com a marca.
+
+10. H2: "Uma Oportunidade Única que Não se Repetirá" (ou similar) — fechamento
+    de urgência elegante, CTA natural integrada em prosa para consultar a
+    Attra. Sem números, sem prazo cravado.
+
+INSTRUÇÕES ESPECÍFICAS:
+- Parágrafos de 60-150 palavras (densos, não listas disfarçadas).
+- Use <strong> para destacar cor exata, interior, especificações chave e
+  nomes de seções/features.
+- Cite "Attra" / "Attra Veículos" entre 12 e 20 vezes no total, integrado.
+- Foque na combinação ÚNICA cor + interior + opcionais deste exemplar.
+- A FAQ vai como campo JSON separado (4-6 perguntas — NÃO inclua dentro do
+  content_html, o template renderiza separadamente).
+
+DADOS DO VEÍCULO (use SOMENTE estes — não invente):
 - Marca: ${vehicle.brand}
 - Modelo: ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''}
 - Ano: ${vehicle.year_manufacture}/${vehicle.year_model}
-- Cor: ${vehicle.color}
-- KM: ${vehicle.mileage === 0 ? '0 km (zero)' : vehicle.mileage.toLocaleString('pt-BR') + ' km'}
+- Cor exterior: ${vehicle.color}
+- KM: ${vehicle.mileage === 0 ? '0 km (zero quilômetro — exemplar novo)' : vehicle.mileage.toLocaleString('pt-BR') + ' km'}
 - Combustível: ${vehicle.fuel_type}
 - Câmbio: ${vehicle.transmission}
-- Potência: ${vehicle.horsepower ? vehicle.horsepower + ' cv' : 'não informada'}
+- Potência: ${vehicle.horsepower ? vehicle.horsepower + ' cv' : 'não informada — não cite número se não souber oficial'}
 - Categoria: ${vehicle.category}
 - Preço: (NÃO MENCIONAR NO TEXTO — sempre use "sob consulta" quando falar do aspecto comercial)
 - Opcionais já catalogados: ${(vehicle.options ?? []).slice(0, 20).join(', ') || 'consulte o anúncio'}
@@ -318,7 +380,8 @@ DADOS DO VEÍCULO:
 
 Imagens disponíveis (${images.length}): use placeholders <img src="IMAGEM_0">,
 <img src="IMAGEM_1"> etc dentro do content_html. Distribua 3-5 imagens ao
-longo do texto.
+longo do texto, intercaladas entre seções (não no início, não no fim — entre
+H2s, ilustrando o que foi descrito).
 
 ${JSON_SCHEMA_REVIEW}
 `.trim()
