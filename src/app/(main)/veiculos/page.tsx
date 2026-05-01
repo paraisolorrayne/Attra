@@ -212,6 +212,7 @@ export default async function VeiculosPage({ searchParams }: VeiculosPageProps) 
 
         if (blindagemFilter) {
           const hasArmor = vehicle.options?.some(opt => {
+            if (!opt) return false
             const normalized = opt.toLowerCase()
             return normalized.includes('blindad') || normalized.includes('blindagem')
           }) || false

@@ -78,7 +78,7 @@ export function cleanVersionString(modeloNome: string, modeloPaiNome: string): s
   let version = modeloNome
 
   // Remove model name prefix if version starts with it
-  const modelLower = modeloPaiNome.toLowerCase()
+  const modelLower = (modeloPaiNome || '').toLowerCase()
   const versionLower = version.toLowerCase()
 
   if (versionLower.startsWith(modelLower)) {
@@ -376,7 +376,8 @@ export function mapAutoConfToVehicle(autoconfVehicle: AutoConfVehicle): Vehicle 
 
   // Determine if vehicle is imported based on brand
   const importedBrands = ['Ferrari', 'Lamborghini', 'McLaren', 'Bentley', 'Rolls-Royce', 'Aston Martin', 'Maserati']
-  const isImported = importedBrands.some(b => autoconfVehicle.marca_nome.toLowerCase().includes(b.toLowerCase()))
+  const brandName = (autoconfVehicle.marca_nome || '').toLowerCase()
+  const isImported = importedBrands.some(b => brandName.includes(b.toLowerCase()))
 
   // Safely handle potentially missing fields from /ads-home endpoint
   const km = autoconfVehicle.km ?? 0
@@ -439,7 +440,7 @@ function generateVehicleSlug(vehicle: AutoConfVehicle): string {
  * Determine vehicle category based on characteristics
  */
 function determineCategoryFromVehicle(vehicle: AutoConfVehicle, price: number): string {
-  const brand = vehicle.marca_nome.toLowerCase()
+  const brand = (vehicle.marca_nome || '').toLowerCase()
 
   // Supercars/Sports
   const supercarBrands = ['ferrari', 'lamborghini', 'mclaren', 'bugatti', 'pagani', 'koenigsegg']
@@ -684,7 +685,9 @@ export async function getRelatedVehicles(currentId: string, brand: string, limit
 function deduplicateVehicles(vehicles: AutoConfVehicle[]): AutoConfVehicle[] {
   const seen = new Set<string>()
   return vehicles.filter(vehicle => {
-    const key = `${vehicle.marca_nome.toLowerCase()}-${vehicle.modelopai_nome.toLowerCase()}-${vehicle.anomodelo}`
+    const brand = (vehicle.marca_nome || '').toLowerCase()
+    const model = (vehicle.modelopai_nome || '').toLowerCase()
+    const key = `${brand}-${model}-${vehicle.anomodelo}`
     if (seen.has(key)) {
       return false
     }
@@ -699,7 +702,9 @@ function deduplicateVehicles(vehicles: AutoConfVehicle[]): AutoConfVehicle[] {
 function deduplicateMappedVehicles(vehicles: Vehicle[]): Vehicle[] {
   const seen = new Set<string>()
   return vehicles.filter(vehicle => {
-    const key = `${vehicle.brand.toLowerCase()}-${vehicle.model.toLowerCase()}-${vehicle.year_model}`
+    const brand = (vehicle.brand || '').toLowerCase()
+    const model = (vehicle.model || '').toLowerCase()
+    const key = `${brand}-${model}-${vehicle.year_model}`
     if (seen.has(key)) {
       return false
     }
