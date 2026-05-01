@@ -5,6 +5,7 @@
 
 import type { Vehicle } from '@/types'
 import { type AutoConfVehicle, cleanVersionString } from './autoconf-api'
+import { resolveBrand, nonEmpty, joinNonEmpty } from './vehicle-fallbacks'
 import inventoryData from '../../list_vehicle.json'
 
 // Type for the JSON structure
@@ -68,17 +69,24 @@ function determineCategoryFromVehicle(vehicle: AutoConfVehicle, price: number): 
 function generateDescription(vehicle: AutoConfVehicle): string {
   const isNew = vehicle.zero_km === 1
   const km = (vehicle.km ?? 0).toLocaleString('pt-BR')
-  const brand = vehicle.marca_nome || 'Veículo'
-  const model = vehicle.modelopai_nome || ''
-  const year = vehicle.anomodelo || ''
-  const fuel = vehicle.combustivel_nome || 'Não informado'
-  const transmission = vehicle.cambio_nome || 'Não informado'
+  const brand = resolveBrand(vehicle.marca_nome, vehicle.modelopai_nome)
+  const model = nonEmpty(vehicle.modelopai_nome)
+  const year = vehicle.anomodelo ? String(vehicle.anomodelo) : ''
+  const fuel = nonEmpty(vehicle.combustivel_nome)
+  const transmission = nonEmpty(vehicle.cambio_nome)
+
+  const namePart = joinNonEmpty([brand, model, year]) || 'Veículo premium'
+  const versao = vehicle.versao_descricao ? ` ${vehicle.versao_descricao}` : ''
+  const drivetrain = joinNonEmpty([
+    fuel ? `Motor ${fuel}` : '',
+    transmission ? `câmbio ${transmission}` : '',
+  ], ', ')
+  const drivetrainPart = drivetrain ? ` ${drivetrain}.` : ''
 
   if (isNew) {
-    return `${brand} ${model} ${year} 0km. ${vehicle.versao_descricao || ''} Motor ${fuel}, câmbio ${transmission}. Verifique a disponibilidade com nossos consultores.`
+    return `${namePart} 0km.${versao}${drivetrainPart} Verifique a disponibilidade com nossos consultores.`
   }
-
-  return `${brand} ${model} ${year} com apenas ${km} km rodados. ${vehicle.versao_descricao || ''} Motor ${fuel}, câmbio ${transmission}. Documentação em dia, pronto para entrega.`
+  return `${namePart} com apenas ${km} km rodados.${versao}${drivetrainPart} Documentação em dia, pronto para entrega.`
 }
 
 /**
@@ -96,32 +104,37 @@ function mapAutoConfToVehicle(autoconfVehicle: AutoConfVehicle): Vehicle {
   const category = determineCategoryFromVehicle(autoconfVehicle, price)
 
   const importedBrands = ['Ferrari', 'Lamborghini', 'McLaren', 'Bentley', 'Rolls-Royce', 'Aston Martin', 'Maserati']
-  const brand = autoconfVehicle.marca_nome || 'Desconhecido'
+  const brand = resolveBrand(autoconfVehicle.marca_nome, autoconfVehicle.modelopai_nome)
+  const model = nonEmpty(autoconfVehicle.modelopai_nome)
   const isImported = importedBrands.some(b => brand.toLowerCase().includes(b.toLowerCase()))
+
+  const namePart = joinNonEmpty([brand, model, autoconfVehicle.anomodelo])
+  const seoBase = namePart || 'Veículo premium'
+  const km = autoconfVehicle.km ?? 0
 
   return {
     id: String(autoconfVehicle.id),
     slug,
     brand,
-    model: autoconfVehicle.modelopai_nome || 'Modelo',
+    model,
     version: cleanVersionString(autoconfVehicle.modelo_nome, autoconfVehicle.modelopai_nome)
       || autoconfVehicle.versao_descricao || null,
     year_manufacture: parseInt(autoconfVehicle.anofabricacao) || 0,
     year_model: parseInt(autoconfVehicle.anomodelo) || 0,
-    color: autoconfVehicle.cor_nome || 'Não informado',
-    mileage: autoconfVehicle.km ?? 0,
-    fuel_type: autoconfVehicle.combustivel_nome || 'Não informado',
-    transmission: autoconfVehicle.cambio_nome || 'Não informado',
+    color: nonEmpty(autoconfVehicle.cor_nome),
+    mileage: km,
+    fuel_type: nonEmpty(autoconfVehicle.combustivel_nome),
+    transmission: nonEmpty(autoconfVehicle.cambio_nome),
     price,
     category,
-    body_type: autoconfVehicle.carroceria_nome || 'Outros',
+    body_type: nonEmpty(autoconfVehicle.carroceria_nome),
     location_id: '1',
     photos: autoconfVehicle.fotos?.map(f => f.url) || (autoconfVehicle.foto ? [autoconfVehicle.foto] : []),
     videos: null,
     options: uniqueOptions.length > 0 ? uniqueOptions : null,
     description: generateDescription(autoconfVehicle),
-    seo_title: `${brand} ${autoconfVehicle.modelopai_nome || ''} ${autoconfVehicle.anomodelo || ''} | Attra Veículos`,
-    seo_description: `${brand} ${autoconfVehicle.modelopai_nome || ''} ${autoconfVehicle.anomodelo || ''} com ${(autoconfVehicle.km ?? 0).toLocaleString('pt-BR')} km. Compre com a Attra Veículos.`,
+    seo_title: `${seoBase} | Attra Veículos`,
+    seo_description: `${seoBase}${km > 0 ? ` com ${km.toLocaleString('pt-BR')} km` : ''}. Compre com a Attra Veículos.`,
     status: 'available',
     is_featured: (autoconfVehicle.prioridade_veiculo ?? 0) > 0,
     is_new: autoconfVehicle.zero_km === 1,

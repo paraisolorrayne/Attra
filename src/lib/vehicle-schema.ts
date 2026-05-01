@@ -56,8 +56,10 @@ function imageObjects(photos: string[] | null | undefined, vehicleName: string) 
 export function buildVehicleSchema(vehicle: Vehicle) {
   const { baseUrl } = getContext()
   const url = `${baseUrl}/veiculo/${vehicle.slug}`
-  const name = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''}`
-  const fullName = `${name} ${vehicle.year_model}`
+  const nameParts = [vehicle.brand, vehicle.model, vehicle.version, vehicle.year_model]
+    .filter(p => p != null && String(p).trim() !== '')
+    .map(String)
+  const fullName = nameParts.join(' ') || 'Veículo premium'
   const isNew = vehicle.is_new || vehicle.mileage === 0
 
   return {
@@ -67,21 +69,21 @@ export function buildVehicleSchema(vehicle: Vehicle) {
     name: fullName,
     description: vehicle.description || vehicle.seo_description || `${fullName} disponível na Attra Veículos em Uberlândia/MG.`,
     url,
-    brand: { '@type': 'Brand', name: vehicle.brand },
-    manufacturer: { '@type': 'Organization', name: vehicle.brand },
-    model: vehicle.model,
+    ...(vehicle.brand ? { brand: { '@type': 'Brand', name: vehicle.brand } } : {}),
+    ...(vehicle.brand ? { manufacturer: { '@type': 'Organization', name: vehicle.brand } } : {}),
+    ...(vehicle.model ? { model: vehicle.model } : {}),
     vehicleModelDate: String(vehicle.year_model),
     productionDate: String(vehicle.year_manufacture),
-    color: vehicle.color,
-    bodyType: vehicle.body_type,
+    ...(vehicle.color ? { color: vehicle.color } : {}),
+    ...(vehicle.body_type ? { bodyType: vehicle.body_type } : {}),
     vehicleConfiguration: vehicle.version || undefined,
     mileageFromOdometer: {
       '@type': 'QuantitativeValue',
       value: vehicle.mileage,
       unitCode: 'KMT',
     },
-    fuelType: vehicle.fuel_type,
-    vehicleTransmission: vehicle.transmission,
+    ...(vehicle.fuel_type ? { fuelType: vehicle.fuel_type } : {}),
+    ...(vehicle.transmission ? { vehicleTransmission: vehicle.transmission } : {}),
     itemCondition: isNew ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
     ...(vehicle.engine
       ? {
@@ -122,7 +124,10 @@ export function buildVehicleSchema(vehicle: Vehicle) {
 export function buildVehicleProductSchema(vehicle: Vehicle) {
   const { baseUrl } = getContext()
   const url = `${baseUrl}/veiculo/${vehicle.slug}`
-  const name = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year_model}`
+  const nameParts = [vehicle.brand, vehicle.model, vehicle.version, vehicle.year_model]
+    .filter(p => p != null && String(p).trim() !== '')
+    .map(String)
+  const name = nameParts.join(' ') || 'Veículo premium'
   const isNew = vehicle.is_new || vehicle.mileage === 0
 
   return {
@@ -134,9 +139,9 @@ export function buildVehicleProductSchema(vehicle: Vehicle) {
     sku: vehicle.id,
     mpn: vehicle.id,
     image: vehicle.photos?.slice(0, 12) ?? [],
-    brand: { '@type': 'Brand', name: vehicle.brand },
-    category: vehicle.category,
-    color: vehicle.color,
+    ...(vehicle.brand ? { brand: { '@type': 'Brand', name: vehicle.brand } } : {}),
+    ...(vehicle.category ? { category: vehicle.category } : {}),
+    ...(vehicle.color ? { color: vehicle.color } : {}),
     itemCondition: isNew ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
     offers: {
       '@type': 'Offer',
@@ -151,12 +156,21 @@ export function buildVehicleProductSchema(vehicle: Vehicle) {
 
 export function buildVehicleBreadcrumbSchema(vehicle: Vehicle) {
   const { baseUrl } = getContext()
-  const items = [
+  const items: { name: string; url: string }[] = [
     { name: 'Início', url: baseUrl },
     { name: 'Veículos', url: `${baseUrl}/veiculos` },
-    { name: vehicle.brand, url: `${baseUrl}/veiculos?marca=${vehicle.brand.toLowerCase()}` },
-    { name: `${vehicle.model} ${vehicle.year_model}`, url: `${baseUrl}/veiculo/${vehicle.slug}` },
   ]
+  if (vehicle.brand) {
+    items.push({
+      name: vehicle.brand,
+      url: `${baseUrl}/veiculos?marca=${vehicle.brand.toLowerCase()}`,
+    })
+  }
+  const lastName = [vehicle.model, vehicle.year_model]
+    .filter(p => p != null && String(p).trim() !== '')
+    .map(String)
+    .join(' ') || 'Detalhes'
+  items.push({ name: lastName, url: `${baseUrl}/veiculo/${vehicle.slug}` })
 
   return {
     '@context': 'https://schema.org',
