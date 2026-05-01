@@ -496,7 +496,7 @@ const DATASHEETS: VehicleDatasheet[] = [
 	{
 		brand: 'Mercedes-Benz',
 		model: 'AMG GT',
-		matchKeywords: ['amg gt', 'amg-gt'],
+		matchKeywords: ['amg gt'],
 		engine: 'V8 biturbo handcrafted',
 		displacement: '3.982 cc',
 		power: '585 cv a 6.100 rpm',
