@@ -525,7 +525,7 @@ const DATASHEETS: VehicleDatasheet[] = [
 	{
 		brand: 'Bentley',
 		model: 'Continental GT',
-		matchKeywords: ['continental', 'gt'],
+		matchKeywords: ['continental gt'],
 		engine: 'W12 biturbo',
 		displacement: '5.950 cc',
 		power: '659 cv a 5.000–6.000 rpm',
