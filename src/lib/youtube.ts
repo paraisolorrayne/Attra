@@ -210,6 +210,81 @@ export async function fetchAttraYouTubeFeed(): Promise<YouTubeFeed> {
   }
 }
 
+/**
+ * Search the Attra YouTube channel for videos related to a specific vehicle.
+ * Uses the YouTube search endpoint scoped to the channel. Returns up to
+ * `maxResults` matching videos sorted by relevance.
+ *
+ * Fail-open: returns an empty array on any error so the page still renders.
+ */
+export async function searchVehicleVideos(
+  brand: string,
+  model: string,
+  maxResults = 6,
+): Promise<YouTubeVideo[]> {
+  const apiKey = process.env.YOUTUBE_API_KEY
+  if (!apiKey) return []
+
+  const query = [brand, model].filter(Boolean).join(' ').trim()
+  if (!query) return []
+
+  try {
+    const channelId = await resolveChannelId(apiKey)
+
+    const searchData = await ytFetch<{
+      items?: Array<{
+        id?: { videoId?: string }
+        snippet?: {
+          title?: string
+          description?: string
+          publishedAt?: string
+          thumbnails?: Record<string, { url?: string; width?: number; height?: number }>
+        }
+      }>
+    }>('search', {
+      part: 'snippet',
+      channelId,
+      q: query,
+      type: 'video',
+      order: 'relevance',
+      maxResults: String(maxResults),
+    }, apiKey)
+
+    const videoIds = (searchData.items ?? [])
+      .map(it => it.id?.videoId)
+      .filter((x): x is string => Boolean(x))
+
+    if (videoIds.length === 0) return []
+
+    const durations = await listVideoDurations(videoIds, apiKey)
+
+    return (searchData.items ?? [])
+      .map(it => {
+        const id = it.id?.videoId
+        if (!id) return null
+        const seconds = durations.get(id) ?? 0
+        const isShort = seconds > 0 && seconds <= SHORT_DURATION_LIMIT_SECONDS
+        return {
+          id,
+          title: it.snippet?.title ?? '',
+          description: it.snippet?.description ?? '',
+          publishedAt: it.snippet?.publishedAt ?? '',
+          thumbnail: pickBestThumbnail(it.snippet?.thumbnails),
+          durationSeconds: seconds,
+          isShort,
+          url: isShort
+            ? `https://www.youtube.com/shorts/${id}`
+            : `https://www.youtube.com/watch?v=${id}`,
+        } satisfies YouTubeVideo
+      })
+      .filter((v): v is YouTubeVideo => v !== null)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[youtube] vehicle search failed:', msg)
+    return []
+  }
+}
+
 export function formatDuration(seconds: number): string {
   if (seconds <= 0) return '–'
   const h = Math.floor(seconds / 3600)
