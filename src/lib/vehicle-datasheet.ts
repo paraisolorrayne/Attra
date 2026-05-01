@@ -670,12 +670,14 @@ export function findVehicleDatasheet(
 	let bestScore = 0
 
 	for (const ds of DATASHEETS) {
-		let score = 0
+		let keywordScore = 0
 		for (const kw of ds.matchKeywords) {
 			if (haystack.includes(normalizeForMatch(kw))) {
-				score += kw.length
+				keywordScore += kw.length
 			}
 		}
+		if (keywordScore === 0) continue
+		let score = keywordScore
 		if (normalizeForMatch(ds.brand) && haystack.includes(normalizeForMatch(ds.brand))) {
 			score += ds.brand.length * 2
 		}
