@@ -13,6 +13,7 @@ import {
   saveInventorySnapshot,
   InventorySnapshotSources,
 } from './inventory-snapshot'
+import { resolveBrand, nonEmpty, joinNonEmpty } from './vehicle-fallbacks'
 
 // AutoConf API Types
 export interface AutoConfVehicle {
@@ -374,38 +375,52 @@ export function mapAutoConfToVehicle(autoconfVehicle: AutoConfVehicle): Vehicle 
   const price = parseFloat(autoconfVehicle.valorvenda)
   const category = determineCategoryFromVehicle(autoconfVehicle, price)
 
+  // Resolve brand: try the field, infer from model, else empty (UI hides label)
+  const resolvedBrand = resolveBrand(autoconfVehicle.marca_nome, autoconfVehicle.modelopai_nome)
+  const resolvedModel = nonEmpty(autoconfVehicle.modelopai_nome)
+
   // Determine if vehicle is imported based on brand
   const importedBrands = ['Ferrari', 'Lamborghini', 'McLaren', 'Bentley', 'Rolls-Royce', 'Aston Martin', 'Maserati']
-  const brandName = (autoconfVehicle.marca_nome || '').toLowerCase()
+  const brandName = resolvedBrand.toLowerCase()
   const isImported = importedBrands.some(b => brandName.includes(b.toLowerCase()))
+
+  // Log when AutoConf returned an unrecoverably empty brand — actionable signal
+  // for the inventory team to fix the upstream record.
+  if (!resolvedBrand && autoconfVehicle.id) {
+    console.warn(`[autoconf] vehicle ${autoconfVehicle.id} has no resolvable brand (model: ${autoconfVehicle.modelopai_nome ?? 'null'})`)
+  }
 
   // Safely handle potentially missing fields from /ads-home endpoint
   const km = autoconfVehicle.km ?? 0
   const kmFormatted = km.toLocaleString('pt-BR')
 
+  // Build SEO strings only from fields we actually have
+  const namePart = joinNonEmpty([resolvedBrand, resolvedModel, autoconfVehicle.anomodelo])
+  const seoBase = namePart || 'Veículo premium'
+
   return {
     id: String(autoconfVehicle.id),
     slug,
-    brand: autoconfVehicle.marca_nome || 'Desconhecido',
-    model: autoconfVehicle.modelopai_nome || 'Modelo',
+    brand: resolvedBrand,
+    model: resolvedModel,
     version: cleanVersionString(autoconfVehicle.modelo_nome, autoconfVehicle.modelopai_nome)
       || autoconfVehicle.versao_descricao || null,
     year_manufacture: parseInt(autoconfVehicle.anofabricacao) || 0,
     year_model: parseInt(autoconfVehicle.anomodelo) || 0,
-    color: autoconfVehicle.cor_nome || 'Não informado',
+    color: nonEmpty(autoconfVehicle.cor_nome),
     mileage: km,
-    fuel_type: autoconfVehicle.combustivel_nome || 'Não informado',
-    transmission: autoconfVehicle.cambio_nome || 'Não informado',
+    fuel_type: nonEmpty(autoconfVehicle.combustivel_nome),
+    transmission: nonEmpty(autoconfVehicle.cambio_nome),
     price,
     category,
-    body_type: autoconfVehicle.carroceria_nome || 'Outros',
+    body_type: nonEmpty(autoconfVehicle.carroceria_nome),
     location_id: '1', // Default location
     photos: autoconfVehicle.fotos?.map(f => f.url) || (autoconfVehicle.foto ? [autoconfVehicle.foto] : []),
     videos: null,
     options: uniqueOptions.length > 0 ? uniqueOptions : null,
     description: generateDescription(autoconfVehicle),
-    seo_title: `${autoconfVehicle.marca_nome || 'Veículo'} ${autoconfVehicle.modelopai_nome || ''} ${autoconfVehicle.anomodelo || ''} | Attra Veículos`,
-    seo_description: `${autoconfVehicle.marca_nome || 'Veículo'} ${autoconfVehicle.modelopai_nome || ''} ${autoconfVehicle.anomodelo || ''} com ${kmFormatted} km. Compre com a Attra Veículos.`,
+    seo_title: `${seoBase} | Attra Veículos`,
+    seo_description: `${seoBase}${km > 0 ? ` com ${kmFormatted} km` : ''}. Compre com a Attra Veículos.`,
     status: 'available',
     is_featured: (autoconfVehicle.prioridade_veiculo ?? 0) > 0,
     is_new: autoconfVehicle.zero_km === 1,

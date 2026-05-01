@@ -18,12 +18,13 @@ import { getVehicleBySlug } from '@/lib/autoconf-api'
 import { getVehicleSoundByVehicleId } from '@/lib/vehicle-sounds-storage'
 import { formatPrice, formatMileage } from '@/lib/utils'
 import { buildVehiclePageSchemas } from '@/lib/vehicle-schema'
+import { joinNonEmpty } from '@/lib/vehicle-fallbacks'
 import { SITE_URL } from '@/lib/constants'
 import { Vehicle } from '@/types'
 
 /** Generate dynamic FAQ items based on vehicle data for SEO */
 function generateVehicleFAQs(vehicle: Vehicle) {
-	const name = `${vehicle.brand} ${vehicle.model}`
+	const name = joinNonEmpty([vehicle.brand, vehicle.model]) || 'veículo'
 	const faqs: { question: string; answer: string }[] = []
 
 	faqs.push({
@@ -36,10 +37,19 @@ function generateVehicleFAQs(vehicle: Vehicle) {
 		answer: `${vehicle.is_new || vehicle.mileage === 0 ? `Sim, o ${name} 0 km possui garantia de fábrica integral.` : `Sim, o ${name} seminovo passou pela inspeção rigorosa da Attra e conta com garantia.`} Todos os veículos da Attra passam por curadoria técnica antes de serem disponibilizados para venda.`,
 	})
 
-	faqs.push({
-		question: `Quais as especificações do ${name} ${vehicle.year_model}?`,
-		answer: `O ${name} ${vehicle.year_model} possui motor ${vehicle.fuel_type}, câmbio ${vehicle.transmission}, cor ${vehicle.color}${vehicle.horsepower ? `, ${vehicle.horsepower} cv de potência` : ''}${vehicle.torque ? ` e ${vehicle.torque} Nm de torque` : ''}. ${vehicle.version ? `Versão: ${vehicle.version}.` : ''}`,
-	})
+	const specsParts = joinNonEmpty([
+		vehicle.fuel_type ? `motor ${vehicle.fuel_type}` : '',
+		vehicle.transmission ? `câmbio ${vehicle.transmission}` : '',
+		vehicle.color ? `cor ${vehicle.color}` : '',
+		vehicle.horsepower ? `${vehicle.horsepower} cv de potência` : '',
+		vehicle.torque ? `${vehicle.torque} Nm de torque` : '',
+	], ', ')
+	if (specsParts) {
+		faqs.push({
+			question: `Quais as especificações do ${name} ${vehicle.year_model}?`,
+			answer: `O ${name} ${vehicle.year_model} possui ${specsParts}.${vehicle.version ? ` Versão: ${vehicle.version}.` : ''}`,
+		})
+	}
 
 	faqs.push({
 		question: `A Attra entrega o ${name} em todo o Brasil?`,
@@ -63,7 +73,8 @@ interface VehiclePageProps {
 /** Build a self-contained one-line summary used both as meta description and
  * as the LLMO lede (first paragraph). LLMs extract this verbatim. */
 function buildVehicleSummary(vehicle: Vehicle): string {
-	const name = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year_model}`
+	const name = joinNonEmpty([vehicle.brand, vehicle.model, vehicle.version, vehicle.year_model])
+		|| 'Veículo premium'
 	const condition = vehicle.is_new || vehicle.mileage === 0
 		? '0 km'
 		: `${vehicle.mileage.toLocaleString('pt-BR')} km`
@@ -88,7 +99,8 @@ export async function generateMetadata({ params }: VehiclePageProps): Promise<Me
 		}
 	}
 
-	const fullName = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year_model}`
+	const fullName = joinNonEmpty([vehicle.brand, vehicle.model, vehicle.version, vehicle.year_model])
+		|| 'Veículo premium'
 	const summary = buildVehicleSummary(vehicle)
 	const url = `${baseUrl}/veiculo/${vehicle.slug}`
 	const ogImages = (vehicle.photos ?? []).slice(0, 4).map(u => ({ url: u, alt: fullName }))
@@ -98,14 +110,14 @@ export async function generateMetadata({ params }: VehiclePageProps): Promise<Me
 		description: vehicle.seo_description || summary,
 		keywords: [
 			vehicle.brand,
-			`${vehicle.brand} ${vehicle.model}`,
+			joinNonEmpty([vehicle.brand, vehicle.model]),
 			fullName,
 			vehicle.color,
 			vehicle.body_type,
 			vehicle.is_new ? 'zero quilômetro' : 'seminovo premium',
 			'Attra Veículos',
 			'Uberlândia',
-		].filter(Boolean) as string[],
+		].filter(k => typeof k === 'string' && k.trim().length > 0) as string[],
 		alternates: { canonical: url },
 		openGraph: {
 			type: 'website',
@@ -155,11 +167,19 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 	// Fetch engine sound from admin panel database (if configured)
 	const vehicleSound = await getVehicleSoundByVehicleId(vehicle.id)
 
-	const breadcrumbItems = [
+	// Breadcrumb: skip the brand level entirely when brand is empty (rare —
+	// happens when AutoConf returns null marca_nome and we couldn't infer).
+	const breadcrumbItems: { label: string; href?: string }[] = [
 		{ label: 'Veículos', href: '/veiculos' },
-		{ label: vehicle.brand, href: `/veiculos?marca=${vehicle.brand.toLowerCase()}` },
-		{ label: `${vehicle.model} ${vehicle.year_model}` },
 	]
+	if (vehicle.brand) {
+		breadcrumbItems.push({
+			label: vehicle.brand,
+			href: `/veiculos?marca=${vehicle.brand.toLowerCase()}`,
+		})
+	}
+	const lastLabel = joinNonEmpty([vehicle.model, vehicle.year_model]) || 'Detalhes'
+	breadcrumbItems.push({ label: lastLabel })
 
 	const vehicleFaqs = generateVehicleFAQs(vehicle)
 	const schemas = buildVehiclePageSchemas(vehicle, vehicleFaqs)
@@ -190,7 +210,7 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 			{vehicle.photos && vehicle.photos.length > 0 ? (
 				<CinematicGallery
 					photos={vehicle.photos}
-					vehicleName={`${vehicle.brand} ${vehicle.model}`}
+					vehicleName={joinNonEmpty([vehicle.brand, vehicle.model]) || 'Veículo'}
 				/>
 			) : (
 				<div className="h-[40vh] bg-background-soft flex items-center justify-center">
@@ -209,11 +229,13 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 					<div className="lg:col-span-2 space-y-8">
 						{/* Title and price - mobile visible */}
 						<div className="lg:hidden">
-							<p className="text-primary text-sm font-medium uppercase tracking-wider mb-1">
-								{vehicle.brand}
-							</p>
+							{vehicle.brand && (
+								<p className="text-primary text-sm font-medium uppercase tracking-wider mb-1">
+									{vehicle.brand}
+								</p>
+							)}
 							<h1 className="text-3xl font-bold text-foreground mb-2">
-								{vehicle.model}
+								{vehicle.model || vehicle.brand || 'Veículo premium'}
 							</h1>
 							<p className="text-foreground-secondary mb-4">
 								{vehicle.version && `${vehicle.version} • `}
@@ -233,7 +255,7 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 						{vehicleSound && (
 							<EngineAudioPlayer
 								audioUrl={vehicleSound.sound_file_url}
-								vehicleName={`${vehicle.brand} ${vehicle.model}`}
+								vehicleName={joinNonEmpty([vehicle.brand, vehicle.model]) || 'Veículo'}
 								isElectric={vehicleSound.is_electric}
 							/>
 						)}
@@ -314,8 +336,8 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 			{/* Vehicle FAQ — visible accordion. JSON-LD FAQ schema is rendered above. */}
 			<FAQSection
 				faqs={vehicleFaqs}
-				title={`Perguntas sobre o ${vehicle.brand} ${vehicle.model}`}
-				subtitle={`Dúvidas frequentes sobre este ${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`}
+				title={`Perguntas sobre o ${joinNonEmpty([vehicle.brand, vehicle.model]) || 'veículo'}`}
+				subtitle={`Dúvidas frequentes sobre este ${joinNonEmpty([vehicle.brand, vehicle.model, vehicle.year_model]) || 'veículo'}`}
 				className="mt-0"
 			/>
 		</main>
