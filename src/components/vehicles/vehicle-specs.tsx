@@ -1,4 +1,4 @@
-import { Car, Fuel, Gauge, Settings, Calendar, Palette, MapPin, Zap } from 'lucide-react'
+import { Car, Fuel, Gauge, Settings, Calendar, Palette, Zap } from 'lucide-react'
 import { Vehicle } from '@/types'
 
 interface VehicleSpecsProps {
@@ -52,21 +52,21 @@ export function VehicleSpecs({ vehicle }: VehicleSpecsProps) {
   }
 
   return (
-    <div className="bg-background-card border border-border rounded-xl p-6">
+    <section className="bg-background-card border border-border rounded-xl p-6">
       <h2 className="text-xl font-semibold text-foreground mb-6">Ficha Técnica</h2>
-      
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+      <dl className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {specs.map((spec) => (
           <div key={spec.key} className="flex items-start gap-3 p-3 bg-background rounded-lg">
-            <spec.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <spec.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div>
-              <p className="text-sm text-foreground-secondary">{spec.label}</p>
-              <p className="font-medium text-foreground">{getValue(spec.key)}</p>
+              <dt className="text-sm text-foreground-secondary">{spec.label}</dt>
+              <dd className="font-medium text-foreground">{getValue(spec.key)}</dd>
             </div>
           </div>
         ))}
-      </div>
-    </div>
+      </dl>
+    </section>
   )
 }
 

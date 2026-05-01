@@ -14,10 +14,11 @@ import { AIVehicleDescription, AIVehicleDescriptionSkeleton } from '@/components
 import { RelatedVehiclesSkeleton } from '@/components/ui/skeleton'
 import { VehicleContextSetter } from '@/components/vehicles/vehicle-context-setter'
 import { FAQSection } from '@/components/home'
-import { FAQSchema } from '@/components/seo'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
 import { getVehicleSoundByVehicleId } from '@/lib/vehicle-sounds-storage'
 import { formatPrice, formatMileage } from '@/lib/utils'
+import { buildVehiclePageSchemas } from '@/lib/vehicle-schema'
+import { SITE_URL } from '@/lib/constants'
 import { Vehicle } from '@/types'
 
 /** Generate dynamic FAQ items based on vehicle data for SEO */
@@ -59,9 +60,26 @@ interface VehiclePageProps {
 	params: Promise<{ slug: string }>
 }
 
+/** Build a self-contained one-line summary used both as meta description and
+ * as the LLMO lede (first paragraph). LLMs extract this verbatim. */
+function buildVehicleSummary(vehicle: Vehicle): string {
+	const name = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year_model}`
+	const condition = vehicle.is_new || vehicle.mileage === 0
+		? '0 km'
+		: `${vehicle.mileage.toLocaleString('pt-BR')} km`
+	const colorPart = vehicle.color ? ` na cor ${vehicle.color}` : ''
+	const enginePart = vehicle.engine
+		? ` com motor ${vehicle.engine}`
+		: vehicle.horsepower
+			? ` com ${vehicle.horsepower} cv de potência`
+			: ''
+	return `${name}${colorPart}${enginePart}, ${condition}, disponível na Attra Veículos em Uberlândia/MG. Curadoria, procedência verificada e entrega nacional.`
+}
+
 export async function generateMetadata({ params }: VehiclePageProps): Promise<Metadata> {
 	const { slug } = await params
 	const vehicle = await getVehicleBySlug(slug)
+	const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? SITE_URL
 
 	if (!vehicle) {
 		return {
@@ -70,13 +88,46 @@ export async function generateMetadata({ params }: VehiclePageProps): Promise<Me
 		}
 	}
 
+	const fullName = `${vehicle.brand} ${vehicle.model}${vehicle.version ? ' ' + vehicle.version : ''} ${vehicle.year_model}`
+	const summary = buildVehicleSummary(vehicle)
+	const url = `${baseUrl}/veiculo/${vehicle.slug}`
+	const ogImages = (vehicle.photos ?? []).slice(0, 4).map(u => ({ url: u, alt: fullName }))
+
 	return {
-		title: vehicle.seo_title || `${vehicle.brand} ${vehicle.model} ${vehicle.year_model} | Attra Veículos`,
-		description: vehicle.seo_description || `${vehicle.brand} ${vehicle.model} ${vehicle.year_model} com ${vehicle.mileage.toLocaleString('pt-BR')} km. ${formatPrice(vehicle.price)}. Compre com a Attra Veículos em Uberlândia.`,
+		title: vehicle.seo_title || `${fullName} | Attra Veículos`,
+		description: vehicle.seo_description || summary,
+		keywords: [
+			vehicle.brand,
+			`${vehicle.brand} ${vehicle.model}`,
+			fullName,
+			vehicle.color,
+			vehicle.body_type,
+			vehicle.is_new ? 'zero quilômetro' : 'seminovo premium',
+			'Attra Veículos',
+			'Uberlândia',
+		].filter(Boolean) as string[],
+		alternates: { canonical: url },
 		openGraph: {
-			title: `${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`,
-			description: vehicle.description || `${vehicle.brand} ${vehicle.model} à venda na Attra Veículos`,
-			images: vehicle.photos?.[0] ? [{ url: vehicle.photos[0] }] : [],
+			type: 'website',
+			locale: 'pt_BR',
+			url,
+			siteName: 'Attra Veículos',
+			title: fullName,
+			description: vehicle.description || summary,
+			images: ogImages,
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title: fullName,
+			description: summary,
+			images: ogImages.map(img => img.url),
+		},
+		other: {
+			'product:price:amount': String(vehicle.price),
+			'product:price:currency': 'BRL',
+			'product:availability': vehicle.status === 'available' ? 'in stock' : 'out of stock',
+			'product:condition': vehicle.is_new || vehicle.mileage === 0 ? 'new' : 'used',
+			'product:brand': vehicle.brand,
 		},
 	}
 }
@@ -103,8 +154,20 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 		{ label: `${vehicle.model} ${vehicle.year_model}` },
 	]
 
+	const vehicleFaqs = generateVehicleFAQs(vehicle)
+	const schemas = buildVehiclePageSchemas(vehicle, vehicleFaqs)
+	const summary = buildVehicleSummary(vehicle)
+
 	return (
 		<main className="min-h-screen bg-background">
+			{schemas.map((schema, i) => (
+				<script
+					key={i}
+					type="application/ld+json"
+					dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+				/>
+			))}
+
 			{/* Set vehicle data in global context for WhatsApp button and analytics tracking */}
 			<VehicleContextSetter
 				vehicleId={vehicle.id}
@@ -153,6 +216,11 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 								{formatPrice(vehicle.price)}
 							</p>
 						</div>
+
+						{/* LLMO summary — self-contained sentence that LLMs and snippets extract verbatim */}
+						<p className="text-base lg:text-lg text-foreground-secondary leading-relaxed border-l-4 border-primary/30 pl-4">
+							{summary}
+						</p>
 
 						{/* Engine Audio Player - shows if vehicle has sound configured in admin */}
 						{vehicleSound && (
@@ -236,21 +304,13 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 				/>
 			</Suspense>
 
-			{/* Vehicle FAQ — SEO structured data */}
-			{(() => {
-				const vehicleFaqs = generateVehicleFAQs(vehicle)
-				return (
-					<>
-						<FAQSection
-							faqs={vehicleFaqs}
-							title={`Perguntas sobre o ${vehicle.brand} ${vehicle.model}`}
-							subtitle={`Dúvidas frequentes sobre este ${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`}
-							className="mt-0"
-						/>
-						<FAQSchema faqs={vehicleFaqs} pageName={`${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`} />
-					</>
-				)
-			})()}
+			{/* Vehicle FAQ — visible accordion. JSON-LD FAQ schema is rendered above. */}
+			<FAQSection
+				faqs={vehicleFaqs}
+				title={`Perguntas sobre o ${vehicle.brand} ${vehicle.model}`}
+				subtitle={`Dúvidas frequentes sobre este ${vehicle.brand} ${vehicle.model} ${vehicle.year_model}`}
+				className="mt-0"
+			/>
 		</main>
 	)
 }

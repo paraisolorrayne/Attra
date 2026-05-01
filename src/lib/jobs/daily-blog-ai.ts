@@ -18,6 +18,8 @@
  */
 
 import { createAdminClient } from '@/lib/supabase/server'
+import { snapshotExternalImages } from '@/lib/supabase/storage'
+import type { CarReviewFields, CarReviewGalleryImage } from '@/types'
 import {
   fetchLatestInstagramPost,
   extractImageUrls,
@@ -35,6 +37,7 @@ import {
   type BlogAiStrategy,
   type GeneratedBlog,
 } from '@/lib/blog-ai/gemini-blog'
+import { addInternalLinks } from '@/lib/blog-ai/internal-linker'
 
 export interface BlogAiRunResult {
   success: boolean
@@ -121,12 +124,87 @@ async function logRun(params: {
   }
 }
 
+/** Discriminate the gallery union (`string[] | CarReviewGalleryImage[]`). */
+function isStringGallery(
+  gallery: CarReviewFields['gallery_images']
+): gallery is string[] {
+  return gallery.length === 0 || typeof gallery[0] === 'string'
+}
+
+/** Apply URL substitution to a gallery without losing its discriminated type. */
+function rewriteGallery(
+  gallery: CarReviewFields['gallery_images'],
+  apply: (url: string) => string
+): CarReviewFields['gallery_images'] {
+  if (isStringGallery(gallery)) {
+    return gallery.map(apply)
+  }
+  return gallery.map((g): CarReviewGalleryImage => ({ ...g, url: apply(g.url) }))
+}
+
+/**
+ * Snapshot all external image URLs in a post (featured, gallery, content) into
+ * Supabase Storage, so the post is immune to upstream link rot.
+ * Returns a copy of the post with snapshotted URLs.
+ */
+async function snapshotPostImages(post: GeneratedBlog['post']): Promise<GeneratedBlog['post']> {
+  const urls: string[] = []
+  if (post.featured_image) urls.push(post.featured_image)
+
+  const gallery = post.car_review?.gallery_images
+  if (gallery) {
+    if (isStringGallery(gallery)) {
+      for (const u of gallery) if (u) urls.push(u)
+    } else {
+      for (const g of gallery) if (g.url) urls.push(g.url)
+    }
+  }
+
+  const contentImgUrls: string[] = []
+  if (post.content) {
+    const re = /<img[^>]*src=["'](https?:\/\/[^"']+)["']/g
+    let m: RegExpExecArray | null
+    while ((m = re.exec(post.content)) !== null) {
+      contentImgUrls.push(m[1])
+      urls.push(m[1])
+    }
+  }
+
+  if (urls.length === 0) return post
+
+  const map = await snapshotExternalImages(urls)
+  const apply = (url: string) => map[url] ?? url
+
+  let nextContent = post.content
+  for (const u of contentImgUrls) {
+    if (map[u] && map[u] !== u) {
+      nextContent = nextContent.split(u).join(map[u])
+    }
+  }
+
+  return {
+    ...post,
+    featured_image: apply(post.featured_image),
+    content: nextContent,
+    car_review: post.car_review
+      ? {
+          ...post.car_review,
+          gallery_images: rewriteGallery(post.car_review.gallery_images, apply),
+        }
+      : post.car_review,
+  }
+}
+
 async function persistPost(generated: GeneratedBlog): Promise<{
   id: string
   slug: string
 }> {
   const supabase = createAdminClient()
-  const { post } = generated
+  const linked = await addInternalLinks(generated.post)
+  if (linked.linksAdded > 0) {
+    console.log(`[DailyBlogAI] added ${linked.linksAdded} internal links`)
+  }
+  const post = await snapshotPostImages(linked.post)
 
   const { data, error } = await supabase
     .from('dual_blog_posts')
