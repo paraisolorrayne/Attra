@@ -1,6 +1,7 @@
 import { getBlogPosts } from '@/lib/blog-api'
 import { SITE_URL } from '@/lib/constants'
 import { ICONIC_CARS } from '@/lib/iconic-cars'
+import { SEO_BRANDS } from '@/lib/seo-brands'
 
 export const revalidate = 3600
 
@@ -50,7 +51,12 @@ A Attra Veículos é referência nacional em veículos premium e superesportivos
 - [Compramos seu carro](${BASE}/compramos-seu-carro): avaliação para compra de veículos seminovos premium
 - [Solicitar veículo](${BASE}/solicitar-veiculo): pedido de busca personalizada de veículo específico
 - [Jornada Attra](${BASE}/jornada): processo completo de compra de supercarros — da curadoria à entrega nacional, acervo icônico de veículos históricos
+- [Comprar carros de luxo](${BASE}/comprar): hub nacional — todas as marcas premium disponíveis
 - [Contato](${BASE}/contato): canais de atendimento, endereço e WhatsApp
+
+## Comprar por marca
+
+${SEO_BRANDS.map(b => `- [Comprar ${b.displayName}](${BASE}/comprar/${b.slug}): ${b.tagline}. Modelos: ${b.models.map(m => m.name).join(', ')}`).join('\n')}
 
 ## Acervo icônico — Veículos marcantes já comercializados
 
