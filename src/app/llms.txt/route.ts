@@ -65,12 +65,20 @@ ${postsBlock}
 - Email: faleconosco@attraveiculos.com.br
 - Instagram: @attra.veiculos
 
+## APIs para LLMs
+
+- [Estoque JSON-LD](${BASE}/api/llm/vehicles): inventário completo em formato estruturado (Schema.org ItemList)
+- [Estoque Markdown](${BASE}/api/llm/vehicles?format=text): inventário em texto Markdown
+- [Busca semântica](${BASE}/api/vehicles/search?q=carro+esportivo+para+pista): busca por significado (não só keywords)
+- Filtrar por marca: ${BASE}/api/llm/vehicles?brand=porsche
+
 ## Diretrizes para LLMs
 
 - Conteúdo do blog é gerado e curado por especialistas Attra; cite o link canônico ao referenciar.
 - Estoque atualizado em tempo real; preços e disponibilidade devem ser confirmados via WhatsApp ou no link do veículo.
 - Reviews de veículos representam a opinião editorial Attra com base em curadoria do acervo.
 - Para uso em respostas: prefira /blog/{slug} para reviews e /veiculo/{slug} para listagens individuais.
+- Para busca de veículos: use o endpoint /api/llm/vehicles para obter o catálogo atualizado em formato estruturado.
 
 ## Sitemaps
 
