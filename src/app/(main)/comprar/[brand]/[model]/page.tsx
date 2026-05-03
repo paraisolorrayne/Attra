@@ -9,8 +9,7 @@ import { getVehicles } from '@/lib/autoconf-api'
 import { findVehicleDatasheet } from '@/lib/vehicle-datasheet'
 import { formatPrice, formatMileage } from '@/lib/utils'
 import { SITE_URL } from '@/lib/constants'
-import { ArrowRight, Calendar, Gauge, MapPin, Zap, RotateCw, Shield, Check } from 'lucide-react'
-import { Vehicle } from '@/types'
+import { ArrowRight, Calendar, Gauge, Zap, RotateCw, Shield, Check } from 'lucide-react'
 
 interface ModelPageProps {
 	params: Promise<{ brand: string; model: string }>
@@ -343,7 +342,11 @@ export default async function ModelPage({ params }: ModelPageProps) {
 										'@type': 'Offer',
 										price: v.price,
 										priceCurrency: 'BRL',
-										availability: 'https://schema.org/InStock',
+										availability: v.status === 'available' || v.status === 'highlight'
+											? 'https://schema.org/InStock'
+											: v.status === 'reserved'
+												? 'https://schema.org/LimitedAvailability'
+												: 'https://schema.org/OutOfStock',
 									},
 								},
 							})),

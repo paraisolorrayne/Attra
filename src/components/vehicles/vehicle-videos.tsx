@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Play, Youtube, Instagram } from 'lucide-react'
 import { YouTubeVideo, formatDuration } from '@/lib/youtube'
-import { joinNonEmpty } from '@/lib/vehicle-fallbacks'
+
 
 interface VehicleVideosProps {
 	videos: YouTubeVideo[]

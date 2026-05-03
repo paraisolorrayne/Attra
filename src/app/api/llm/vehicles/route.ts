@@ -105,7 +105,11 @@ export async function GET(request: NextRequest) {
 							'@type': 'Offer',
 							price: v.price,
 							priceCurrency: 'BRL',
-							availability: 'https://schema.org/InStock',
+							availability: v.status === 'available' || v.status === 'highlight'
+								? 'https://schema.org/InStock'
+								: v.status === 'reserved'
+									? 'https://schema.org/LimitedAvailability'
+									: 'https://schema.org/OutOfStock',
 						},
 					},
 				}
