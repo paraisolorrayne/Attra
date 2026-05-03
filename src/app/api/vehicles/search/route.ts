@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(request: NextRequest) {
 	const query = request.nextUrl.searchParams.get('q')
-	const limit = Math.min(Number(request.nextUrl.searchParams.get('limit') ?? 10), 50)
+	const limit = Math.min(Number(request.nextUrl.searchParams.get('limit')) || 10, 50)
 
 	if (!query || query.trim().length < 2) {
 		return NextResponse.json({ error: 'Query parameter "q" is required (min 2 chars)' }, { status: 400 })
