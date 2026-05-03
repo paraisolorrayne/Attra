@@ -13,11 +13,11 @@ CREATE TABLE IF NOT EXISTS vehicle_embeddings (
     updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Index for fast nearest-neighbour queries (IVFFlat — good up to ~100k rows)
-CREATE INDEX IF NOT EXISTS idx_vehicle_embeddings_ivfflat
+-- Index for fast nearest-neighbour queries (HNSW — no training data required,
+-- works correctly from the first insert unlike IVFFlat)
+CREATE INDEX IF NOT EXISTS idx_vehicle_embeddings_hnsw
     ON vehicle_embeddings
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 50);
+    USING hnsw (embedding vector_cosine_ops);
 
 -- Index by vehicle_id for upsert/lookup
 CREATE INDEX IF NOT EXISTS idx_vehicle_embeddings_vehicle_id
