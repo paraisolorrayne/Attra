@@ -7,12 +7,13 @@
  *   3. Reader    — fetch a URL as clean Markdown (for LLMO monitoring)
  */
 
-const JINA_API_KEY = process.env.JINA_API_KEY
+function getJinaApiKey() { return process.env.JINA_API_KEY }
 
 function headers(): Record<string, string> {
+	const key = getJinaApiKey()
 	return {
 		'Content-Type': 'application/json',
-		...(JINA_API_KEY ? { Authorization: `Bearer ${JINA_API_KEY}` } : {}),
+		...(key ? { Authorization: `Bearer ${key}` } : {}),
 	}
 }
 
@@ -136,7 +137,7 @@ export async function readUrl(url: string): Promise<ReaderResponse> {
 	const res = await fetch(`https://r.jina.ai/${url}`, {
 		headers: {
 			Accept: 'application/json',
-			...(JINA_API_KEY ? { Authorization: `Bearer ${JINA_API_KEY}` } : {}),
+			...(getJinaApiKey() ? { Authorization: `Bearer ${getJinaApiKey()}` } : {}),
 		},
 	})
 	if (!res.ok) throw new Error(`Jina Reader error ${res.status}: ${await res.text()}`)
@@ -151,7 +152,7 @@ export async function searchWeb(query: string): Promise<SearchResponse> {
 	const res = await fetch(`https://s.jina.ai/${encodeURIComponent(query)}`, {
 		headers: {
 			Accept: 'application/json',
-			...(JINA_API_KEY ? { Authorization: `Bearer ${JINA_API_KEY}` } : {}),
+			...(getJinaApiKey() ? { Authorization: `Bearer ${getJinaApiKey()}` } : {}),
 		},
 	})
 	if (!res.ok) throw new Error(`Jina Search error ${res.status}: ${await res.text()}`)

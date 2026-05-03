@@ -20,7 +20,7 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? SITE_URL
  */
 export async function GET(request: NextRequest) {
 	const brand = request.nextUrl.searchParams.get('brand')
-	const limit = Math.min(Number(request.nextUrl.searchParams.get('limit') ?? 50), 200)
+	const limit = Math.min(Number(request.nextUrl.searchParams.get('limit') ?? 50) || 50, 200)
 	const format = request.nextUrl.searchParams.get('format') ?? 'json'
 
 	try {
