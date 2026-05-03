@@ -7,9 +7,17 @@ export const dynamic = 'force-dynamic'
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX = 10
 const ipRequestMap = new Map<string, { count: number; resetAt: number }>()
+let cleanupCounter = 0
 
 function checkRateLimit(ip: string): boolean {
 	const now = Date.now()
+
+	if (++cleanupCounter % 100 === 0) {
+		for (const [key, val] of ipRequestMap) {
+			if (now > val.resetAt) ipRequestMap.delete(key)
+		}
+	}
+
 	const entry = ipRequestMap.get(ip)
 	if (!entry || now > entry.resetAt) {
 		ipRequestMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
