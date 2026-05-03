@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { Play, Youtube, Instagram } from 'lucide-react'
-import { YouTubeVideo, formatDuration, searchVehicleVideos } from '@/lib/youtube'
+import { YouTubeVideo, formatDuration } from '@/lib/youtube'
 import { joinNonEmpty } from '@/lib/vehicle-fallbacks'
 
 interface VehicleVideosProps {
@@ -125,17 +125,6 @@ export function VehicleVideos({ videos, vehicleName, brand, model }: VehicleVide
 			</div>
 		</section>
 	)
-}
-
-interface VehicleVideosServerProps {
-	brand: string
-	model: string
-}
-
-export async function VehicleVideosServer({ brand, model }: VehicleVideosServerProps) {
-	const videos = await searchVehicleVideos(brand, model)
-	const vehicleName = joinNonEmpty([brand, model]) || 'Veículo'
-	return <VehicleVideos videos={videos} vehicleName={vehicleName} brand={brand} model={model} />
 }
 
 export function VehicleVideosSkeleton() {

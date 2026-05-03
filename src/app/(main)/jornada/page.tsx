@@ -493,6 +493,7 @@ export default function JornadaPage() {
             ))}
           </div>
 
+          {/* Editorial claim — based on cumulative inventory since 2009 */}
           <div className="text-center mt-12">
             <p className="text-foreground-secondary text-sm">
               Mais de <strong className="text-foreground">500 supercarros</strong> já passaram pela Attra desde 2009.

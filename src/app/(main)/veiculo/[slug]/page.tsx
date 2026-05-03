@@ -13,7 +13,6 @@ import { EngineAudioPlayer } from '@/components/vehicles/engine-audio-player'
 import { AIVehicleDescription, AIVehicleDescriptionSkeleton } from '@/components/vehicles/ai-vehicle-description'
 import { RelatedVehiclesSkeleton } from '@/components/ui/skeleton'
 import { VehicleContextSetter } from '@/components/vehicles/vehicle-context-setter'
-import { VehicleVideosServer, VehicleVideosSkeleton } from '@/components/vehicles/vehicle-videos'
 import { VehicleDatasheetSection } from '@/components/vehicles/vehicle-datasheet'
 import { FAQSection } from '@/components/home'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
@@ -73,8 +72,8 @@ interface VehiclePageProps {
 	params: Promise<{ slug: string }>
 }
 
-/** Build a self-contained one-line summary used as meta description,
- * Open Graph / Twitter Card text, and JSON-LD description. */
+/** Build a self-contained one-line summary used as meta description
+ * and Open Graph / Twitter Card text via generateMetadata(). */
 function buildVehicleSummary(vehicle: Vehicle): string {
 	const name = joinNonEmpty([vehicle.brand, vehicle.model, vehicle.version, vehicle.year_model])
 		|| 'Veículo premium'
@@ -167,12 +166,9 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 		permanentRedirect(`/veiculo/${vehicle.slug}`)
 	}
 
-	// Fetch engine sound and technical datasheet in parallel
-	// (YouTube videos are fetched inside VehicleVideosServer for Suspense streaming)
-	const [vehicleSound, datasheet] = await Promise.all([
-		getVehicleSoundByVehicleId(vehicle.id),
-		Promise.resolve(findVehicleDatasheet(vehicle.brand, vehicle.model, vehicle.version)),
-	])
+	// Fetch engine sound; datasheet lookup is synchronous
+	const vehicleSound = await getVehicleSoundByVehicleId(vehicle.id)
+	const datasheet = findVehicleDatasheet(vehicle.brand, vehicle.model, vehicle.version)
 
 	// Breadcrumb: skip the brand level entirely when brand is empty (rare —
 	// happens when AutoConf returns null marca_nome and we couldn't infer).
@@ -196,7 +192,7 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 			question: `Qual o motor do ${dsName}?`,
 			answer: `O ${dsName} é equipado com motor ${datasheet.engine} de ${datasheet.displacement}, que entrega ${datasheet.power} e ${datasheet.torque}. A transmissão é ${datasheet.transmission} com ${datasheet.drivetrain.toLowerCase()}.`,
 		})
-		const accelValue = datasheet.acceleration.replace(/\s*\(0.100\s*km\/h\)/, '')
+		const accelValue = datasheet.acceleration.replace(/\s*\(0\s*[\u2013-]\s*100\s*km\/h\)/, '')
 		vehicleFaqs.push({
 			question: `Qual a aceleração e velocidade máxima do ${dsName}?`,
 			answer: `O ${dsName} acelera de 0 a 100 km/h em ${accelValue} e atinge velocidade máxima de ${datasheet.topSpeed}. Peso em ordem de marcha: ${datasheet.weight}.`,
@@ -350,15 +346,6 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 				</div>
 			</Container>
 
-			{/* YouTube Videos from Attra channel */}
-			<Container className="pb-8 lg:pb-12">
-				<Suspense fallback={<VehicleVideosSkeleton />}>
-					<VehicleVideosServer
-						brand={vehicle.brand}
-						model={vehicle.model}
-					/>
-				</Suspense>
-			</Container>
 
 			{/* Related Vehicles */}
 			<Suspense fallback={<RelatedVehiclesSkeleton />}>

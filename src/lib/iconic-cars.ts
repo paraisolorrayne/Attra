@@ -8,7 +8,8 @@
  * Rules:
  *  - No prices shown (historical record only — prices change over time).
  *  - Data is provisioned from past inventory snapshots.
- *  - Photos reference the Attra S3 bucket (permanent URLs).
+ *  - Photos currently reference the AutoConf S3 bucket. Run POST /api/iconic/snapshot
+ *    once with CRON_SECRET to migrate them to Supabase (link-rot prevention).
  *  - Each entry includes a short editorial note about why it's iconic.
  */
 
