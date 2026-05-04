@@ -6,7 +6,7 @@ import { MessageCircle, X, Car, Wrench, HelpCircle, Loader2, Bot } from 'lucide-
 import { cn } from '@/lib/utils'
 import { sendWhatsAppWebhook, sendToLeadsterWithoutAI, sendToLeadsterWithAI, sendChatMessage, getGeoLocation, generateVehicleMessage, ChatMessage } from '@/lib/webhook'
 import { useToast } from '@/components/ui/toast'
-import { WHATSAPP_NUMBER } from '@/lib/constants'
+import { WHATSAPP_NUMBER, isSeoPage } from '@/lib/constants'
 import { GeoLocation } from '@/types'
 import { useVehicleContext } from '@/contexts/vehicle-context'
 import { usePageChannel, mapChannelToBehavior, type PageBehavior } from '@/hooks/use-page-channel'
@@ -17,49 +17,10 @@ interface WhatsAppButtonProps {
   sourcePage?: string // Optional - will auto-detect from pathname if not provided
 }
 
-// SEO content pages that should default to WhatsApp direct (not chat widget)
-const SEO_PAGE_PREFIXES = [
-  '/comprar/modelo/',
-  '/preco/',
-  '/comprar/condicao/',
-  '/comprar/preco/',
-  '/comprar/perfil/',
-  '/guia/',
-  '/importacao/',
-  '/importacao-de-veiculos-de-luxo',
-  '/por-que-comprar-na-attra',
-  '/garantia-e-procedencia',
-  '/como-funciona-entrega-brasil',
-]
-
-const isSeoPage = (path: string): boolean =>
-  SEO_PAGE_PREFIXES.some(prefix => path.startsWith(prefix))
-
 // Build a human-readable label from the SEO page path for tracking
 const getSeoPageLabel = (path: string): string => {
   const slug = path.split('/').filter(Boolean).pop() || path
   return slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-}
-
-// Fallback: Determine page behavior based on sourcePage (used when DB returns 'default')
-const getDefaultPageBehavior = (sourcePage: string, vehicleId?: string): PageBehavior => {
-  // Vehicle page: /veiculo/[slug] - uses N8N webhook, shows toast
-  if (sourcePage.includes('/veiculo/') || vehicleId) {
-    return 'vehicle'
-  }
-
-  // SEO content pages: WhatsApp direct with page-source tracking
-  if (isSeoPage(sourcePage)) {
-    return 'vehicle'
-  }
-
-  // Veículos page: /veiculos (or legacy /estoque) - Leadster sem IA + redirect WhatsApp
-  if (sourcePage === '/veiculos' || sourcePage.startsWith('/veiculos') || sourcePage === '/estoque' || sourcePage.startsWith('/estoque')) {
-    return 'estoque'
-  }
-
-  // All other pages: Leadster com IA + chat widget
-  return 'general'
 }
 
 // Context-aware messages based on page and behavior
