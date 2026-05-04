@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { IMPORTACAO_MAIN, IMPORTACAO_MARCAS } from '@/lib/seo-content'
+import { IMPORTACAO_MAIN, IMPORTACAO_MARCAS } from '@/lib/seo'
 import { SITE_URL, getWhatsAppUrl } from '@/lib/constants'
 import { ArrowRight, MessageCircle, Globe, Check, AlertTriangle } from 'lucide-react'
 

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { PERFIS_COMPRADOR, findPerfil } from '@/lib/seo-content'
+import { PERFIS_COMPRADOR, findPerfil } from '@/lib/seo'
 import { SITE_URL, getWhatsAppUrl } from '@/lib/constants'
 import { ArrowRight, User, MessageCircle, AlertTriangle, Check, X } from 'lucide-react'
 

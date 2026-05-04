@@ -10,7 +10,7 @@ import {
 	GUIAS_OPERACIONAIS,
 	CONFIANCA_PAGES,
 	IMPORTACAO_MARCAS,
-} from '@/lib/seo-content'
+} from '@/lib/seo'
 
 export const revalidate = 3600
 

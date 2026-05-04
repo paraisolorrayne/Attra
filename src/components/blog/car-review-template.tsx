@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react'
 import {
   Calendar, Clock, User, ArrowRight, Gauge, Zap, RotateCcw, Fuel,
   CheckCircle, ChevronLeft, ChevronRight, MessageCircle, Car,
-  Shield, TrendingUp, Star, Settings, Disc
+  Shield, TrendingUp, Star, Settings, Disc,
+  type LucideIcon,
 } from 'lucide-react'
 import type {
   DualBlogPost, CarReviewSpecs, CarReviewFAQ, CarReviewHighlight,
@@ -51,7 +52,7 @@ function VehicleSpecsTable({ specs }: {
 
   if (performanceSpecs.length === 0 && configSpecs.length === 0) return null
 
-  const renderSpecItem = (item: any) => (
+  const renderSpecItem = (item: { label: string; value: string | undefined; icon: LucideIcon }) => (
     <div key={item.label} className="flex items-start gap-4 pb-4 border-b border-border/30 last:border-b-0">
       <div className="p-2.5 rounded-lg bg-primary/10 flex-shrink-0">
         <item.icon className="w-5 h-5 text-primary" />

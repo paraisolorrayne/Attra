@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { GUIAS_OPERACIONAIS, findGuiaOperacional } from '@/lib/seo-content'
+import { GUIAS_OPERACIONAIS, findGuiaOperacional } from '@/lib/seo'
 import { SITE_URL, getWhatsAppUrl } from '@/lib/constants'
 import { ArrowRight, BookOpen, MessageCircle } from 'lucide-react'
 

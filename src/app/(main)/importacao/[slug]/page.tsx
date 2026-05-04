@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { IMPORTACAO_MARCAS, findImportacaoMarca } from '@/lib/seo-content'
+import { IMPORTACAO_MARCAS, findImportacaoMarca } from '@/lib/seo'
 import { SITE_URL, getWhatsAppUrl } from '@/lib/constants'
 import { ArrowRight, MessageCircle, Globe, Check, Clock, DollarSign } from 'lucide-react'
 

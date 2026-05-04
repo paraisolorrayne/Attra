@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Container } from '@/components/ui/container'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { FAIXAS_PRECO, findFaixaPreco } from '@/lib/seo-content'
+import { FAIXAS_PRECO, findFaixaPreco } from '@/lib/seo'
 import { SITE_URL, getWhatsAppUrl } from '@/lib/constants'
 import { ArrowRight, MessageCircle, Banknote } from 'lucide-react'
 
