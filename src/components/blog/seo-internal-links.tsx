@@ -57,7 +57,7 @@ export function SEOInternalLinks({ brand, model }: SEOInternalLinksProps) {
 
 	links.push(
 		{ label: 'Comprar Carros de Luxo no Brasil', href: '/comprar' },
-		{ label: 'Como Comprar Carro de Luxo no Brasil', href: '/guia/como-comprar-carro-de-luxo-no-brasil' },
+		{ label: 'Por Que Comprar na Attra', href: '/por-que-comprar-na-attra' },
 	)
 
 	const uniqueLinks = links.filter(
