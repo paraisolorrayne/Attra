@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from 'react'
 import { useTheme } from 'next-themes'
 import { Container } from '@/components/ui/container'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -13,6 +13,7 @@ import { X } from 'lucide-react'
 // Minimal navigation for premium boutique feel
 const navigation = [
   { name: 'Veículos', href: '/veiculos' },
+  { name: 'Importação', href: '/importacao-de-veiculos-de-luxo' },
   { name: 'Jornada Attra', href: '/jornada' },
   { name: 'Serviços', href: '/servicos' },
   { name: 'Notícias', href: '/news' },
@@ -23,8 +24,8 @@ const navigation = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [activeSection, setActiveSection] = useState('')
-  const [mounted, setMounted] = useState(false)
+  const [activeSection] = useState('')
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false)
   const { resolvedTheme } = useTheme()
 
   // Refs for focus management
@@ -46,10 +47,6 @@ export function Header() {
   // Toggle menu function
   const toggleMenu = useCallback(() => {
     setMobileMenuOpen(prev => !prev)
-  }, [])
-
-  useEffect(() => {
-    setMounted(true)
   }, [])
 
   // Lock body scroll when mobile menu is open - improved version
@@ -155,8 +152,6 @@ export function Header() {
 
   // Determine which logo to show based on theme
   // Always show white logo since header now has dark background
-  const showWhiteLogo = true
-
   // Check if it's light mode for scrolled state styling
   const isLightMode = mounted && resolvedTheme === 'light'
 

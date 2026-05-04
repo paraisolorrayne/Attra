@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { isSeoPage } from '@/lib/constants'
 
 export type ChannelBehavior = 'leadster_static' | 'leadster_ai' | 'whatsapp_direct' | 'default'
 
@@ -43,6 +44,7 @@ export function mapChannelToBehavior(
     case 'default':
       // Fall back to path-based detection
       if (currentPath.includes('/veiculo/')) return 'vehicle'
+      if (isSeoPage(currentPath)) return 'vehicle'
       if (currentPath === '/veiculos' || currentPath.startsWith('/veiculos') || currentPath === '/estoque' || currentPath.startsWith('/estoque')) return 'estoque'
       return 'general'
     default:

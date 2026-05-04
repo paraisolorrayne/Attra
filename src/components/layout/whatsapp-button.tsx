@@ -6,7 +6,7 @@ import { MessageCircle, X, Car, Wrench, HelpCircle, Loader2, Bot } from 'lucide-
 import { cn } from '@/lib/utils'
 import { sendWhatsAppWebhook, sendToLeadsterWithoutAI, sendToLeadsterWithAI, sendChatMessage, getGeoLocation, generateVehicleMessage, ChatMessage } from '@/lib/webhook'
 import { useToast } from '@/components/ui/toast'
-import { WHATSAPP_NUMBER } from '@/lib/constants'
+import { WHATSAPP_NUMBER, isSeoPage } from '@/lib/constants'
 import { GeoLocation } from '@/types'
 import { useVehicleContext } from '@/contexts/vehicle-context'
 import { usePageChannel, mapChannelToBehavior, type PageBehavior } from '@/hooks/use-page-channel'
@@ -17,20 +17,10 @@ interface WhatsAppButtonProps {
   sourcePage?: string // Optional - will auto-detect from pathname if not provided
 }
 
-// Fallback: Determine page behavior based on sourcePage (used when DB returns 'default')
-const getDefaultPageBehavior = (sourcePage: string, vehicleId?: string): PageBehavior => {
-  // Vehicle page: /veiculo/[slug] - uses N8N webhook, shows toast
-  if (sourcePage.includes('/veiculo/') || vehicleId) {
-    return 'vehicle'
-  }
-
-  // Veículos page: /veiculos (or legacy /estoque) - Leadster sem IA + redirect WhatsApp
-  if (sourcePage === '/veiculos' || sourcePage.startsWith('/veiculos') || sourcePage === '/estoque' || sourcePage.startsWith('/estoque')) {
-    return 'estoque'
-  }
-
-  // All other pages: Leadster com IA + chat widget
-  return 'general'
+// Build a human-readable label from the SEO page path for tracking
+const getSeoPageLabel = (path: string): string => {
+  const slug = path.split('/').filter(Boolean).pop() || path
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
 // Context-aware messages based on page and behavior
@@ -42,6 +32,19 @@ const getContextMessage = (sourcePage: string, pageBehavior: PageBehavior, vehic
       message: `Olá! Tenho interesse no ${vehicleBrand} ${vehicleModel}. Gostaria de mais informações.`,
       icon: Car,
       buttonText: 'Tenho interesse',
+      behavior: 'vehicle' as PageBehavior,
+    }
+  }
+
+  // SEO content pages: WhatsApp direct with page-source tracking
+  if (isSeoPage(sourcePage)) {
+    const label = getSeoPageLabel(sourcePage)
+    return {
+      title: 'Falar com especialista',
+      subtitle: 'Atendimento direto via WhatsApp',
+      message: `Olá! Vim da página "${label}" e gostaria de mais informações. [ref: ${sourcePage}]`,
+      icon: Car,
+      buttonText: 'Abrir WhatsApp',
       behavior: 'vehicle' as PageBehavior,
     }
   }
@@ -184,6 +187,10 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
 
   // Generate WhatsApp redirect URL with formatted message including location and year
   const getWhatsAppRedirectUrl = () => {
+    // SEO pages: use tracked message with page source reference
+    if (isSeoPage(currentPage) && !vehicleBrand) {
+      return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(context.message)}`
+    }
     const formattedMessage = generateVehicleMessage(vehicleBrand, vehicleModel, vehicleYear, geoLocation)
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(formattedMessage)}`
   }

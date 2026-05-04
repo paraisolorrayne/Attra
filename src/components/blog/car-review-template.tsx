@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react'
 import {
   Calendar, Clock, User, ArrowRight, Gauge, Zap, RotateCcw, Fuel,
   CheckCircle, ChevronLeft, ChevronRight, MessageCircle, Car,
-  Shield, TrendingUp, Star, Settings, Disc
+  Shield, TrendingUp, Star, Settings, Disc,
+  type LucideIcon,
 } from 'lucide-react'
 import type {
   DualBlogPost, CarReviewSpecs, CarReviewFAQ, CarReviewHighlight,
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { formatDate, cn } from '@/lib/utils'
 import { ListenToContent } from './listen-to-content'
 import { BlogContentRenderer } from './blog-content-renderer'
+import { SEOInternalLinks } from './seo-internal-links'
 
 interface CarReviewTemplateProps {
   post: DualBlogPost
@@ -50,7 +52,7 @@ function VehicleSpecsTable({ specs }: {
 
   if (performanceSpecs.length === 0 && configSpecs.length === 0) return null
 
-  const renderSpecItem = (item: any) => (
+  const renderSpecItem = (item: { label: string; value: string | undefined; icon: LucideIcon }) => (
     <div key={item.label} className="flex items-start gap-4 pb-4 border-b border-border/30 last:border-b-0">
       <div className="p-2.5 rounded-lg bg-primary/10 flex-shrink-0">
         <item.icon className="w-5 h-5 text-primary" />
@@ -854,6 +856,15 @@ export function CarReviewTemplate({ post }: CarReviewTemplateProps) {
       {/* CTA FINAL */}
       {/* ================================================================== */}
       <CTASection brand={car_review?.brand} model={car_review?.model} />
+
+      {/* ================================================================== */}
+      {/* SEO INTERNAL LINKS — /comprar/ pages */}
+      {/* ================================================================== */}
+      <SEOInternalLinks
+        brand={car_review?.brand}
+        model={car_review?.model}
+        title={post.title}
+      />
 
       {/* ================================================================== */}
       {/* RODAPÉ DO ARTIGO - Links relacionados */}

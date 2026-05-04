@@ -38,6 +38,24 @@ export const EDITORIAL_SECTION = {
   brandName: 'Attra Insights',     // Nome da marca editorial
 } as const
 
+// Páginas SEO que devem usar WhatsApp direto (não chat widget)
+const SEO_PAGE_PREFIXES = [
+  '/comprar/modelo/',
+  '/preco/',
+  '/comprar/condicao/',
+  '/comprar/faixa-preco/',
+  '/comprar/perfil/',
+  '/guia/',
+  '/importacao/',
+  '/importacao-de-veiculos-de-luxo',
+  '/por-que-comprar-na-attra',
+  '/garantia-e-procedencia',
+  '/como-funciona-entrega-brasil',
+]
+
+export const isSeoPage = (path: string): boolean =>
+  SEO_PAGE_PREFIXES.some(prefix => path.startsWith(prefix))
+
 // Função helper para gerar link do WhatsApp
 export function getWhatsAppUrl(message?: string): string {
   const encodedMessage = message ? encodeURIComponent(message) : ''
