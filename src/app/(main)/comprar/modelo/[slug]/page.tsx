@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { MODELOS, findModelo } from '@/lib/seo-content'
 import { SITE_URL, getWhatsAppUrl } from '@/lib/constants'
 import { ArrowRight, MessageCircle, Car, ShieldCheck, AlertTriangle, HelpCircle } from 'lucide-react'
+import { EstoqueAoVivo } from '@/components/vehicles/estoque-ao-vivo'
 
 interface PageProps {
 	params: Promise<{ slug: string }>
@@ -177,6 +178,16 @@ export default async function ModeloPage({ params }: PageProps) {
 							Falar no WhatsApp
 						</a>
 					</div>
+				</Container>
+			</section>
+
+			{/* Estoque ao vivo */}
+			<section className="py-12 lg:py-16 bg-background-card border-y border-border">
+				<Container>
+					<h2 className="text-2xl font-bold text-foreground mb-6">
+						{data.brand} {data.model} Disponíveis na Attra
+					</h2>
+					<EstoqueAoVivo brand={data.brand} model={data.model} limit={5} />
 				</Container>
 			</section>
 

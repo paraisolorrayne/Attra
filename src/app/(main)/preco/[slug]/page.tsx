@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { PRECOS, findPreco } from '@/lib/seo-content'
 import { SITE_URL, getWhatsAppUrl } from '@/lib/constants'
 import { ArrowRight, MessageCircle, DollarSign, TrendingUp } from 'lucide-react'
+import { EstoqueAoVivo } from '@/components/vehicles/estoque-ao-vivo'
 
 interface PageProps {
 	params: Promise<{ slug: string }>
@@ -58,36 +59,35 @@ export default async function PrecoPage({ params }: PageProps) {
 							Preço do {data.brand} {data.model} no Brasil
 						</h1>
 						<p className="text-lg text-foreground-secondary leading-relaxed">
-							Faixa de preço atualizada do {data.brand} {data.model} no mercado brasileiro, com comparação entre zero km e seminovo por período.
+							Análise de posicionamento de preço do {data.brand} {data.model} no mercado brasileiro, com diferença entre versões e fatores que impactam o valor.
 						</p>
 					</div>
 				</Container>
 			</section>
 
-			{/* Tabela de preços por período */}
+			{/* Posicionamento de preço */}
 			<section className="py-12 lg:py-16 border-b border-border">
 				<Container>
-					<h2 className="text-2xl font-bold text-foreground mb-6">Faixa de Preço por Período</h2>
-					<div className="overflow-x-auto">
-						<table className="w-full max-w-3xl text-sm">
-							<thead>
-								<tr className="border-b border-border">
-									<th className="text-left py-3 pr-4 font-semibold text-foreground">Período</th>
-									<th className="text-left py-3 pr-4 font-semibold text-foreground">Novo</th>
-									<th className="text-left py-3 font-semibold text-foreground">Seminovo</th>
-								</tr>
-							</thead>
-							<tbody>
-								{data.faixaPreco.map((f, i) => (
-									<tr key={i} className="border-b border-border last:border-b-0">
-										<td className="py-3 pr-4 text-foreground-secondary">{f.periodo}</td>
-										<td className="py-3 pr-4 font-medium text-foreground">{f.faixaNovo}</td>
-										<td className="py-3 font-medium text-foreground">{f.faixaSeminovo}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
+					<div className="max-w-3xl">
+						<h2 className="text-2xl font-bold text-foreground mb-4">Posicionamento de Preço</h2>
+						<p className="text-foreground-secondary leading-relaxed mb-6">{data.faixaGeral}</p>
+						<Link
+							href={`/veiculos?search=${encodeURIComponent(`${data.brand} ${data.model}`)}`}
+							className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+						>
+							Consultar preço atual no estoque <ArrowRight className="w-4 h-4" />
+						</Link>
 					</div>
+				</Container>
+			</section>
+
+			{/* Estoque ao vivo */}
+			<section className="py-12 lg:py-16 bg-background-card border-y border-border">
+				<Container>
+					<h2 className="text-2xl font-bold text-foreground mb-6">
+						Disponíveis na Attra Agora
+					</h2>
+					<EstoqueAoVivo brand={data.brand} model={data.model} limit={5} />
 				</Container>
 			</section>
 
@@ -190,8 +190,7 @@ export default async function PrecoPage({ params }: PageProps) {
 							'@type': 'BreadcrumbList',
 							itemListElement: [
 								{ '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
-								{ '@type': 'ListItem', position: 2, name: 'Preço', item: `${SITE_URL}/preco` },
-								{ '@type': 'ListItem', position: 3, name: `${data.brand} ${data.model}`, item: `${SITE_URL}/preco/${slug}` },
+								{ '@type': 'ListItem', position: 2, name: `${data.brand} ${data.model}`, item: `${SITE_URL}/preco/${slug}` },
 							],
 						},
 						author: { '@type': 'Organization', name: 'Attra Veículos', url: SITE_URL },

@@ -24,11 +24,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 		title: data.metaTitle,
 		description: data.metaDescription,
 		keywords: data.keywords,
-		alternates: { canonical: `${SITE_URL}/comprar/preco/${slug}` },
+		alternates: { canonical: `${SITE_URL}/comprar/faixa-preco/${slug}` },
 		openGraph: {
 			title: data.metaTitle,
 			description: data.metaDescription,
-			url: `${SITE_URL}/comprar/preco/${slug}`,
+			url: `${SITE_URL}/comprar/faixa-preco/${slug}`,
 			type: 'website',
 		},
 	}
@@ -62,7 +62,7 @@ export default async function FaixaPrecoPage({ params }: PageProps) {
 							{data.oQueDaPraComprar}
 						</p>
 						<a
-							href={getWhatsAppUrl(`Olá! Estou buscando veículos na faixa de ${data.title.replace('Carros de Luxo de ', '').replace('Carros de Luxo ', '')}. [ref: /comprar/preco/${data.slug}]`)}
+							href={getWhatsAppUrl(`Olá! Estou buscando veículos na faixa de ${data.title.replace('Carros de Luxo de ', '').replace('Carros de Luxo ', '')}. [ref: /comprar/faixa-preco/${data.slug}]`)}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
@@ -119,7 +119,7 @@ export default async function FaixaPrecoPage({ params }: PageProps) {
 						</h2>
 						<div className="flex flex-wrap justify-center gap-4 mb-8">
 							<a
-								href={getWhatsAppUrl(`Olá! Quero receber opções de veículos na faixa de ${data.title.replace('Carros de Luxo de ', '').replace('Carros de Luxo ', '')}. [ref: /comprar/preco/${data.slug}]`)}
+								href={getWhatsAppUrl(`Olá! Quero receber opções de veículos na faixa de ${data.title.replace('Carros de Luxo de ', '').replace('Carros de Luxo ', '')}. [ref: /comprar/faixa-preco/${data.slug}]`)}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
@@ -152,13 +152,13 @@ export default async function FaixaPrecoPage({ params }: PageProps) {
 						'@type': 'WebPage',
 						name: data.title,
 						description: data.metaDescription,
-						url: `${SITE_URL}/comprar/preco/${slug}`,
+						url: `${SITE_URL}/comprar/faixa-preco/${slug}`,
 						breadcrumb: {
 							'@type': 'BreadcrumbList',
 							itemListElement: [
 								{ '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
 								{ '@type': 'ListItem', position: 2, name: 'Comprar', item: `${SITE_URL}/comprar` },
-								{ '@type': 'ListItem', position: 3, name: data.title, item: `${SITE_URL}/comprar/preco/${slug}` },
+								{ '@type': 'ListItem', position: 3, name: data.title, item: `${SITE_URL}/comprar/faixa-preco/${slug}` },
 							],
 						},
 						author: { '@type': 'Organization', name: 'Attra Veículos', url: SITE_URL },

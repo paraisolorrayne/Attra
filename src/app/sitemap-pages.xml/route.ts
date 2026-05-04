@@ -69,7 +69,7 @@ export async function GET() {
 		})),
 		// Bloco 4 — Faixa de preço
 		...FAIXAS_PRECO.map(f => ({
-			loc: `${BASE}/comprar/preco/${f.slug}`,
+			loc: `${BASE}/comprar/faixa-preco/${f.slug}`,
 			lastmod,
 			changefreq: 'monthly' as const,
 			priority: 0.6,

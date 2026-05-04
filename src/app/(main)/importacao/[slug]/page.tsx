@@ -154,7 +154,7 @@ export default async function ImportacaoMarcaPage({ params }: PageProps) {
 							</Link>
 						</div>
 						<div className="flex flex-wrap justify-center gap-4 text-sm">
-							<Link href="/comprar/preco/acima-de-1-milhao" className="text-primary hover:underline">Acima de R$ 1 Milhão</Link>
+							<Link href="/comprar/faixa-preco/acima-de-1-milhao" className="text-primary hover:underline">Acima de R$ 1 Milhão</Link>
 							<Link href="/comprar/condicao/supercarros-seminovos" className="text-primary hover:underline">Supercarros Seminovos</Link>
 							<Link href="/por-que-comprar-na-attra" className="text-primary hover:underline">Por Que a Attra</Link>
 							<Link href="/veiculos" className="text-primary hover:underline">Ver Estoque</Link>

@@ -53,8 +53,8 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Entusiasta que quer performance real no dia a dia. Pessoas que valorizam engenharia, tradição esportiva e precisão mecânica. Ideal para quem busca um carro que entrega emoção na pista e conforto na cidade.',
 		quandoNaoComprar: 'Se a prioridade é espaço interno ou conforto de passageiros traseiros. Não é a escolha certa para quem precisa de um carro familiar ou quer apenas status visual sem interesse em dirigibilidade.',
 		faq: [
-			{ pergunta: 'Qual o preço do Porsche 911 no Brasil?', resposta: 'O Porsche 911 seminovo parte de aproximadamente R$ 500 mil para versões Carrera mais antigas e pode ultrapassar R$ 2,5 milhões em versões GT3 RS ou Turbo S recentes. Novos, os preços começam em R$ 800 mil.' },
-			{ pergunta: 'A manutenção do 911 é cara?', resposta: 'Revisões periódicas custam entre R$ 3 mil e R$ 8 mil dependendo da versão. Peças de desgaste como pastilhas e discos podem ser mais caras nas versões cerâmicas. O custo é compatível com a categoria de esportivos premium.' },
+			{ pergunta: 'Qual o preço do Porsche 911 no Brasil?', resposta: 'O valor varia amplamente conforme versão (Carrera, Turbo S, GT3 RS), quilometragem e estado geral. Consulte nosso estoque para preços atualizados e condições reais de cada unidade disponível.' },
+			{ pergunta: 'A manutenção do 911 é cara?', resposta: 'O custo de manutenção é compatível com a categoria de esportivos premium. Versões cerâmicas têm peças de desgaste mais caras. Revisões na rede autorizada garantem valorização e segurança do veículo.' },
 			{ pergunta: 'O 911 é um bom carro para uso diário?', resposta: 'Sim. É um dos esportivos mais adaptados ao uso diário do mercado. Possui porta-malas funcional, visibilidade adequada e modos de condução que equilibram conforto e performance.' },
 			{ pergunta: 'A Attra entrega o 911 em todo o Brasil?', resposta: 'Sim. A Attra realiza entrega em caminhão fechado com seguro completo e rastreamento em tempo real para todo o território nacional.' },
 		],
@@ -82,7 +82,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Motorista que busca precisão de condução e feedback mecânico em um pacote funcional. Ideal para quem precisa de 4 portas sem abrir mão de performance real.',
 		quandoNaoComprar: 'Se você prioriza conforto de rodagem acima de tudo. A suspensão firme e o foco esportivo podem incomodar em deslocamentos longos no dia a dia urbano.',
 		faq: [
-			{ pergunta: 'Qual o preço do BMW M3 no Brasil?', resposta: 'Seminovos partem de cerca de R$ 400 mil para gerações anteriores (F80) e podem chegar a R$ 900 mil para versões Competition ou CS da geração atual (G80). Novos, os preços começam em R$ 700 mil.' },
+			{ pergunta: 'Qual o preço do BMW M3 no Brasil?', resposta: 'O valor depende da geração (F80, G80) e versão (Standard, Competition, CS). Seminovos de gerações anteriores são mais acessíveis. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'O M3 é confiável?', resposta: 'Sim. O motor S58 é considerado robusto e confiável desde que as revisões sejam feitas na rede autorizada. A manutenção preventiva é essencial para longevidade.' },
 			{ pergunta: 'M3 Competition ou M3 CS?', resposta: 'O Competition é a versão mais equilibrada para uso misto. O CS é focado em pista com menos conforto, peso reduzido e potência superior. Para uso diário, o Competition é mais indicado.' },
 			{ pergunta: 'A Attra entrega o M3 em todo o Brasil?', resposta: 'Sim. Entrega especializada em caminhão fechado com seguro completo para todo o território nacional.' },
@@ -111,7 +111,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Quem busca experiência sensorial completa: ronco de V8, interior luxuoso e presença marcante. Ideal para motoristas que valorizam a combinação de potência bruta com refinamento.',
 		quandoNaoComprar: 'Se pureza de condução e feedback de volante são prioridade absoluta. O C63 é mais pesado e menos comunicativo que rivais focados em pista. A nova geração com 4 cilindros híbrido também divide opiniões entre puristas.',
 		faq: [
-			{ pergunta: 'Qual o preço do C63 AMG no Brasil?', resposta: 'Versões V8 seminovas (W205) partem de R$ 350 mil. Modelos mais recentes e versões S podem chegar a R$ 800 mil. A nova geração híbrida (W206) tem preços a partir de R$ 800 mil.' },
+			{ pergunta: 'Qual o preço do C63 AMG no Brasil?', resposta: 'O valor varia conforme geração (V8 W205 ou híbrido W206) e versão. As versões V8 estão em tendência de valorização. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'O V8 do C63 vai acabar?', resposta: 'A geração W206 já utiliza motor 4 cilindros híbrido. Porém, as versões V8 (W205) continuam sendo as mais procuradas no mercado de seminovos pela sonoridade e caráter único.' },
 			{ pergunta: 'C63 AMG ou BMW M3?', resposta: 'O M3 oferece condução mais pura e comunicativa. O C63 entrega experiência mais visceral com o V8 e interior mais luxuoso. A escolha depende do perfil do motorista.' },
 			{ pergunta: 'A Attra entrega o C63 em todo o Brasil?', resposta: 'Sim. Entrega em caminhão fechado com seguro completo e rastreamento para todo o país.' },
@@ -140,9 +140,9 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Entusiasta prático. Quem quer levar a família e a bagagem sem abrir mão de 600 cv e aceleração de superesportivo. Ideal para viagens longas com performance sob demanda.',
 		quandoNaoComprar: 'Se o objetivo é um carro compacto para uso urbano. O RS6 é grande e pesado, com consumo elevado. Não é a escolha para quem busca economia ou agilidade em espaços apertados.',
 		faq: [
-			{ pergunta: 'Qual o preço do Audi RS6 no Brasil?', resposta: 'Seminovos partem de R$ 700 mil e podem ultrapassar R$ 1,2 milhão para versões Performance com poucos quilômetros. Novos, o RS6 Avant começa em R$ 1 milhão.' },
+			{ pergunta: 'Qual o preço do Audi RS6 no Brasil?', resposta: 'O RS6 Avant é posicionado no topo do segmento, com valor variando conforme versão e quilometragem. Consulte nosso estoque para preços atualizados e disponibilidade.' },
 			{ pergunta: 'O RS6 serve como carro de família?', resposta: 'Perfeitamente. Possui 5 lugares confortáveis, porta-malas generoso e modos de condução que o transformam de uma perua confortável a um superesportivo em segundos.' },
-			{ pergunta: 'Manutenção do RS6 é cara?', resposta: 'Compatível com a categoria. Revisões na rede autorizada Audi custam entre R$ 5 mil e R$ 12 mil. O motor V8 biturbo requer atenção ao óleo e sistema de refrigeração.' },
+			{ pergunta: 'Manutenção do RS6 é cara?', resposta: 'O custo de manutenção é compatível com a categoria de superesportivos. O motor V8 biturbo requer atenção especial ao óleo e sistema de refrigeração. Revisões na rede Audi garantem qualidade.' },
 			{ pergunta: 'A Attra entrega o RS6 em todo o Brasil?', resposta: 'Sim. Entrega nacional em caminhão fechado com seguro completo.' },
 		],
 		modelosRelacionados: [
@@ -169,7 +169,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Quem precisa de espaço e versatilidade de SUV com a dirigibilidade Porsche. Ideal para famílias que não abrem mão de performance e querem um carro completo para todas as situações.',
 		quandoNaoComprar: 'Se o foco é exclusivamente performance pura de esportivo. Apesar de rápido, o Cayenne nunca vai oferecer a mesma conexão com a estrada que um 911 ou Cayman.',
 		faq: [
-			{ pergunta: 'Qual o preço do Porsche Cayenne no Brasil?', resposta: 'Seminovos partem de R$ 350 mil para versões base e chegam a R$ 1,3 milhão para Turbo GT. Novos começam em R$ 600 mil.' },
+			{ pergunta: 'Qual o preço do Porsche Cayenne no Brasil?', resposta: 'O valor varia amplamente conforme versão (base, S, GTS, Turbo, Turbo GT) e formato (SUV ou Coupé). Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'Cayenne ou Range Rover?', resposta: 'O Cayenne é mais esportivo e dinâmico. O Range Rover prioriza conforto e presença. Para quem valoriza dirigibilidade, o Cayenne é a escolha.' },
 			{ pergunta: 'Cayenne diesel ou gasolina?', resposta: 'No Brasil, a maioria das versões disponíveis é gasolina ou híbrida. O diesel era oferecido em gerações anteriores e pode ser encontrado no mercado de seminovos.' },
 			{ pergunta: 'A Attra entrega o Cayenne em todo o Brasil?', resposta: 'Sim. Entrega nacional especializada com seguro completo.' },
@@ -198,7 +198,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Quem busca um SUV compacto premium com dirigibilidade esportiva. Ideal para uso urbano diário, sendo a escolha mais popular entre mulheres que buscam conforto, segurança e elegância.',
 		quandoNaoComprar: 'Se precisa de muito espaço para passageiros traseiros ou bagagem volumosa. O Macan é compacto e prioriza a experiência do motorista sobre o espaço interno.',
 		faq: [
-			{ pergunta: 'Qual o preço do Porsche Macan no Brasil?', resposta: 'Seminovos partem de R$ 250 mil e chegam a R$ 600 mil para versões Turbo recentes. Novos começam em R$ 450 mil.' },
+			{ pergunta: 'Qual o preço do Porsche Macan no Brasil?', resposta: 'O Macan é o Porsche mais acessível. O valor depende da versão (base, S, GTS, Turbo) e do ano. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'Macan ou Cayenne?', resposta: 'O Macan é mais compacto, ágil e acessível. O Cayenne oferece mais espaço e versões mais potentes. Para uso urbano, o Macan é mais prático.' },
 			{ pergunta: 'O Macan elétrico já está disponível?', resposta: 'O Macan elétrico foi lançado globalmente e começa a chegar ao Brasil. Confira disponibilidade no nosso estoque.' },
 			{ pergunta: 'A Attra entrega o Macan em todo o Brasil?', resposta: 'Sim. Entrega nacional em caminhão fechado com seguro completo.' },
@@ -227,7 +227,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Executivos e famílias que precisam de espaço sem abrir mão de performance. O X5 é a escolha para quem quer um SUV completo que entrega tanto na cidade quanto na estrada.',
 		quandoNaoComprar: 'Se busca exclusividade extrema ou presença off-road radical. O X5 é eficiente em quase tudo, mas não se destaca em nenhum extremo.',
 		faq: [
-			{ pergunta: 'Qual o preço do BMW X5 no Brasil?', resposta: 'Seminovos partem de R$ 300 mil e podem chegar a R$ 900 mil para versões M Competition. Novos começam em R$ 600 mil.' },
+			{ pergunta: 'Qual o preço do BMW X5 no Brasil?', resposta: 'O valor varia conforme versão (xDrive40i, M50i, M Competition) e quilometragem. Seminovos de 3 a 5 anos oferecem ótimo custo-benefício. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'X5 ou X6?', resposta: 'O X5 oferece mais espaço interno e praticidade. O X6 prioriza design coupé com perfil mais esportivo. Para famílias, o X5 é mais funcional.' },
 			{ pergunta: 'O X5 híbrido vale a pena?', resposta: 'O X5 xDrive45e oferece autonomia elétrica de até 80 km, ideal para uso urbano. Combina economia no dia a dia com performance quando necessário.' },
 			{ pergunta: 'A Attra entrega o X5 em todo o Brasil?', resposta: 'Sim. Entrega em caminhão fechado com seguro completo para todo o território nacional.' },
@@ -256,7 +256,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Quem prioriza design e presença visual em um SUV. Ideal para motoristas que dispensam o espaço máximo em favor de uma silhueta mais expressiva e dinâmica.',
 		quandoNaoComprar: 'Se precisa de máximo espaço interno e praticidade. O teto inclinado reduz o espaço traseiro e o porta-malas em comparação ao X5.',
 		faq: [
-			{ pergunta: 'Qual o preço do BMW X6 no Brasil?', resposta: 'Seminovos partem de R$ 350 mil e chegam a R$ 1 milhão para versões M Competition. Novos começam em R$ 650 mil.' },
+			{ pergunta: 'Qual o preço do BMW X6 no Brasil?', resposta: 'O valor depende da versão (xDrive40i, M50i, M Competition) e estado geral. O perfil coupé posiciona o X6 ligeiramente acima do X5. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'X6 ou X5?', resposta: 'O X6 é para quem prioriza design e esportividade. O X5 para quem prioriza espaço e funcionalidade. Mecanicamente, compartilham a mesma base.' },
 			{ pergunta: 'O X6 é confortável?', resposta: 'Sim. Apesar do perfil coupé, o X6 mantém o conforto de rodagem BMW. Apenas passageiros mais altos podem notar diferença no espaço traseiro.' },
 			{ pergunta: 'A Attra entrega o X6 em todo o Brasil?', resposta: 'Sim. Entrega nacional especializada com seguro completo.' },
@@ -285,7 +285,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Famílias que precisam de espaço para 7 pessoas com conforto premium. Ideal para viagens longas, golfe no fim de semana ou transporte diário de família com conforto garantido.',
 		quandoNaoComprar: 'Se você dirige sozinho na maioria do tempo e não precisa de espaço extra. O Q7 é grande e consome mais que SUVs menores da mesma marca.',
 		faq: [
-			{ pergunta: 'Qual o preço do Audi Q7 no Brasil?', resposta: 'Seminovos partem de R$ 250 mil e chegam a R$ 700 mil para versões SQ7 recentes. Novos começam em R$ 500 mil.' },
+			{ pergunta: 'Qual o preço do Audi Q7 no Brasil?', resposta: 'O valor varia conforme versão (45 TFSI, 55 TFSI, SQ7) e quilometragem. Seminovos de 3 a 5 anos oferecem oportunidades significativas. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'A terceira fileira do Q7 é funcional?', resposta: 'Sim. Diferente de muitos concorrentes, a terceira fileira do Q7 acomoda adultos com razoável conforto, não apenas crianças.' },
 			{ pergunta: 'Q7 ou Q8?', resposta: 'O Q7 oferece mais espaço e 7 lugares. O Q8 tem design coupé mais esportivo com 5 lugares. Para famílias, o Q7 é mais funcional.' },
 			{ pergunta: 'A Attra entrega o Q7 em todo o Brasil?', resposta: 'Sim. Entrega nacional em caminhão fechado com seguro completo.' },
@@ -314,7 +314,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Executivos que querem o melhor da Audi em formato SUV. Ideal para quem busca tecnologia de ponta, conforto supremo e design que se diferencia no segmento.',
 		quandoNaoComprar: 'Se precisa de 7 lugares, o Q7 é a escolha. O Q8 sacrifica espaço da terceira fileira pelo design coupé.',
 		faq: [
-			{ pergunta: 'Qual o preço do Audi Q8 no Brasil?', resposta: 'Seminovos partem de R$ 400 mil e chegam a R$ 1,2 milhão para versões RS Q8. Novos começam em R$ 700 mil.' },
+			{ pergunta: 'Qual o preço do Audi Q8 no Brasil?', resposta: 'O valor depende da versão (55 TFSI, SQ8, RS Q8). Versões RS mantêm valor acima da média pela exclusividade. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'RS Q8 ou Cayenne Turbo?', resposta: 'O RS Q8 tem mais tecnologia embarcada e interior mais moderno. O Cayenne Turbo tem chassis mais esportivo e melhor feedback de condução. Ambos entregam performance excepcional.' },
 			{ pergunta: 'O Q8 é confortável para viagens?', resposta: 'Extremamente. Suspensão pneumática, isolamento acústico e bancos multicontorno fazem dele um dos SUVs mais confortáveis do mercado.' },
 			{ pergunta: 'A Attra entrega o Q8 em todo o Brasil?', resposta: 'Sim. Entrega especializada nacional com seguro completo.' },
@@ -343,7 +343,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Quem busca presença marcante com versatilidade total. Ideal para uso em fazendas, golfe e estrada sem abrir mão de luxo e performance no asfalto.',
 		quandoNaoComprar: 'Se busca economia de manutenção e consumo. Range Rover Sport tem custo de propriedade elevado e pode ter questões de confiabilidade eletrônica em modelos mais antigos.',
 		faq: [
-			{ pergunta: 'Qual o preço do Range Rover Sport no Brasil?', resposta: 'Seminovos partem de R$ 350 mil e chegam a R$ 1,2 milhão para versões SVR. Novos começam em R$ 700 mil.' },
+			{ pergunta: 'Qual o preço do Range Rover Sport no Brasil?', resposta: 'O valor varia significativamente conforme motorização (P360, P400, P530, SVR). Consulte nosso estoque para preços atualizados e condições reais.' },
 			{ pergunta: 'Range Rover Sport ou Cayenne?', resposta: 'O Cayenne é mais esportivo no asfalto. O Range Rover Sport oferece melhor capacidade off-road e interior mais luxuoso. Depende do uso prioritário.' },
 			{ pergunta: 'O Range Rover Sport é confiável?', resposta: 'A nova geração melhorou significativamente em confiabilidade. Recomenda-se manutenção preventiva rigorosa e preferir veículos com histórico completo de revisões.' },
 			{ pergunta: 'A Attra entrega o Range Rover Sport em todo o Brasil?', resposta: 'Sim. Entrega nacional em caminhão fechado com seguro completo.' },
@@ -372,7 +372,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Aventureiros e proprietários rurais que precisam de capacidade off-road real. Também para quem valoriza o estilo robusto e a personalidade única do Defender na cidade.',
 		quandoNaoComprar: 'Se busca conforto de rodagem refinado no asfalto. O Defender prioriza robustez sobre suavidade. Para estrada, um Range Rover Sport é mais confortável.',
 		faq: [
-			{ pergunta: 'Qual o preço do Defender no Brasil?', resposta: 'Seminovos partem de R$ 350 mil e chegam a R$ 1 milhão para versões V8 ou 130. Novos começam em R$ 500 mil.' },
+			{ pergunta: 'Qual o preço do Defender no Brasil?', resposta: 'O valor depende do comprimento (90, 110, 130) e motorização. Alta demanda mantém valores elevados nos primeiros anos. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'Defender 90 ou 110?', resposta: 'O 90 é mais compacto e ágil, ideal para uso urbano e trilhas. O 110 oferece mais espaço para família e bagagem. O 130 tem a maior capacidade de carga e 8 lugares.' },
 			{ pergunta: 'O Defender novo é bom como o antigo?', resposta: 'O novo Defender combina a capacidade off-road lendária com tecnologia e conforto modernos. É superior em quase todos os aspectos técnicos ao modelo anterior.' },
 			{ pergunta: 'A Attra entrega o Defender em todo o Brasil?', resposta: 'Sim. Entrega nacional em caminhão fechado com seguro completo.' },
@@ -401,7 +401,7 @@ export const MODELOS: ModeloPage[] = [
 		perfilIdeal: 'Executivos e famílias que priorizam conforto absoluto e tecnologia de ponta. O GLE é para quem quer chegar descansado após horas de viagem e impressionar em qualquer ocasião.',
 		quandoNaoComprar: 'Se a prioridade é dirigibilidade esportiva pura. O GLE prioriza conforto sobre esportividade, mesmo nas versões AMG.',
 		faq: [
-			{ pergunta: 'Qual o preço do Mercedes GLE no Brasil?', resposta: 'Seminovos partem de R$ 300 mil e chegam a R$ 1 milhão para versões AMG 63 S. Novos começam em R$ 550 mil.' },
+			{ pergunta: 'Qual o preço do Mercedes GLE no Brasil?', resposta: 'O valor varia conforme versão (GLE 450, AMG 53, AMG 63 S). Versões AMG mantêm valor acima da média. Consulte nosso estoque para preços atualizados.' },
 			{ pergunta: 'GLE ou BMW X5?', resposta: 'O GLE é mais confortável e luxuoso no interior. O X5 é mais esportivo e dinâmico na condução. Para conforto, GLE. Para dirigibilidade, X5.' },
 			{ pergunta: 'O GLE Coupé vale a pena?', resposta: 'O GLE Coupé sacrifica espaço pelo design fastback. Para quem prioriza presença visual sobre funcionalidade, é uma alternativa atraente.' },
 			{ pergunta: 'A Attra entrega o GLE em todo o Brasil?', resposta: 'Sim. Entrega em caminhão fechado com seguro completo para todo o território nacional.' },
@@ -425,7 +425,7 @@ export interface PrecoPage {
 	metaTitle: string
 	metaDescription: string
 	keywords: string[]
-	faixaPreco: { periodo: string; faixaNovo: string; faixaSeminovo: string }[]
+	faixaGeral: string // Faixa ampla qualitativa (ex: "entrada do segmento esportivo até topo de linha GT")
 	diferencaVersoes: string
 	fatoresPreco: string[]
 	novoVsSeminovo: string
@@ -440,11 +440,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Porsche 911 no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Porsche 911 no Brasil atualizado. Faixa de preço novo e seminovo, diferença entre versões e fatores que impactam o valor. Attra Veículos.',
 		keywords: ['preço porsche 911', 'porsche 911 preço brasil', 'quanto custa porsche 911', 'porsche 911 valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 800 mil a R$ 3,5 mi', faixaSeminovo: 'R$ 500 mil a R$ 2,5 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 400 mil a R$ 1,8 mi' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 350 mil a R$ 1,5 mi' },
-		],
+		faixaGeral: 'O 911 tem faixa ampla: a versão Carrera base representa a entrada do segmento, enquanto as versões GT e Turbo S posicionam-se no topo de linha, com variação significativa entre zero km e seminovos bem conservados. Consulte valores atualizados diretamente no estoque.',
 		diferencaVersoes: 'A versão Carrera base parte do menor valor. A Turbo S e GT3 RS são as mais valorizadas. Versões GT mantêm ou até valorizam com o tempo, especialmente com baixa quilometragem.',
 		fatoresPreco: ['Quilometragem (abaixo de 20 mil km valoriza significativamente)', 'Histórico completo na rede autorizada', 'Opcionais de fábrica (PCCB, Sport Chrono, cores especiais)', 'Condição dos pneus e freios (especialmente cerâmicos)'],
 		novoVsSeminovo: 'O 911 seminovo é uma das melhores compras do segmento esportivo. Modelos com 2 a 3 anos perdem entre 15% e 25% do valor de zero km, enquanto oferecem a mesma experiência de condução. Versões GT são exceção: muitas valorizam acima do preço de tabela.',
@@ -457,11 +453,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço BMW M3 no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do BMW M3 no Brasil atualizado. Faixa de preço novo e seminovo, versões e fatores que impactam o valor. Attra Veículos.',
 		keywords: ['preço bmw m3', 'bmw m3 preço brasil', 'quanto custa bmw m3', 'bmw m3 valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 700 mil a R$ 1,2 mi', faixaSeminovo: 'R$ 500 mil a R$ 900 mil' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 350 mil a R$ 600 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 250 mil a R$ 450 mil' },
-		],
+		faixaGeral: 'O M3 posiciona-se no segmento intermediário de sedans esportivos. A versão Standard é a entrada; Competition e CS elevam consideravelmente o valor. Seminovos da geração anterior oferecem excelente relação custo-performance. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O M3 Standard é a versão de entrada. O Competition adiciona potência e diferencial ativo. O CS é a versão mais exclusiva com menos peso e mais potência.',
 		fatoresPreco: ['Quilometragem e histórico de uso (pista x rua)', 'Versão (Standard, Competition, xDrive, CS)', 'Condição do motor S58 e câmbio', 'Opcionais como bancos M e pacote Carbon'],
 		novoVsSeminovo: 'O M3 seminovo da geração G80 oferece boa relação custo-performance. A geração anterior F80 é mais acessível e ainda muito competente. A depreciação inicial é de 20% a 30% nos primeiros 3 anos.',
@@ -474,11 +466,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Mercedes C63 AMG no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Mercedes C63 AMG no Brasil. Faixa de preço V8 e híbrido, diferença entre versões. Attra Veículos.',
 		keywords: ['preço mercedes c63 amg', 'c63 amg preço brasil', 'quanto custa c63 amg', 'mercedes amg c63 valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 800 mil a R$ 1,3 mi', faixaSeminovo: 'R$ 500 mil a R$ 800 mil' },
-			{ periodo: '3 a 6 anos (V8)', faixaNovo: '-', faixaSeminovo: 'R$ 350 mil a R$ 550 mil' },
-			{ periodo: '6 a 10 anos (V8)', faixaNovo: '-', faixaSeminovo: 'R$ 280 mil a R$ 450 mil' },
-		],
+		faixaGeral: 'O C63 AMG abrange desde versões de entrada até a linha S de alta performance. As versões V8 (W205) estão em tendência de valorização pela descontinuação do motor. A nova geração híbrida reposiciona o modelo. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'A versão S entrega mais potência e equipamentos. O Coupé tem visual mais esportivo. A nova geração W206 com 4 cilindros híbrido divide opiniões, mas oferece potência superior com auxílio elétrico.',
 		fatoresPreco: ['Motor V8 (W205) vs 4 cilindros híbrido (W206)', 'Quilometragem e histórico de manutenção AMG', 'Versão (C 63, C 63 S, C 63 S Coupé)', 'Condição dos pneus e sistema de freios AMG'],
 		novoVsSeminovo: 'As versões V8 (W205) estão se valorizando no mercado de seminovos por serem as últimas da linhagem V8. Comprar um V8 bem conservado pode ser investimento de médio prazo.',
@@ -491,11 +479,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Audi RS6 no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Audi RS6 Avant no Brasil. Faixa de preço, versões e análise de valor. Attra Veículos.',
 		keywords: ['preço audi rs6', 'audi rs6 preço brasil', 'quanto custa audi rs6', 'audi rs6 avant valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 1 mi a R$ 1,5 mi', faixaSeminovo: 'R$ 750 mil a R$ 1,2 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 600 mil a R$ 900 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 400 mil a R$ 700 mil' },
-		],
+		faixaGeral: 'O RS6 Avant é posicionado no topo do segmento de peruas esportivas. A exclusividade e o motor V8 biturbo mantêm alto valor de revenda. Seminovos recentes depreciam moderadamente. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O RS6 Avant Standard já vem completo. A versão Performance adiciona 30 cv e detalhes exclusivos. Ambas compartilham o mesmo motor V8 4.0L biturbo.',
 		fatoresPreco: ['Quilometragem (RS6 com menos de 15 mil km mantém valor alto)', 'Pacote de opcionais (Dynamic, Design, Black Optic)', 'Histórico completo na rede Audi', 'Condição da suspensão pneumática'],
 		novoVsSeminovo: 'O RS6 seminovo recente é uma compra inteligente. A depreciação nos primeiros 2 anos é moderada (15% a 20%) e o carro mantém alto valor de revenda pela exclusividade.',
@@ -508,11 +492,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Porsche Cayenne no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Porsche Cayenne no Brasil. Todas as versões, faixa de preço novo e seminovo. Attra Veículos.',
 		keywords: ['preço porsche cayenne', 'cayenne preço brasil', 'quanto custa porsche cayenne', 'cayenne valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 600 mil a R$ 1,8 mi', faixaSeminovo: 'R$ 400 mil a R$ 1,3 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 300 mil a R$ 800 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 200 mil a R$ 500 mil' },
-		],
+		faixaGeral: 'O Cayenne varia bastante conforme versão: a base é a entrada do portfólio SUV Porsche, enquanto Turbo GT representa o topo. O formato Coupé tem posicionamento ligeiramente acima do SUV convencional. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O Cayenne base já é completo. S e GTS oferecem mais potência. Turbo e Turbo GT são as versões de performance extrema. E-Hybrid combina economia urbana com potência.',
 		fatoresPreco: ['Versão (base, S, GTS, Turbo, Turbo GT, E-Hybrid)', 'Quilometragem e histórico de revisões Porsche', 'Opcionais (PASM, ar condicionado 4 zonas, Pack Sport)', 'Formato (SUV ou Coupé)'],
 		novoVsSeminovo: 'O Cayenne seminovo é excelente compra. A depreciação nos primeiros 3 anos é de 20% a 30%. Versões de 3 a 5 anos oferecem ótimo custo-benefício mantendo a qualidade Porsche.',
@@ -525,11 +505,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Porsche Macan no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Porsche Macan no Brasil. Faixa de preço novo e seminovo, versões disponíveis. Attra Veículos.',
 		keywords: ['preço porsche macan', 'macan preço brasil', 'quanto custa porsche macan', 'macan valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 450 mil a R$ 800 mil', faixaSeminovo: 'R$ 300 mil a R$ 600 mil' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 200 mil a R$ 400 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 150 mil a R$ 300 mil' },
-		],
+		faixaGeral: 'O Macan é a forma mais acessível de entrar no universo Porsche. A versão base é competitiva no segmento de SUVs compactos premium, enquanto o GTS e Turbo elevam o posicionamento. Seminovos oferecem desconto significativo sobre o zero km. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O Macan base é a versão mais acessível da Porsche. GTS com V6 biturbo é a versão com melhor custo-benefício em performance. Turbo é o topo com máxima potência.',
 		fatoresPreco: ['Versão (base, S, GTS, Turbo)', 'Quilometragem e revisões na rede Porsche', 'Opcionais (Sport Chrono, PASM, teto panorâmico)', 'Geração do modelo'],
 		novoVsSeminovo: 'O Macan é o Porsche mais acessível e um dos que mais deprecia nos primeiros anos (25% a 35%). Isso o torna uma excelente compra como seminovo.',
@@ -542,11 +518,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço BMW X5 no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do BMW X5 no Brasil. Faixa de preço, versões e comparação novo vs seminovo. Attra Veículos.',
 		keywords: ['preço bmw x5', 'bmw x5 preço brasil', 'quanto custa bmw x5', 'bmw x5 valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 600 mil a R$ 1,2 mi', faixaSeminovo: 'R$ 400 mil a R$ 900 mil' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 250 mil a R$ 550 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 180 mil a R$ 400 mil' },
-		],
+		faixaGeral: 'O X5 posiciona-se no centro do segmento de SUVs premium. O xDrive40i é o mais equilibrado, enquanto o M50i e M Competition ocupam patamares superiores. Seminovos de 3 a 5 anos oferecem ótimo custo-benefício. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O xDrive40i é a versão mais equilibrada. O M50i entrega performance com motor V8. O X5 M Competition é o extremo com mais de 600 cv.',
 		fatoresPreco: ['Versão e motorização', 'Quilometragem e histórico BMW', 'Pacote de opcionais e acabamento', 'Condição da suspensão e eletrônica'],
 		novoVsSeminovo: 'O X5 seminovo é uma compra inteligente. A depreciação dos primeiros 3 anos é de 25% a 35%, oferecendo acesso a um SUV premium completo por valor significativamente menor.',
@@ -559,11 +531,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço BMW X6 no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do BMW X6 no Brasil. SUV coupé com preço, versões e análise de valor. Attra Veículos.',
 		keywords: ['preço bmw x6', 'bmw x6 preço brasil', 'quanto custa bmw x6', 'bmw x6 valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 650 mil a R$ 1,3 mi', faixaSeminovo: 'R$ 400 mil a R$ 1 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 280 mil a R$ 600 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 200 mil a R$ 450 mil' },
-		],
+		faixaGeral: 'O X6 tem posicionamento ligeiramente acima do X5 pelo perfil coupé. O xDrive40i é a versão principal, M50i e X6 M Competition representam o topo. Deprecia um pouco mais que o X5 nos primeiros anos. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O X6 xDrive40i é a versão mais vendida. O M50i adiciona motor V8. O X6 M Competition é a versão de performance máxima.',
 		fatoresPreco: ['Versão e motorização', 'Quilometragem e histórico', 'Acabamento interno e opcionais', 'Condição geral do veículo'],
 		novoVsSeminovo: 'O X6 deprecia ligeiramente mais que o X5 pelo perfil menos prático. Seminovos de 2 a 4 anos oferecem desconto de 30% a 40% sobre o zero km.',
@@ -576,11 +544,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Audi Q7 no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Audi Q7 no Brasil. SUV 7 lugares com preço, versões e análise. Attra Veículos.',
 		keywords: ['preço audi q7', 'audi q7 preço brasil', 'quanto custa audi q7', 'audi q7 valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 500 mil a R$ 900 mil', faixaSeminovo: 'R$ 350 mil a R$ 700 mil' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 200 mil a R$ 450 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 150 mil a R$ 300 mil' },
-		],
+		faixaGeral: 'O Q7 posiciona-se na faixa intermediária dos SUVs premium de 7 lugares. O 45 TFSI é a entrada, enquanto o SQ7 eleva significativamente o valor. Seminovos de 3 a 5 anos depreciam consideravelmente, criando oportunidades. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O Q7 45 TFSI é a versão de entrada. O 55 TFSI oferece mais potência com motor V6. O SQ7 é a versão de performance com motor V8 diesel ou gasolina.',
 		fatoresPreco: ['Versão e motorização', 'Quilometragem e revisões Audi', 'Condição da terceira fileira e interiores', 'Suspensão pneumática (quando equipado)'],
 		novoVsSeminovo: 'O Q7 tem depreciação moderada a alta nos primeiros anos (30% a 40%). Isso torna os seminovos de 3 a 5 anos excelentes oportunidades para quem busca 7 lugares premium.',
@@ -593,12 +557,8 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Audi Q8 no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Audi Q8 no Brasil. SUV coupé de luxo com preço, versões e análise. Attra Veículos.',
 		keywords: ['preço audi q8', 'audi q8 preço brasil', 'quanto custa audi q8', 'audi q8 valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 700 mil a R$ 1,5 mi', faixaSeminovo: 'R$ 450 mil a R$ 1,2 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 350 mil a R$ 800 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 250 mil a R$ 600 mil' },
-		],
-		diferencaVersoes: 'O Q8 55 TFSI é a versão principal. O SQ8 adiciona V8 diesel. O RS Q8 é o topo absoluto com V8 gasolina biturbo de 600 cv.',
+		faixaGeral: 'O Q8 posiciona-se no segmento alto dos SUVs coupé. O 55 TFSI é a versão principal, SQ8 adiciona performance, e o RS Q8 é o topo absoluto da linha. Versões RS mantêm valor acima da média pela exclusividade. Consulte valores atualizados no estoque.',
+		diferencaVersoes: 'O Q8 55 TFSI é a versão principal. O SQ8 adiciona V8 diesel. O RS Q8 é o topo absoluto com V8 gasolina biturbo.',
 		fatoresPreco: ['Versão (55 TFSI, SQ8, RS Q8)', 'Quilometragem e estado geral', 'Pacote tecnológico (dupla tela, head-up display)', 'Condição da suspensão adaptativa'],
 		novoVsSeminovo: 'O Q8 deprecia entre 25% e 35% nos primeiros 3 anos. Versões RS Q8 mantêm valor acima da média pela exclusividade e performance.',
 		valeAPena: 'Sim, especialmente como seminovo. Oferece o melhor da tecnologia Audi com design premium e presença marcante.',
@@ -610,11 +570,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Range Rover Sport no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Range Rover Sport no Brasil. Faixa de preço, versões e comparação. Attra Veículos.',
 		keywords: ['preço range rover sport', 'range rover sport preço brasil', 'quanto custa range rover sport', 'range rover sport valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 700 mil a R$ 1,5 mi', faixaSeminovo: 'R$ 450 mil a R$ 1,2 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 300 mil a R$ 700 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 200 mil a R$ 500 mil' },
-		],
+		faixaGeral: 'O Range Rover Sport tem variação ampla conforme motorização: P360 e P400 são as versões mais acessíveis, enquanto SVR com V8 supercharged ocupa o topo. Deprecia consideravelmente nos primeiros anos, criando boas oportunidades em seminovos. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'P360 e P400 são versões 6 cilindros. P530 com V8. SVR é a versão de performance com V8 supercharged de 575 cv.',
 		fatoresPreco: ['Versão e motorização', 'Quilometragem e histórico na rede Land Rover', 'Condição eletrônica e suspensão pneumática', 'Opcionais (teto panorâmico, sistema Meridian)'],
 		novoVsSeminovo: 'O Range Rover Sport deprecia significativamente nos primeiros anos (30% a 45%). Seminovos de 3 a 5 anos são oportunidades reais de custo-benefício.',
@@ -627,11 +583,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Land Rover Defender no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Land Rover Defender no Brasil. Versões 90, 110, 130 e V8. Faixa de preço e análise. Attra Veículos.',
 		keywords: ['preço land rover defender', 'defender preço brasil', 'quanto custa defender', 'defender valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 500 mil a R$ 1,2 mi', faixaSeminovo: 'R$ 380 mil a R$ 1 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 300 mil a R$ 700 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 250 mil a R$ 500 mil' },
-		],
+		faixaGeral: 'O Defender tem alta demanda e filas de espera, mantendo valores de seminovos próximos aos de zero km nos primeiros anos. O 90 é o mais compacto, o 110 o mais equilibrado, e o V8 é a versão de performance. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O Defender 90 é o mais compacto. O 110 é o mais equilibrado para famílias. O 130 tem capacidade máxima. O V8 é a versão de performance com 525 cv.',
 		fatoresPreco: ['Comprimento (90, 110, 130)', 'Motorização (4 cilindros, 6 cilindros, V8)', 'Quilometragem e uso (estrada x off-road)', 'Acessórios e preparação off-road'],
 		novoVsSeminovo: 'O Defender tem alta demanda e filas de espera, o que mantém preços de seminovos próximos aos de zero km nos primeiros 2 anos. Após esse período, a depreciação começa a se normalizar.',
@@ -644,11 +596,7 @@ export const PRECOS: PrecoPage[] = [
 		metaTitle: 'Preço Mercedes GLE no Brasil | Tabela Atualizada | Attra Veículos',
 		metaDescription: 'Preço do Mercedes GLE no Brasil. Faixa de preço, versões e comparação novo vs seminovo. Attra Veículos.',
 		keywords: ['preço mercedes gle', 'mercedes gle preço brasil', 'quanto custa mercedes gle', 'mercedes gle valor'],
-		faixaPreco: [
-			{ periodo: 'Últimos 3 anos', faixaNovo: 'R$ 550 mil a R$ 1,3 mi', faixaSeminovo: 'R$ 380 mil a R$ 1 mi' },
-			{ periodo: '3 a 6 anos', faixaNovo: '-', faixaSeminovo: 'R$ 250 mil a R$ 600 mil' },
-			{ periodo: '6 a 10 anos', faixaNovo: '-', faixaSeminovo: 'R$ 180 mil a R$ 400 mil' },
-		],
+		faixaGeral: 'O GLE posiciona-se no centro do segmento de SUVs premium. O GLE 450 é a versão mais equilibrada, AMG 53 adiciona esportividade, e o AMG 63 S é o topo com performance extrema. Versões AMG mantêm valor acima da média. Consulte valores atualizados no estoque.',
 		diferencaVersoes: 'O GLE 450 é a versão mais equilibrada. O AMG 53 adiciona esportividade. O AMG 63 S é o extremo com V8 biturbo de 612 cv.',
 		fatoresPreco: ['Versão e motorização', 'Quilometragem e histórico Mercedes', 'Condição do sistema MBUX e eletrônica', 'Pacote de opcionais (AMG Line, Burmester, etc.)'],
 		novoVsSeminovo: 'O GLE deprecia entre 25% e 35% nos primeiros 3 anos. Versões AMG mantêm valor acima da média. Seminovos de 2 a 4 anos oferecem excelente custo-benefício.',
@@ -703,7 +651,7 @@ export const CONDICOES: CondicaoPage[] = [
 			{ aspecto: 'Validação', descricao: 'Laudo cautelar independente, verificação de pintura original e análise técnica por especialistas.' },
 		],
 		categoriasDisponiveis: [
-			{ nome: 'SUVs Premium', href: '/comprar/preco/600-a-1-milhao' },
+			{ nome: 'SUVs Premium', href: '/comprar/faixa-preco/600-a-1-milhao' },
 			{ nome: 'Sedans Esportivos', href: '/comprar/modelo/bmw-m3' },
 			{ nome: 'Porsche', href: '/comprar/modelo/porsche-911' },
 			{ nome: 'BMW', href: '/comprar/modelo/bmw-x5' },
@@ -739,7 +687,7 @@ export const CONDICOES: CondicaoPage[] = [
 		],
 		categoriasDisponiveis: [
 			{ nome: 'Porsche 911', href: '/comprar/modelo/porsche-911' },
-			{ nome: 'Acima de R$ 1 milhão', href: '/comprar/preco/acima-de-1-milhao' },
+			{ nome: 'Acima de R$ 1 milhão', href: '/comprar/faixa-preco/acima-de-1-milhao' },
 			{ nome: 'Importação', href: '/importacao-de-veiculos-de-luxo' },
 		],
 		ctaText: 'Ver supercarros disponíveis',
@@ -987,7 +935,7 @@ export const PERFIS_COMPRADOR: PerfilComprador[] = [
 		errosComuns: ['Escolher SUV grande e difícil de manobrar', 'Priorizar potência desnecessária para o perfil de uso', 'Ignorar ergonomia e facilidade de uso da tecnologia'],
 		modelosIdeais: [
 			{ nome: 'Porsche Macan', href: '/comprar/modelo/porsche-macan', motivo: 'SUV compacto com dirigibilidade esportiva e tamanho ideal para cidade' },
-			{ nome: 'Audi Q5', href: '/comprar/preco/400-a-600-mil', motivo: 'Tamanho médio com tecnologia Audi e conforto de referência' },
+			{ nome: 'Audi Q5', href: '/comprar/faixa-preco/400-a-600-mil', motivo: 'Tamanho médio com tecnologia Audi e conforto de referência' },
 		],
 		quandoNaoEscolher: 'Se a condutora prefere carros maiores e com mais presença. Nesse caso, um Cayenne ou X5 pode ser mais adequado que um SUV compacto.',
 		ctaText: 'Consultar SUVs compactos premium disponíveis',
@@ -1022,7 +970,7 @@ export const PERFIS_COMPRADOR: PerfilComprador[] = [
 		errosComuns: ['Comprar SUV grande demais para uso exclusivamente urbano', 'Ignorar custo de manutenção e consumo urbano', 'Priorizar status sobre funcionalidade diária'],
 		modelosIdeais: [
 			{ nome: 'Porsche Macan', href: '/comprar/modelo/porsche-macan', motivo: 'O SUV compacto premium com a melhor dirigibilidade da categoria' },
-			{ nome: 'Audi Q5', href: '/comprar/preco/400-a-600-mil', motivo: 'Tamanho ideal para cidade com tecnologia Quattro e conforto Audi' },
+			{ nome: 'Audi Q5', href: '/comprar/faixa-preco/400-a-600-mil', motivo: 'Tamanho ideal para cidade com tecnologia Quattro e conforto Audi' },
 		],
 		quandoNaoEscolher: 'Se há necessidade frequente de transportar mais de 4 pessoas ou equipamentos volumosos. Nesse caso, um SUV de porte médio como X5 ou Q7 é mais indicado.',
 		ctaText: 'Consultar SUVs compactos disponíveis',

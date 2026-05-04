@@ -43,7 +43,7 @@ const SEO_PAGE_PREFIXES = [
   '/comprar/modelo/',
   '/preco/',
   '/comprar/condicao/',
-  '/comprar/preco/',
+  '/comprar/faixa-preco/',
   '/comprar/perfil/',
   '/guia/',
   '/importacao/',

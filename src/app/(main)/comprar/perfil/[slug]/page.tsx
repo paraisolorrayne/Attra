@@ -200,9 +200,9 @@ export default async function PerfilPage({ params }: PageProps) {
 				<Container>
 					<h2 className="text-lg font-bold text-foreground mb-4">Explore Mais</h2>
 					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-						<Link href="/comprar/preco/400-a-600-mil" className="text-sm text-primary hover:underline">R$ 400 a R$ 600 mil</Link>
-						<Link href="/comprar/preco/600-a-1-milhao" className="text-sm text-primary hover:underline">R$ 600 mil a R$ 1 milhão</Link>
-						<Link href="/comprar/preco/acima-de-1-milhao" className="text-sm text-primary hover:underline">Acima de R$ 1 milhão</Link>
+						<Link href="/comprar/faixa-preco/400-a-600-mil" className="text-sm text-primary hover:underline">R$ 400 a R$ 600 mil</Link>
+						<Link href="/comprar/faixa-preco/600-a-1-milhao" className="text-sm text-primary hover:underline">R$ 600 mil a R$ 1 milhão</Link>
+						<Link href="/comprar/faixa-preco/acima-de-1-milhao" className="text-sm text-primary hover:underline">Acima de R$ 1 milhão</Link>
 						<Link href="/comprar/condicao/seminovos-premium" className="text-sm text-primary hover:underline">Seminovos Premium</Link>
 						<Link href="/importacao-de-veiculos-de-luxo" className="text-sm text-primary hover:underline">Importação</Link>
 						<Link href="/por-que-comprar-na-attra" className="text-sm text-primary hover:underline">Por Que a Attra</Link>

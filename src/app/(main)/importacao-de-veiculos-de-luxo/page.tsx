@@ -198,7 +198,7 @@ export default function ImportacaoPage() {
 					<h2 className="text-lg font-bold text-foreground mb-4">Explore Mais</h2>
 					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
 						<Link href="/comprar/modelo/porsche-911" className="text-sm text-primary hover:underline">Porsche 911</Link>
-						<Link href="/comprar/preco/acima-de-1-milhao" className="text-sm text-primary hover:underline">Acima de R$ 1 Milhão</Link>
+						<Link href="/comprar/faixa-preco/acima-de-1-milhao" className="text-sm text-primary hover:underline">Acima de R$ 1 Milhão</Link>
 						<Link href="/comprar/condicao/supercarros-seminovos" className="text-sm text-primary hover:underline">Supercarros Seminovos</Link>
 						<Link href="/por-que-comprar-na-attra" className="text-sm text-primary hover:underline">Por Que a Attra</Link>
 						<Link href="/garantia-e-procedencia" className="text-sm text-primary hover:underline">Garantia e Procedência</Link>
