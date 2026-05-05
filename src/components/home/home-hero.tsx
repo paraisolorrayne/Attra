@@ -129,12 +129,13 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
               )}
             </p>
 
+            {/* Contextual link to the active vehicle — discreet on purpose,
+                so the WhatsApp/Estoque CTAs at the bottom carry the main weight. */}
             <Link
               href={`/veiculo/${activeVehicle.slug}`}
-              className="inline-flex items-center gap-2 border border-white/40 hover:border-white
-                         text-white text-sm sm:text-base font-medium px-7 sm:px-10 py-3.5 sm:py-4
-                         rounded-sm transition-colors backdrop-blur-sm
-                         hover:bg-white/5"
+              className="inline-flex items-center gap-1.5 text-white/90 hover:text-white
+                         text-sm font-medium border-b border-white/30 hover:border-white
+                         pb-1 transition-colors"
             >
               Conheça este veículo
               <ArrowRight className="w-4 h-4" />
@@ -186,32 +187,44 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
         </div>
       )}
 
-      {/* Persistent action bar — bottom of the hero, sempre visível.
-          Atende ao pedido do dono (WhatsApp + estoque "logo de cara") sem
-          competir com o protagonismo do carro no centro. */}
+      {/* Persistent action bar — convidativa.
+          Pedido explícito do dono (Thiago/Attra): CTAs precisam convidar
+          ao clique, não ficar discretos. Cores fortes + sombra + tamanho
+          generoso, mas separados do bloco editorial central pra não virar
+          layout LP. */}
       <div className="absolute inset-x-0 bottom-0 z-10
-                      bg-gradient-to-t from-black/70 to-transparent
-                      px-6 sm:px-10 py-4 sm:py-5">
+                      bg-gradient-to-t from-black/85 via-black/50 to-transparent
+                      px-6 sm:px-10 pt-12 sm:pt-16 pb-7 sm:pb-9">
         <div className="mx-auto max-w-3xl flex flex-col sm:flex-row items-stretch sm:items-center
-                        justify-center gap-2.5 sm:gap-3">
+                        justify-center gap-3 sm:gap-4">
           <a
             href={getWhatsAppUrl(whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90
-                       font-medium text-sm px-6 py-3 rounded-sm transition-colors"
+            className="group inline-flex items-center justify-center gap-2.5
+                       bg-[#25D366] hover:bg-[#1ea952] text-white
+                       font-semibold text-base sm:text-[17px]
+                       px-8 sm:px-10 py-4 sm:py-[18px] rounded-md
+                       shadow-[0_8px_24px_rgba(37,211,102,0.35)]
+                       hover:shadow-[0_10px_30px_rgba(37,211,102,0.5)]
+                       transition-all duration-200"
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-5 h-5" />
             Falar com especialista
+            <ArrowRight className="w-4 h-4 opacity-0 -ml-1 group-hover:opacity-100 group-hover:ml-0 transition-all" />
           </a>
           <Link
             href="/veiculos"
-            className="inline-flex items-center justify-center gap-2
-                       border border-white/40 hover:border-white text-white
-                       font-medium text-sm px-6 py-3 rounded-sm transition-colors"
+            className="group inline-flex items-center justify-center gap-2.5
+                       bg-white hover:bg-white/90 text-black
+                       font-semibold text-base sm:text-[17px]
+                       px-8 sm:px-10 py-4 sm:py-[18px] rounded-md
+                       shadow-[0_8px_24px_rgba(255,255,255,0.15)]
+                       hover:shadow-[0_10px_30px_rgba(255,255,255,0.25)]
+                       transition-all duration-200"
           >
-            Ver estoque
-            <ArrowRight className="w-4 h-4" />
+            Ver estoque completo
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>
