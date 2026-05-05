@@ -88,10 +88,7 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
               style={{ opacity: i === safeIndex ? 1 : 0 }}
               aria-hidden={i !== safeIndex}
             >
-              {/* Mobile: contain — carro inteiro visível centralizado.
-                  Next.js Image aplica object-fit/position via style inline,
-                  então classes condicionais não funcionam. Solução: dois
-                  Image components com display toggle (Next otimiza ambos). */}
+              {/* Mobile: contain centralizado — carro inteiro visível. */}
               <Image
                 src={vehicle.photos[0]}
                 alt={`${vehicle.brand} ${vehicle.model}`}
@@ -101,15 +98,19 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
                 style={{ objectFit: 'contain', objectPosition: 'center' }}
                 sizes="100vw"
               />
-              {/* Desktop: cover com objectPosition 40% — privilegia o lado
-                  esquerdo da foto (frente do carro em composições 3/4). */}
+              {/* Desktop: contain + position right —
+                  Foto AutoConf preserva o carro inteiro (sem cortes), e
+                  o objectPosition 'right' empurra a imagem pra direita do
+                  container. A esquerda fica naturalmente preta (bg-section)
+                  pro texto editorial. Cover cortava partes do carro
+                  (fronte/traseira) dependendo do ângulo da foto. */}
               <Image
                 src={vehicle.photos[0]}
                 alt={`${vehicle.brand} ${vehicle.model}`}
                 fill
                 priority={i === 0}
                 className="hidden lg:block"
-                style={{ objectFit: 'cover', objectPosition: '40% center' }}
+                style={{ objectFit: 'contain', objectPosition: 'right center' }}
                 sizes="100vw"
               />
             </div>
@@ -128,14 +129,15 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
           }}
         />
 
-        {/* Desktop: horizontal split (Lambo Beverly Hills pattern).
-            Painel preto sólido até 38%, cross-fade até 58%, carro limpo
-            a partir de 68%. */}
+        {/* Desktop: gradient suave de transição entre o panel preto à esquerda
+            (criado pelo bg-section) e o carro à direita (object-fit contain
+            position right). Não precisa ser forte — a esquerda já é preta
+            puro porque a imagem não cobre essa região. */}
         <div
-          className="absolute inset-0 hidden lg:block"
+          className="absolute inset-0 hidden lg:block pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, #0A0A0A 0%, #0A0A0A 38%, rgba(10,10,10,0.55) 50%, rgba(10,10,10,0.15) 58%, transparent 68%)',
+              'linear-gradient(to right, transparent 0%, transparent 35%, rgba(10,10,10,0.4) 45%, transparent 55%)',
           }}
         />
 
