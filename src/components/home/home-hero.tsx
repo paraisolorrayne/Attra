@@ -74,8 +74,11 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
       aria-label="Apresentação Attra Veículos"
       className="relative w-full h-[100svh] min-h-[640px] max-h-[920px] overflow-hidden bg-[#0A0A0A]"
     >
-      {/* Background — carro como protagonista visual, sem texto sobre ele.
-          Attra é a galeria; o carro é a obra. */}
+      {/* Background — carro empurrado pra direita (object-position: right) com
+          gradient horizontal forte à esquerda criando zona escura pra texto.
+          Lamborghini Beverly Hills pattern: carro à direita ocupando ~60% do
+          frame visualmente, texto à esquerda em zona preta sólida — sem
+          texto sobre o carro. */}
       <div className="absolute inset-0">
         {slides.length > 0 ? (
           slides.map((vehicle, i) => (
@@ -91,6 +94,7 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
                 fill
                 priority={i === 0}
                 className="object-cover"
+                style={{ objectPosition: '85% center' }}
                 sizes="100vw"
               />
             </div>
@@ -99,17 +103,41 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
           <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] via-[#0f0f0f] to-[#000]" />
         )}
 
-        {/* Single overlay — gradient bottom 40% pra legibilidade do texto à esquerda.
-            Brief: "Gradient sutil preto translúcido na metade inferior (40% opacity)". */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        {/* Mobile: vertical overlay pra texto centralizado ler sobre o carro.
+            Não dá pra fazer split horizontal em mobile (não cabe). */}
+        <div
+          className="absolute inset-0 lg:hidden"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.55) 35%, rgba(10,10,10,0.45) 60%, rgba(10,10,10,0.85) 100%)',
+          }}
+        />
+
+        {/* Desktop: horizontal split (Lambo Beverly Hills pattern).
+            Painel preto sólido até 38%, cross-fade até 58%, carro limpo
+            a partir de 68%. */}
+        <div
+          className="absolute inset-0 hidden lg:block"
+          style={{
+            background:
+              'linear-gradient(to right, #0A0A0A 0%, #0A0A0A 38%, rgba(10,10,10,0.55) 50%, rgba(10,10,10,0.15) 58%, transparent 68%)',
+          }}
+        />
+
+        {/* Slight bottom darkening — só pra reforçar a leitura da progress bar
+            sem cobrir o carro. */}
+        <div className="absolute inset-x-0 bottom-0 h-32
+                        bg-gradient-to-t from-black/60 to-transparent" />
       </div>
 
-      {/* Editorial copy — bottom-left aligned (Lambo Beverly Hills pattern).
-          Não é centralizado: empurra o olhar pra esquerda, deixa o carro
-          respirar à direita. Headline é manifesto Attra, não modelo do carro. */}
-      <div className="relative z-10 flex h-full flex-col justify-end px-8 sm:px-12 lg:px-16
-                      pb-28 sm:pb-32 lg:pb-36 max-w-3xl">
+      {/* Editorial copy.
+          Desktop: left panel, vertically centered (Lambo Beverly Hills pattern)
+          Mobile: centralizado vertical e horizontalmente sobre overlay vertical */}
+      <div className="relative z-10 flex h-full flex-col
+                      justify-center items-center text-center
+                      lg:items-start lg:text-left
+                      px-6 sm:px-10 lg:px-20 pt-24 pb-32 sm:pb-36
+                      mx-auto lg:mx-0 max-w-xl lg:max-w-[42%]">
 
         {/* Geometric eyebrow — linha champagne fina + número/contagem (DNA Lamborghini) */}
         <div className="flex items-center gap-4 mb-7 sm:mb-9">
@@ -174,21 +202,29 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
         </div>
       </div>
 
-      {/* Vehicle caption — discreta, top-right. Atribuição "qual carro estou
-          vendo" sem competir com o headline manifesto. Padrão galeria de arte. */}
+      {/* Vehicle caption — bottom-right, sobre a zona escurecida pelo gradient
+          inferior. "Etiqueta da obra" estilo galeria de arte. Posicionada do
+          lado do carro, não do texto. */}
       {activeVehicle && (
-        <div className="absolute top-24 right-8 sm:top-28 sm:right-12 z-10 text-right
-                        [text-shadow:_0_1px_6px_rgba(0,0,0,0.6)]">
-          <p
-            className="text-[10px] uppercase tracking-[0.3em] font-medium mb-1.5"
-            style={{ color: CHAMPAGNE }}
-          >
-            Em destaque
-          </p>
-          <p className="text-white/90 text-sm font-light tracking-wide">
+        <div className="absolute bottom-28 sm:bottom-32 right-8 sm:right-12 lg:right-16 z-10 text-right
+                        [text-shadow:_0_2px_8px_rgba(0,0,0,0.7)]">
+          <div className="flex items-center justify-end gap-3 mb-2">
+            <span
+              className="text-[10px] uppercase tracking-[0.3em] font-medium"
+              style={{ color: CHAMPAGNE }}
+            >
+              Em destaque
+            </span>
+            <span
+              aria-hidden
+              className="block h-px w-10"
+              style={{ backgroundColor: CHAMPAGNE }}
+            />
+          </div>
+          <p className="text-white text-base sm:text-lg font-light tracking-wide">
             {activeVehicle.brand} {activeVehicle.model}
           </p>
-          <p className="text-white/60 text-xs font-light tracking-wide mt-0.5">
+          <p className="text-white/65 text-xs font-light tracking-[0.15em] uppercase mt-1">
             {activeVehicle.year_model}
           </p>
         </div>
