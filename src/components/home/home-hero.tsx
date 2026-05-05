@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, MessageCircle } from 'lucide-react'
@@ -7,102 +8,158 @@ import { Vehicle } from '@/types'
 import { getWhatsAppUrl } from '@/lib/constants'
 
 interface HomeHeroProps {
-  vehicle?: Vehicle | null
+  /**
+   * Top vehicles to rotate as background. The component cycles through them
+   * automatically (8s each, fade transition). When empty, falls back to a
+   * static gradient background — no broken layout.
+   */
+  vehicles?: Vehicle[]
 }
 
 const whatsappMessage =
   'Olá, Attra. Gostaria de conversar com um especialista sobre um veículo premium.'
 
-export function HomeHero({ vehicle }: HomeHeroProps) {
-  const photo = vehicle?.photos?.[0]
-  const brand = vehicle?.brand
+const ROTATION_INTERVAL_MS = 8000
+
+export function HomeHero({ vehicles = [] }: HomeHeroProps) {
+  const slides = vehicles.filter(v => v.photos?.[0]).slice(0, 3)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  // Auto-rotate the background image. Pauses if user reduced motion.
+  useEffect(() => {
+    if (slides.length <= 1) return
+    const prefersReduced = typeof window !== 'undefined'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return
+
+    const id = setInterval(() => {
+      setActiveIndex(prev => (prev + 1) % slides.length)
+    }, ROTATION_INTERVAL_MS)
+    return () => clearInterval(id)
+  }, [slides.length])
+
+  const activeVehicle = slides[activeIndex] ?? null
 
   return (
-    <section className="relative w-full overflow-hidden bg-gradient-to-b from-background-soft via-background to-background">
-      {/* Watermark brand — aspirational, non-literal */}
-      {brand && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.035] select-none"
-        >
-          <span className="whitespace-nowrap text-[7rem] sm:text-[14rem] lg:text-[22rem] font-black uppercase tracking-tighter text-foreground">
-            {brand}
-          </span>
+    <section
+      aria-label="Apresentação Attra Veículos"
+      className="relative w-full h-[100svh] min-h-[600px] max-h-[900px] overflow-hidden bg-black"
+    >
+      {/* Background slides — fade between top vehicles */}
+      <div className="absolute inset-0">
+        {slides.length > 0 ? (
+          slides.map((vehicle, i) => (
+            <div
+              key={vehicle.id}
+              className="absolute inset-0 transition-opacity duration-[1500ms] ease-in-out"
+              style={{ opacity: i === activeIndex ? 1 : 0 }}
+              aria-hidden={i !== activeIndex}
+            >
+              <Image
+                src={vehicle.photos[0]}
+                alt={`${vehicle.brand} ${vehicle.model}`}
+                fill
+                priority={i === 0}
+                className="object-cover"
+                sizes="100vw"
+              />
+            </div>
+          ))
+        ) : (
+          // Fallback: gradient when no vehicles in stock
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]" />
+        )}
+
+        {/* Cinematic gradients — bottom for legibility, vignette for focus */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.5)_100%)]" />
+      </div>
+
+      {/* Top-right: brand mark of the active vehicle (subtle, luxury cue) */}
+      {activeVehicle && (
+        <div className="absolute top-24 right-6 sm:top-28 sm:right-10 z-10 text-right">
+          <p className="text-white/40 text-[10px] uppercase tracking-[0.3em] font-medium mb-1">
+            Em destaque
+          </p>
+          <p className="text-white/85 text-sm sm:text-base font-medium tracking-wide">
+            {activeVehicle.brand} {activeVehicle.model}
+          </p>
         </div>
       )}
 
-      <div className="relative mx-auto max-w-[92%] lg:max-w-[72%] pt-24 pb-10 md:pt-32 md:pb-16 lg:pt-36 lg:pb-20">
-        <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
-          {/* Copy column */}
-          <div className="relative z-10 max-w-xl">
-            <p className="text-primary text-[10px] sm:text-xs font-semibold uppercase tracking-[0.22em] mb-3 md:mb-5">
-              Curadoria nacional · Desde 2009
-            </p>
+      {/* Bottom-left: copy + CTAs */}
+      <div className="absolute inset-x-0 bottom-0 z-10 px-6 sm:px-10 lg:px-16 pb-10 sm:pb-14 lg:pb-20">
+        <div className="max-w-2xl">
+          <p className="text-white/60 text-[10px] sm:text-xs uppercase tracking-[0.28em] font-medium mb-4 sm:mb-6">
+            Attra · Curadoria nacional desde 2009
+          </p>
 
-            <h1 className="text-[1.85rem] leading-[1.08] sm:text-4xl sm:leading-[1.05] lg:text-[3.6rem] lg:leading-[1.02] font-black text-foreground tracking-tight mb-5 md:mb-6">
-              Um atendimento à altura do carro que você vai comprar.
-            </h1>
+          <h1 className="text-white font-light tracking-tight leading-[1.05] mb-7 sm:mb-9
+                         text-[clamp(2rem,6vw,4.5rem)]">
+            Um atendimento à altura
+            <span className="block font-normal">
+              do carro que você vai comprar.
+            </span>
+          </h1>
 
-            {/* CTAs come BEFORE the subhead on mobile so both sit above the fold.
-                Two-column grid on mobile keeps both buttons visible without scroll. */}
-            <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:gap-3">
-              <a
-                href={getWhatsAppUrl(whatsappMessage)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-primary hover:bg-primary-hover text-white font-semibold text-[13px] sm:text-base px-3 sm:px-7 py-3.5 sm:py-4 rounded-xl transition-colors shadow-lg shadow-primary/10"
-              >
-                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                <span>Falar com <span className="hidden sm:inline">um </span>especialista</span>
-              </a>
-              <Link
-                href="/veiculos"
-                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 bg-foreground hover:bg-foreground/90 text-background font-semibold text-[13px] sm:text-base px-3 sm:px-7 py-3.5 sm:py-4 rounded-xl transition-colors shadow-lg shadow-black/10"
-              >
-                <span>Explorar estoque</span>
-                <ArrowRight className="w-4 h-4 shrink-0" />
-              </Link>
-            </div>
+          {/* CTAs — primary solid + secondary ghost. Stacked on mobile,
+              inline on sm+. Anchored bottom-left for cinematic feel. */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-xs sm:max-w-none">
+            <a
+              href={getWhatsAppUrl(whatsappMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90
+                         font-medium text-sm sm:text-base px-7 py-4 rounded-md
+                         transition-colors shadow-xl"
+            >
+              <MessageCircle className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+              Falar com especialista
+            </a>
+            <Link
+              href="/veiculos"
+              className="inline-flex items-center justify-center gap-2 border border-white/40 hover:border-white
+                         bg-transparent text-white font-medium text-sm sm:text-base px-7 py-4 rounded-md
+                         transition-colors backdrop-blur-sm"
+            >
+              Ver estoque
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-
-          {/* Visual column — aspirational vehicle (NOT a listing card) */}
-          {photo && vehicle && (
-            <div className="relative z-10 order-last lg:order-none">
-              <Link
-                href={`/veiculo/${vehicle.slug}`}
-                aria-label={`Ver ${vehicle.brand} ${vehicle.model}`}
-                className="group block"
-              >
-                <div className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl md:rounded-3xl border border-border/60 shadow-2xl shadow-black/20">
-                  <Image
-                    src={photo}
-                    alt={`${vehicle.brand} ${vehicle.model}`}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                    sizes="(max-width: 1024px) 92vw, 44vw"
-                    priority
-                  />
-                  {/* Dark gradient for legibility */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
-
-                  {/* Caption overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
-                    <p className="text-white/70 text-[10px] uppercase tracking-[0.25em] font-semibold mb-1.5">
-                      Destaque do acervo
-                    </p>
-                    <p className="text-white text-lg sm:text-2xl font-bold leading-tight">
-                      {vehicle.brand} {vehicle.model}
-                    </p>
-                    <p className="text-white/80 text-xs sm:text-sm mt-1 inline-flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-                      Conhecer este veículo <ArrowRight className="w-4 h-4" />
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Slide indicators — bottom-right, only when multi-slide */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-10 z-10 flex items-center gap-2">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveIndex(i)}
+              aria-label={`Ver veículo ${i + 1} de ${slides.length}`}
+              aria-current={i === activeIndex}
+              className="group p-2 -m-2"
+            >
+              <span
+                className={`block h-[2px] transition-all duration-500 ${
+                  i === activeIndex
+                    ? 'w-10 bg-white'
+                    : 'w-6 bg-white/40 group-hover:bg-white/70'
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Click-through layer — clicking the background goes to the active vehicle */}
+      {activeVehicle && (
+        <Link
+          href={`/veiculo/${activeVehicle.slug}`}
+          aria-label={`Conhecer ${activeVehicle.brand} ${activeVehicle.model}`}
+          className="absolute inset-0 z-[1]"
+        />
+      )}
     </section>
   )
 }
