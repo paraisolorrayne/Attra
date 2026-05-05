@@ -44,7 +44,7 @@ export const metadata: Metadata = {
 export default async function Home() {
   // Featured vehicles for the editorial selection (top 3 premium, rotates daily)
   let editorialVehicles: Vehicle[] = []
-  let heroVehicle: Vehicle | null = null
+  let heroVehicles: Vehicle[] = []
   try {
     const result = await getVehicles({
       tipo: 'carros',
@@ -57,9 +57,10 @@ export default async function Home() {
     const sorted = [...premium].sort((a, b) => b.price - a.price)
 
     if (sorted.length > 0) {
-      // Hero sempre mostra o veículo mais caro do estoque — estável, sem
-      // competir com a Seleção Editorial logo abaixo (que já traz o top 3).
-      heroVehicle = sorted[0]
+      // Hero rotates between the top 3 most expensive vehicles in stock
+      // (cinematic background swap, see HomeHero). Same source as the
+      // Editorial Selection below — they intentionally share the lineup.
+      heroVehicles = sorted.slice(0, 3)
       editorialVehicles = sorted.slice(0, 3)
     }
   } catch (error) {
@@ -68,8 +69,8 @@ export default async function Home() {
 
   return (
     <>
-      {/* 1. Hero — premium positioning + 2 CTAs + trust chips */}
-      <HomeHero vehicle={heroVehicle} />
+      {/* 1. Hero — fullscreen cinematic with rotation between top 3 */}
+      <HomeHero vehicles={heroVehicles} />
 
       {/* 2. Captação imediata — formulário curto + fallback WhatsApp */}
       <LeadCaptureSection />

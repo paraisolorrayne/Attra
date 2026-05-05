@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { Geist, Geist_Mono, Outfit } from 'next/font/google'
+import { Geist, Geist_Mono, Outfit, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ToastProvider } from '@/components/ui/toast'
@@ -22,6 +22,15 @@ const outfit = Outfit({
   variable: '--font-outfit',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
+  display: 'swap',
+})
+
+// Editorial display serif — Cormorant Garamond carries the "Ferrari Beverly
+// Hills" editorial tone in headlines. High contrast, atemporal, free.
+const cormorant = Cormorant_Garamond({
+  variable: '--font-editorial',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
   display: 'swap',
 })
 
@@ -104,7 +113,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebsiteSchema()) }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${cormorant.variable} antialiased`}>
         {/* GTM NoScript fallback for users without JavaScript */}
         <AnalyticsNoScript />
         <ThemeProvider>
