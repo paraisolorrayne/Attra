@@ -24,6 +24,9 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-outfit);
+  /* Editorial serif — used in luxury headlines (e.g. HomeHero manifesto).
+     Backed by Cormorant Garamond (Google Fonts). */
+  --font-editorial: var(--font-editorial);
 }
 
 body {
