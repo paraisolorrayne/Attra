@@ -98,19 +98,17 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
                 style={{ objectFit: 'contain', objectPosition: 'center' }}
                 sizes="100vw"
               />
-              {/* Desktop: contain + position right —
-                  Foto AutoConf preserva o carro inteiro (sem cortes), e
-                  o objectPosition 'right' empurra a imagem pra direita do
-                  container. A esquerda fica naturalmente preta (bg-section)
-                  pro texto editorial. Cover cortava partes do carro
-                  (fronte/traseira) dependendo do ângulo da foto. */}
+              {/* Desktop: cover preenchendo o container inteiro com object-position
+                  ligeiramente à direita (60%) — mantém o carro inteiro visível
+                  (frente + traseira), com a frente caindo no meio do gradient
+                  diagonal pra evitar cut vertical. */}
               <Image
                 src={vehicle.photos[0]}
                 alt={`${vehicle.brand} ${vehicle.model}`}
                 fill
                 priority={i === 0}
                 className="hidden lg:block"
-                style={{ objectFit: 'contain', objectPosition: 'right center' }}
+                style={{ objectFit: 'cover', objectPosition: '60% center' }}
                 sizes="100vw"
               />
             </div>
@@ -129,15 +127,15 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
           }}
         />
 
-        {/* Desktop: gradient suave de transição entre o panel preto à esquerda
-            (criado pelo bg-section) e o carro à direita (object-fit contain
-            position right). Não precisa ser forte — a esquerda já é preta
-            puro porque a imagem não cobre essa região. */}
+        {/* Desktop: gradient diagonal generoso — ângulo 125deg dá inclinação
+            visível (não vertical), transição estendida 15%→75% suaviza o
+            "cut" entre zona texto e foto. A frente do carro pega o
+            gradiente médio (~40% escuro): ainda legível, sem corte abrupto. */}
         <div
           className="absolute inset-0 hidden lg:block pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, transparent 0%, transparent 35%, rgba(10,10,10,0.4) 45%, transparent 55%)',
+              'linear-gradient(125deg, #0A0A0A 0%, #0A0A0A 15%, rgba(10,10,10,0.9) 28%, rgba(10,10,10,0.7) 38%, rgba(10,10,10,0.45) 48%, rgba(10,10,10,0.22) 58%, rgba(10,10,10,0.08) 68%, transparent 78%)',
           }}
         />
 
