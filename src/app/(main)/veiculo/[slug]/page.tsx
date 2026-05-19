@@ -11,11 +11,13 @@ import { VehicleContact } from '@/components/vehicles/vehicle-contact'
 import { RelatedVehicles } from '@/components/vehicles/related-vehicles'
 import { EngineAudioPlayer } from '@/components/vehicles/engine-audio-player'
 import { AIVehicleDescription, AIVehicleDescriptionSkeleton } from '@/components/vehicles/ai-vehicle-description'
+import { VehicleSectionShowcase } from '@/components/vehicles/vehicle-section-showcase'
 import { RelatedVehiclesSkeleton } from '@/components/ui/skeleton'
 import { VehicleContextSetter } from '@/components/vehicles/vehicle-context-setter'
 import { VehicleDatasheetSection } from '@/components/vehicles/vehicle-datasheet'
 import { FAQSection } from '@/components/home'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
+import { getCachedVehicleSections, getFallbackVehicleSections, generateAndCacheVehicleSections } from '@/lib/vehicle-sections'
 import { getVehicleSoundByVehicleId } from '@/lib/vehicle-sounds-storage'
 import { findVehicleDatasheet } from '@/lib/vehicle-datasheet'
 import { formatPrice, formatMileage } from '@/lib/utils'
@@ -169,6 +171,20 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 	// Fetch engine sound; datasheet lookup is synchronous
 	const vehicleSound = await getVehicleSoundByVehicleId(vehicle.id)
 	const datasheet = findVehicleDatasheet(vehicle.brand, vehicle.model, vehicle.version)
+
+	// Vehicle section showcase (OVERVIEW / EXTERIOR / INTERIOR) — tenta cache
+	// no Supabase. Em cache miss, renderiza fallback estático (sem latência)
+	// e dispara geração Gemini em background; a próxima visita pega cacheado.
+	// Como o app roda em PM2 (VPS Interlivre, não serverless), fire-and-forget
+	// completa mesmo após a resposta ser enviada ao cliente.
+	const photoCount = vehicle.photos?.length ?? 0
+	let vehicleSections = await getCachedVehicleSections(vehicle.id, photoCount)
+	if (!vehicleSections) {
+		vehicleSections = getFallbackVehicleSections(vehicle)
+		void generateAndCacheVehicleSections(vehicle).catch((err) => {
+			console.error('[vehicle-sections] background generation failed:', err)
+		})
+	}
 
 	// Breadcrumb: skip the brand level entirely when brand is empty (rare —
 	// happens when AutoConf returns null marca_nome and we couldn't infer).
@@ -346,6 +362,12 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 				</div>
 			</Container>
 
+			{/* OVERVIEW / EXTERIOR DESIGN / INTERIOR — 3 seções editoriais
+			    com foto + copy Gemini (cacheada no Supabase). Inspirado em
+			    lamborghinibeverlyhills.com/temerario. */}
+			{vehicle.photos && vehicle.photos.length > 0 && (
+				<VehicleSectionShowcase vehicle={vehicle} sections={vehicleSections} />
+			)}
 
 			{/* Related Vehicles */}
 			<Suspense fallback={<RelatedVehiclesSkeleton />}>

@@ -30,7 +30,7 @@ interface TestimonialsData {
 
 export function TestimonialsSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
   const [data, setData] = useState<TestimonialsData | null>(null)
   const [loading, setLoading] = useState(true)
 

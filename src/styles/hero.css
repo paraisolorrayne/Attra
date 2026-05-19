@@ -261,31 +261,36 @@
   );
 }
 
-/* Desktop diagonal overlay — cria a "zona do headline" à esquerda */
+/* Desktop overlay — sombra RADIAL orgânica irradiando do canto esquerdo
+   (origem fora da viewport em -8% 50%), dissolvendo gradualmente até
+   transparente à direita. Não é split linear — é halo de sombra natural.
+   Funciona com fotos quadradas/4:3 da Attra (que não têm composição
+   editorial naturalmente escura à esquerda como o Lambo): o radial cria
+   a "zona escura" sem mostrar borda ou divisão entre texto e foto. */
 :root .home-hero-overlay-desktop {
-  background: linear-gradient(
-    125deg,
+  background: radial-gradient(
+    ellipse 78% 115% at -8% 50%,
     #ecebea 0%,
-    #ecebea 15%,
-    rgba(236, 235, 234, 0.9) 28%,
-    rgba(236, 235, 234, 0.7) 38%,
-    rgba(236, 235, 234, 0.45) 48%,
-    rgba(236, 235, 234, 0.22) 58%,
-    rgba(236, 235, 234, 0.08) 68%,
-    transparent 78%
+    #ecebea 28%,
+    rgba(236, 235, 234, 0.92) 42%,
+    rgba(236, 235, 234, 0.7) 55%,
+    rgba(236, 235, 234, 0.42) 68%,
+    rgba(236, 235, 234, 0.18) 82%,
+    rgba(236, 235, 234, 0.05) 92%,
+    transparent 100%
   );
 }
 .dark .home-hero-overlay-desktop {
-  background: linear-gradient(
-    125deg,
+  background: radial-gradient(
+    ellipse 78% 115% at -8% 50%,
     #060708 0%,
-    #060708 15%,
-    rgba(12, 13, 14, 0.9) 28%,
-    rgba(12, 13, 14, 0.7) 38%,
-    rgba(12, 13, 14, 0.45) 48%,
-    rgba(12, 13, 14, 0.22) 58%,
-    rgba(12, 13, 14, 0.08) 68%,
-    transparent 78%
+    #060708 28%,
+    rgba(12, 13, 14, 0.92) 42%,
+    rgba(12, 13, 14, 0.7) 55%,
+    rgba(12, 13, 14, 0.42) 68%,
+    rgba(12, 13, 14, 0.18) 82%,
+    rgba(12, 13, 14, 0.05) 92%,
+    transparent 100%
   );
 }
 

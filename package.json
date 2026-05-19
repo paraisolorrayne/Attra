@@ -10,7 +10,8 @@
     "start:next": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "hero:preprocess": "tsx scripts/preprocess-hero-assets.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -37,6 +38,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",
+    "tsx": "^4.22.2",
     "typescript": "^5",
     "vitest": "^4.0.18"
   }
