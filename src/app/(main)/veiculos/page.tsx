@@ -6,6 +6,7 @@ import { AdvancedFilters, CinematicVehicleCard, VehiclePagination, FeaturedVehic
 import { SortDropdown } from '@/components/vehicles/sort-dropdown'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getVehicles, type AutoConfFilters } from '@/lib/autoconf-api'
+import { getCachedHeroAsset } from '@/lib/vehicle-hero-asset'
 import { Vehicle } from '@/types'
 import { VehicleRequestForm } from '@/components/forms/vehicle-request-form'
 import { FAQSection } from '@/components/home'
@@ -377,9 +378,22 @@ export default async function VeiculosPage({ searchParams }: VeiculosPageProps) 
         </Container>
       </section>
 
-      {/* Featured vehicle hero - only on first page with no active filters */}
+      {/* Featured vehicle hero - only on first page with no active filters.
+          Tenta o cache de remove-bg pelo ID do veículo destaque; se houver
+          processado, mostra o carro flutuante (PNG transparente). Cache
+          miss cai pra foto original dentro de um card.
+          O cron de hero:preprocess processa o top 9 (hero pool + editorial
+          pool) periodicamente, então o destaque deste pool já está
+          cacheado na maioria dos dias. */}
       {featuredVehicle && (
-        <FeaturedVehicleHero vehicle={featuredVehicle} />
+        <FeaturedVehicleHero
+          vehicle={featuredVehicle}
+          noBgPhotoUrl={
+            featuredVehicle.photos?.[0]
+              ? (await getCachedHeroAsset(featuredVehicle.id, featuredVehicle.photos[0]))?.no_bg_public_url ?? null
+              : null
+          }
+        />
       )}
 
       {/* Search + Editorial Categories */}

@@ -77,7 +77,7 @@ function convertToEngineType(vehicle: VehicleWithSound): EngineType {
 export function EngineSoundSection() {
   const [activeEngine, setActiveEngine] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
   const [engineTypes, setEngineTypes] = useState<EngineType[]>([])
   const [isSoundsLoading, setIsSoundsLoading] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null)

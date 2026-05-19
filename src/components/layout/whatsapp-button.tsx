@@ -252,13 +252,13 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
           bottom: 'calc(1.5rem + env(safe-area-inset-bottom))',
         }}
         className={cn(
-          'fixed right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg transition-all duration-300 hover:scale-110',
+          'fixed right-4 sm:right-6 z-50 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg transition-all duration-300 hover:scale-110',
           // Pulse-glow limitado a ~4 ciclos (8s) pra não drenar bateria
           !hasInteracted && 'animate-pulse-glow [animation-iteration-count:4]',
         )}
         aria-label="Falar pelo WhatsApp"
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
       </a>
 
       {/* Backdrop tocável em mobile pra fechar o tooltip */}
@@ -277,13 +277,13 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
         role="dialog"
         aria-label={context.title}
         style={{
-          bottom: 'calc(6rem + env(safe-area-inset-bottom))',
+          bottom: 'calc(5.5rem + env(safe-area-inset-bottom))',
         }}
         className={cn(
-          'fixed right-6 z-50 bg-background-card border border-border rounded-2xl shadow-2xl p-5 transition-all duration-300',
-          // Mobile: largura adaptativa (viewport - 3rem), max 20rem
+          'fixed right-4 sm:right-6 z-50 bg-background-card border border-border rounded-2xl shadow-2xl p-5 transition-all duration-300',
+          // Mobile: largura adaptativa (viewport - 2rem), max 20rem
           // Desktop (sm+): largura fixa 18rem
-          'w-[calc(100vw-3rem)] max-w-xs sm:w-72',
+          'w-[calc(100vw-2rem)] max-w-xs sm:w-72',
           isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none',
         )}
         onMouseLeave={() => setIsOpen(false)}
@@ -322,10 +322,6 @@ export function WhatsAppButton({ sourcePage }: WhatsAppButtonProps) {
           <MessageCircle className="w-5 h-5" />
           {context.buttonText}
         </a>
-
-        <p className="text-xs text-foreground-secondary text-center mt-3">
-          Nossa equipe responde no horário comercial
-        </p>
       </div>
     </>
   )
