@@ -15,6 +15,7 @@ import { VehicleSectionShowcase } from '@/components/vehicles/vehicle-section-sh
 import { RelatedVehiclesSkeleton } from '@/components/ui/skeleton'
 import { VehicleContextSetter } from '@/components/vehicles/vehicle-context-setter'
 import { VehicleDatasheetSection } from '@/components/vehicles/vehicle-datasheet'
+import { VehicleSpecsFallback } from '@/components/vehicles/vehicle-specs-fallback'
 import { FAQSection } from '@/components/home'
 import { getVehicleBySlug } from '@/lib/autoconf-api'
 import { getCachedVehicleSections, getFallbackVehicleSections, generateAndCacheVehicleSections } from '@/lib/vehicle-sections'
@@ -341,9 +342,13 @@ export default async function VehiclePage({ params }: VehiclePageProps) {
 							</div>
 						)}
 
-						{/* Full Technical Datasheet (from curated database) */}
-						{datasheet && (
+						{/* Technical Datasheet — usa catálogo curado quando o modelo
+						    bate (Porsche 911, Lambo Urus, Ferrari SF90 etc.); senão,
+						    mostra ficha simplificada com dados do Autoconf. */}
+						{datasheet ? (
 							<VehicleDatasheetSection datasheet={datasheet} vehicle={vehicle} />
+						) : (
+							<VehicleSpecsFallback vehicle={vehicle} />
 						)}
 
 						{/* Contact - Mobile */}
