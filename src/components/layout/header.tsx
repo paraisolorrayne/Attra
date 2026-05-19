@@ -248,16 +248,6 @@ export function Header() {
               >
                 Estoque
               </Link>
-              <ThemeToggle
-                className={cn(
-                  'transition-all duration-300 w-11 h-11 flex items-center justify-center',
-                  isScrolled
-                    ? isLightMode
-                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
-                      : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
-                    : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
-                )}
-              />
               <button
                 ref={menuButtonRef}
                 type="button"
@@ -431,12 +421,22 @@ export function Header() {
               )}
               style={{ transitionDelay: mobileMenuOpen ? '300ms' : '0ms' }}
             >
-              <p className={cn(
-                'text-sm',
-                isLightMode ? 'text-gray-500' : 'text-white/50'
-              )}>
-                Attra Veículos © {new Date().getFullYear()}
-              </p>
+              <div className="flex items-center justify-between gap-4">
+                <p className={cn(
+                  'text-sm',
+                  isLightMode ? 'text-gray-500' : 'text-white/50'
+                )}>
+                  Attra Veículos © {new Date().getFullYear()}
+                </p>
+                <ThemeToggle
+                  className={cn(
+                    'transition-all duration-300 w-11 h-11 flex items-center justify-center',
+                    isLightMode
+                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200'
+                      : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                  )}
+                />
+              </div>
             </div>
           </Container>
         </div>

@@ -78,7 +78,7 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
   return (
     <section
       aria-label="Apresentação Attra Veículos"
-      className="home-hero-canvas relative w-full h-[100svh] min-h-[640px] max-h-[920px] overflow-hidden"
+      className="home-hero-canvas relative w-full h-[85svh] sm:h-[100svh] min-h-[560px] sm:min-h-[640px] max-h-[920px] overflow-hidden"
     >
       {/* Background — carro empurrado pra direita (object-position: right) com
           gradient horizontal forte à esquerda criando zona escura pra texto.
@@ -214,16 +214,12 @@ export function HomeHero({ vehicles = [] }: HomeHeroProps) {
           <Link
             href="/veiculos"
             className="hero-cta-primary group inline-flex items-center justify-center gap-3
-                       text-foreground
+                       text-white sm:text-foreground
                        text-xs sm:text-sm font-medium tracking-[0.22em] uppercase
                        px-9 sm:px-12 py-4 rounded-none
-                       transition-all duration-300"
-            style={{
-              borderWidth: '1px',
-              borderStyle: 'solid',
-              borderColor: WINE,
-              backgroundColor: 'rgba(168, 48, 46, 0.08)',
-            }}
+                       transition-all duration-300
+                       bg-[#A8302E] sm:bg-[rgba(168,48,46,0.08)]
+                       border border-[#A8302E]"
           >
             Explorar Estoque
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

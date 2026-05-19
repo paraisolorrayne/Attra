@@ -65,7 +65,7 @@ export function EditorialCategoryChips() {
             onClick={() => handleCategoryClick(cat.id)}
             title={cat.description}
             className={cn(
-              'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border',
+              'inline-flex items-center gap-2 px-4 sm:px-4 min-h-11 py-3 sm:py-2.5 rounded-xl text-sm font-medium transition-all border',
               isActive
                 ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
                 : 'bg-background-card border-border text-foreground-secondary hover:border-primary/40 hover:text-foreground'
