@@ -279,49 +279,59 @@ export async function generateAndCacheHeroAsset(
     return null
   }
 
-  // 1. Roda rembg via Replicate
-  const replicateUrl = await callReplicateRembg(sourcePhotoUrl)
-  if (!replicateUrl) return null
+  // 0. Checa cache existente — reutiliza no_bg se já foi processado
+  //    pra economizar a chamada do BRIA (~$0.011). Útil quando o composite
+  //    falhou em execução anterior e estamos só completando ele.
+  const existing = await getCachedHeroAsset(vehicleId, sourcePhotoUrl)
 
-  // 2. Upload pro Supabase Storage
-  const stored = await uploadToSupabaseStorage(replicateUrl, numericId)
-  if (!stored) return null
+  let noBgAsset: HeroAsset
 
-  // 3. Upsert na tabela
-  try {
-    const supabase = createAdminClient()
-    await supabase
-      .from('vehicle_hero_asset')
-      .upsert(
-        {
-          vehicle_id: numericId,
-          vehicle_slug: vehicleSlug,
-          source_photo_url: sourcePhotoUrl,
-          no_bg_storage_path: stored.storagePath,
-          no_bg_public_url: stored.publicUrl,
-        },
-        { onConflict: 'vehicle_id' },
-      )
-  } catch (error) {
-    console.error('[vehicle-hero-asset] DB upsert failed:', error)
-    return null
+  if (existing) {
+    // Cache parcial detectado — pula BRIA, reusa no_bg cached
+    noBgAsset = existing
+  } else {
+    // Cache vazio — roda pipeline completo (BRIA + upload + upsert)
+    const replicateUrl = await callReplicateRembg(sourcePhotoUrl)
+    if (!replicateUrl) return null
+
+    const stored = await uploadToSupabaseStorage(replicateUrl, numericId)
+    if (!stored) return null
+
+    try {
+      const supabase = createAdminClient()
+      await supabase
+        .from('vehicle_hero_asset')
+        .upsert(
+          {
+            vehicle_id: numericId,
+            vehicle_slug: vehicleSlug,
+            source_photo_url: sourcePhotoUrl,
+            no_bg_storage_path: stored.storagePath,
+            no_bg_public_url: stored.publicUrl,
+          },
+          { onConflict: 'vehicle_id' },
+        )
+    } catch (error) {
+      console.error('[vehicle-hero-asset] DB upsert failed:', error)
+      return null
+    }
+
+    noBgAsset = {
+      vehicle_id: numericId,
+      source_photo_url: sourcePhotoUrl,
+      no_bg_storage_path: stored.storagePath,
+      no_bg_public_url: stored.publicUrl,
+    }
   }
 
-  const noBgAsset: HeroAsset = {
-    vehicle_id: numericId,
-    source_photo_url: sourcePhotoUrl,
-    no_bg_storage_path: stored.storagePath,
-    no_bg_public_url: stored.publicUrl,
-  }
-
-  // 4. Pipeline de inpainting (Flux Fill Pro) — gera background integrado
-  //    mantendo o carro pixel-perfect. Roda em sequência depois do rembg
-  //    porque depende do PNG transparente. Se falhar, retorna apenas o
-  //    no_bg asset (componente cai pro fallback bg fixo + PNG transparente).
-  const composite = await generateComposite(numericId, stored.publicUrl)
-  if (composite) {
-    noBgAsset.composite_storage_path = composite.storagePath
-    noBgAsset.composite_public_url = composite.publicUrl
+  // Pipeline de inpainting (Flux Fill Pro) — só roda se composite ainda
+  // não existe. Reaproveita o no_bg (cacheado ou recém-gerado).
+  if (!noBgAsset.composite_public_url) {
+    const composite = await generateComposite(numericId, noBgAsset.no_bg_public_url)
+    if (composite) {
+      noBgAsset.composite_storage_path = composite.storagePath
+      noBgAsset.composite_public_url = composite.publicUrl
+    }
   }
 
   return noBgAsset
