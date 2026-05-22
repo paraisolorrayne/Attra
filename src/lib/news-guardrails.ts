@@ -4,8 +4,10 @@
  * Covers: F1, Supercars, Haute Horlogerie, High-End Finance
  */
 
+import { GEMINI_TEXT_MODEL } from './gemini-config'
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
-const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_MODEL = GEMINI_TEXT_MODEL
 const API_TIMEOUT = 10000 // 10 seconds
 
 interface ArticleValidation {
