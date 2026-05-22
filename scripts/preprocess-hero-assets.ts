@@ -78,7 +78,8 @@ async function processVehicle(vehicle: Vehicle): Promise<ProcessResult> {
   }
 
   const cached = await getCachedHeroAsset(vehicle.id, sourceUrl)
-  if (cached) {
+  // Cache COMPLETO = tem no_bg E composite. Pula sem processar.
+  if (cached && cached.composite_public_url) {
     return {
       vehicleId: vehicle.id,
       label,
@@ -87,7 +88,11 @@ async function processVehicle(vehicle: Vehicle): Promise<ProcessResult> {
     }
   }
 
-  console.log(`  [${label}] processando…`)
+  // Cache parcial (no_bg ok, composite faltando) OU cache vazio → processa.
+  // A função generateAndCacheHeroAsset reutiliza o no_bg cacheado se existir
+  // e só roda Flux Fill (sem rebuild do BRIA, economiza $0.011/veículo).
+  const stage = cached ? 'composite' : 'full'
+  console.log(`  [${label}] processando (${stage})…`)
   const asset = await generateAndCacheHeroAsset(vehicle.id, vehicle.slug, sourceUrl)
   return {
     vehicleId: vehicle.id,
