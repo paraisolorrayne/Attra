@@ -51,10 +51,69 @@ interface GeminiJsonResponse {
 // Gemini helper
 // ---------------------------------------------------------------------------
 
-async function callGemini(prompt: string): Promise<GeminiJsonResponse> {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
+const MAX_GEMINI_ATTEMPTS = 3
+const RETRY_BASE_DELAY_MS = 1500
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
+ * Extract the first balanced top-level JSON object, respecting string literals
+ * and escapes. Even with responseMimeType=json, Gemini occasionally appends
+ * stray text after the closing brace, which makes a raw JSON.parse throw
+ * "Unexpected non-whitespace character after JSON". Slicing the balanced object
+ * sidesteps that without losing the (valid) object itself.
+ */
+function extractFirstJsonObject(text: string): string | null {
+  const start = text.indexOf('{')
+  if (start === -1) return null
+  let depth = 0
+  let inString = false
+  let escaped = false
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (ch === '\\') escaped = true
+      else if (ch === '"') inString = false
+      continue
+    }
+    if (ch === '"') inString = true
+    else if (ch === '{') depth++
+    else if (ch === '}') {
+      depth--
+      if (depth === 0) return text.slice(start, i + 1)
+    }
+  }
+  return null // unbalanced → truncated, let caller retry
+}
+
+function parseGeminiJson(text: string): GeminiJsonResponse {
+  try {
+    return JSON.parse(text) as GeminiJsonResponse
+  } catch {
+    const obj = extractFirstJsonObject(text)
+    if (!obj) {
+      throw new Error(`Gemini returned non-JSON content: ${text.substring(0, 300)}...`)
+    }
+    return JSON.parse(obj) as GeminiJsonResponse
+  }
+}
+
+function countWords(html: string): number {
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&[a-z]+;/gi, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length
+}
+
+async function fetchGeminiOnce(
+  prompt: string,
+  apiKey: string
+): Promise<GeminiJsonResponse> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
@@ -69,8 +128,6 @@ async function callGemini(prompt: string): Promise<GeminiJsonResponse> {
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          // gemini-2.5-flash supports up to 65536 output tokens; long-form blog
-          // posts with embedded JSON easily exceed 8k.
           maxOutputTokens: 32768,
           responseMimeType: 'application/json',
         },
@@ -88,16 +145,51 @@ async function callGemini(prompt: string): Promise<GeminiJsonResponse> {
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text
     if (!text) throw new Error('Gemini returned empty response')
 
-    try {
-      return JSON.parse(text) as GeminiJsonResponse
-    } catch (err) {
-      throw new Error(
-        `Gemini returned non-JSON content: ${text.substring(0, 300)}... (${String(err)})`
-      )
-    }
+    return parseGeminiJson(text)
   } finally {
     clearTimeout(timeoutId)
   }
+}
+
+/**
+ * Calls Gemini with retries. Two failure modes are handled: (1) transient
+ * API/parse errors → retry; (2) parseable-but-short generations → keep the
+ * longest attempt and stop early once one clears `minWords`. Guarantees output
+ * as long as at least one attempt parsed.
+ */
+async function callGemini(prompt: string, minWords = 1200): Promise<GeminiJsonResponse> {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
+
+  let best: GeminiJsonResponse | null = null
+  let bestWords = -1
+  let lastErr: unknown
+
+  for (let attempt = 1; attempt <= MAX_GEMINI_ATTEMPTS; attempt++) {
+    try {
+      const result = await fetchGeminiOnce(prompt, apiKey)
+      const words = countWords(result.content_html ?? '')
+      if (words > bestWords) {
+        best = result
+        bestWords = words
+      }
+      if (words >= minWords) return result
+      console.warn(
+        `[gemini-blog] attempt ${attempt}/${MAX_GEMINI_ATTEMPTS} too short (${words}w < ${minWords}w), retrying`
+      )
+    } catch (err) {
+      lastErr = err
+      console.warn(
+        `[gemini-blog] attempt ${attempt}/${MAX_GEMINI_ATTEMPTS} failed: ${err instanceof Error ? err.message : String(err)}`
+      )
+    }
+    if (attempt < MAX_GEMINI_ATTEMPTS) await sleep(RETRY_BASE_DELAY_MS * attempt)
+  }
+
+  if (best) return best // never hit minWords, but publish the best we managed
+  throw lastErr instanceof Error
+    ? lastErr
+    : new Error('Gemini generation failed after retries')
 }
 
 // ---------------------------------------------------------------------------
@@ -387,7 +479,7 @@ H2s, ilustrando o que foi descrito).
 ${JSON_SCHEMA_REVIEW}
 `.trim()
 
-  const raw = await callGemini(prompt)
+  const raw = await callGemini(prompt, 2000)
   const content = sanitizeUrlLabels(sanitizePrices(injectImages(raw.content_html, images)))
 
   const carReview: CarReviewFields = {
@@ -501,7 +593,7 @@ Este é um comparativo (tipo "educativo/curadoria"), não um review de carro
 ${JSON_SCHEMA_EDUCATIVO}
 `.trim()
 
-  const raw = await callGemini(prompt)
+  const raw = await callGemini(prompt, 1000)
   const content = sanitizeUrlLabels(sanitizePrices(injectImages(raw.content_html, images)))
 
   const educativo: EducativoFields = {
@@ -581,7 +673,7 @@ Imagens disponíveis (${images.length}): use placeholders <img src="IMAGEM_0">,
 ${hasVehicle ? JSON_SCHEMA_REVIEW : JSON_SCHEMA_EDUCATIVO}
 `.trim()
 
-  const raw = await callGemini(prompt)
+  const raw = await callGemini(prompt, hasVehicle ? 1200 : 800)
   const content = sanitizeUrlLabels(sanitizePrices(injectImages(raw.content_html, images)))
 
   if (hasVehicle && input.vehicle) {
