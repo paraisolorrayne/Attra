@@ -142,31 +142,6 @@ function calculateSimilarity(terms1: Set<string>, terms2: Set<string>): number {
   return intersection.size / union.size
 }
 
-/**
- * Check if an article is too similar to any existing article
- */
-function isDuplicateArticle(
-  newTitle: string,
-  existingTitles: string[],
-  threshold: number = 0.5
-): boolean {
-  const newTerms = extractKeyTerms(newTitle)
-
-  for (const existingTitle of existingTitles) {
-    const existingTerms = extractKeyTerms(existingTitle)
-    const similarity = calculateSimilarity(newTerms, existingTerms)
-
-    if (similarity >= threshold) {
-      console.log(`[NewsIngestion] Duplicate detected (${(similarity * 100).toFixed(0)}% similar):`)
-      console.log(`  - New: "${newTitle}"`)
-      console.log(`  - Existing: "${existingTitle}"`)
-      return true
-    }
-  }
-
-  return false
-}
-
 async function fetchGNewsArticles(query: string, max: number = 15): Promise<GNewsArticle[]> {
   const params = new URLSearchParams({
     q: query,
@@ -188,9 +163,8 @@ async function fetchGNewsArticles(query: string, max: number = 15): Promise<GNew
 
 // Format a Date as YYYY-MM-DD using its local components. Using toISOString()
 // here would shift the date to UTC and, on a server ahead of UTC, roll the
-// Sunday boundary back to Saturday (week_start came out as 05-23 instead of
-// 05-24). Reading local parts keeps the label aligned with the week computed
-// from getDay()/getDate() above.
+// day boundary back (week_start came out a day early). Reading local parts
+// keeps the stored label aligned with the window computed below.
 function toLocalYmd(d: Date): string {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, '0')
@@ -198,23 +172,30 @@ function toLocalYmd(d: Date): string {
   return `${y}-${m}-${day}`
 }
 
-function getWeekRange(): { weekStart: string; weekEnd: string } {
+// The cycle window is the trailing 7 days ending at the run instant — i.e. the
+// week that just happened. This never points into the future (weekEnd = now)
+// and works even when the job runs off-schedule (manual run on a weekday).
+// startDate/endDate are the absolute boundaries used to filter article dates.
+function getWeekRange(): {
+  weekStart: string
+  weekEnd: string
+  startDate: Date
+  endDate: Date
+} {
   const now = new Date()
-  const dayOfWeek = now.getDay()
 
-  // Calculate start of week (Sunday)
-  const weekStart = new Date(now)
-  weekStart.setDate(now.getDate() - dayOfWeek)
-  weekStart.setHours(0, 0, 0, 0)
+  const endDate = new Date(now)
+  endDate.setHours(23, 59, 59, 999)
 
-  // Calculate end of week (Saturday)
-  const weekEnd = new Date(weekStart)
-  weekEnd.setDate(weekStart.getDate() + 6)
-  weekEnd.setHours(23, 59, 59, 999)
+  const startDate = new Date(now)
+  startDate.setDate(now.getDate() - 7)
+  startDate.setHours(0, 0, 0, 0)
 
   return {
-    weekStart: toLocalYmd(weekStart),
-    weekEnd: toLocalYmd(weekEnd),
+    weekStart: toLocalYmd(startDate),
+    weekEnd: toLocalYmd(endDate),
+    startDate,
+    endDate,
   }
 }
 
@@ -228,7 +209,7 @@ export async function runWeeklyNewsIngestion(): Promise<{
   let articlesInserted = 0
   
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
-  const { weekStart, weekEnd } = getWeekRange()
+  const { weekStart, weekEnd, startDate, endDate } = getWeekRange()
 
   console.log(`[NewsIngestion] Starting for week ${weekStart} to ${weekEnd}`)
 
@@ -303,9 +284,27 @@ export async function runWeeklyNewsIngestion(): Promise<{
 
     console.log(`[NewsIngestion] Fetched ${allArticles.length} articles`)
 
+    // 2.5. Keep only articles published inside the cycle window. GNews returns
+    // whatever is most recent regardless of date, so without this the page
+    // showed articles older than week_start and contradicted the "Destaques da
+    // Semana" label. publishedAt is an absolute ISO timestamp; compare in ms.
+    const startMs = startDate.getTime()
+    const endMs = endDate.getTime()
+    const inRangeArticles = allArticles.filter(({ article }) => {
+      const t = new Date(article.publishedAt).getTime()
+      if (Number.isNaN(t)) return false
+      const inRange = t >= startMs && t <= endMs
+      if (!inRange) {
+        console.log(`[NewsIngestion] Out of window (${article.publishedAt}): "${article.title.substring(0, 60)}..."`)
+      }
+      return inRange
+    })
+
+    console.log(`[NewsIngestion] ${inRangeArticles.length} articles inside window ${weekStart}..${weekEnd}`)
+
     // 3. Deduplicate by URL
     const seenUrls = new Set<string>()
-    const uniqueArticles = allArticles.filter(({ article }) => {
+    const uniqueArticles = inRangeArticles.filter(({ article }) => {
       if (seenUrls.has(article.url)) return false
       seenUrls.add(article.url)
       return true
@@ -313,17 +312,35 @@ export async function runWeeklyNewsIngestion(): Promise<{
 
     console.log(`[NewsIngestion] ${uniqueArticles.length} unique articles after URL deduplication`)
 
-    // 3.5. Deduplicate by title similarity (threshold mais alto para mais rigor)
-    const seenTitles: string[] = []
+    // 3.5. Remove near-duplicates and cap how many articles cover the same
+    // subject. Title similarity (Jaccard over key terms):
+    //   >= HARD_DUP   → same story reworded → drop entirely
+    //   >= SAME_TOPIC → same subject → keep at most MAX_PER_TOPIC of them
+    // Catches exact repeats AND topic flooding (e.g. 6x "Ferrari Luce").
+    const HARD_DUP = 0.4
+    const SAME_TOPIC = 0.28
+    const MAX_PER_TOPIC = 2
+    const acceptedTerms: Set<string>[] = []
     const deduplicatedArticles = uniqueArticles.filter(({ article }) => {
-      if (isDuplicateArticle(article.title, seenTitles, 0.5)) {
+      const terms = extractKeyTerms(article.title)
+      let topicMatches = 0
+      for (const prev of acceptedTerms) {
+        const sim = calculateSimilarity(terms, prev)
+        if (sim >= HARD_DUP) {
+          console.log(`[NewsIngestion] Near-duplicate dropped: "${article.title.substring(0, 60)}..."`)
+          return false
+        }
+        if (sim >= SAME_TOPIC) topicMatches++
+      }
+      if (topicMatches >= MAX_PER_TOPIC) {
+        console.log(`[NewsIngestion] Topic cap (${MAX_PER_TOPIC}) reached, dropped: "${article.title.substring(0, 60)}..."`)
         return false
       }
-      seenTitles.push(article.title)
+      acceptedTerms.push(terms)
       return true
     })
 
-    console.log(`[NewsIngestion] ${deduplicatedArticles.length} unique articles after similarity deduplication`)
+    console.log(`[NewsIngestion] ${deduplicatedArticles.length} unique articles after dedup + topic cap`)
 
     // 4. Pre-filter obvious non-automotive articles (fast keyword check)
     const preFilteredArticles = deduplicatedArticles.filter(({ article }) => {

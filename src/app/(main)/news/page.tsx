@@ -114,12 +114,26 @@ function formatDate(dateString: string | Date): string {
   return date.toLocaleDateString('pt-BR', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'America/Sao_Paulo',
+  })
+}
+
+// week_start / week_end are date-only strings ('YYYY-MM-DD'). new Date(str)
+// parses them as UTC midnight, so rendering in a negative-offset timezone
+// rolled the label back a day ("31 mai" showed as "30 mai"). Parse and render
+// in UTC so the stored calendar day is preserved verbatim.
+function formatWeekDate(ymd: string): string {
+  return new Date(`${ymd}T00:00:00Z`).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
   })
 }
 
 function formatWeekRange(start: string, end: string): string {
-  return `${formatDate(start)} - ${formatDate(end)}`
+  return `${formatWeekDate(start)} - ${formatWeekDate(end)}`
 }
 
 function NewsCard({ article, featured = false }: { article: NewsArticle; featured?: boolean }) {
