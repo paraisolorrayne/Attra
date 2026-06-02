@@ -15,29 +15,36 @@ git fetch origin
 git checkout master
 git pull --ff-only origin master
 
+# pm2 e node v20 estão no nvm, NÃO no PATH de um shell não-interativo
+# (`ssh host 'comando'` não carrega ~/.bashrc). Sem isto: `pm2: command not
+# found`. node/npm de sistema (/usr/bin) bastam pro build; o pm2 não.
+export PATH="/root/.nvm/versions/node/v20.20.0/bin:$PATH"
+
 # Carrega as variáveis de ambiente ANTES do build.
 # O Next.js lê .env.production automaticamente, mas se as vars estiverem
 # apenas no shell/PM2, o build não as enxerga e pode falhar.
 set -a; source .env.production; set +a
 
 npm ci
-npm run build        # dispara o postbuild que copia .next/static + public
+npm run build        # prebuild limpa o cache do standalone; postbuild copia .next/static + public
 
 # Valida que o bundle standalone foi gerado corretamente.
 test -f .next/standalone/server.js || { echo "ERRO: server.js não gerado — build falhou"; exit 1; }
 
-# Troca o processo antigo (que rodava `npm start` = `next start`) pelo
-# server.js do bundle standalone — sem isso as rotas que não são a home
-# continuam quebradas porque o process anterior ainda serve o bundle antigo.
-pm2 delete attra 2>/dev/null || true
-pm2 start .next/standalone/server.js \
-  --name attra \
-  --update-env \
-  --time \
-  --cwd "$(pwd)"
+# Reinicia o processo existente (já roda o server.js do bundle standalone).
+# Na PRIMEIRA migração de `npm start` -> server.js, troque por:
+#   pm2 delete attra 2>/dev/null || true
+#   pm2 start .next/standalone/server.js --name attra --update-env --time --cwd "$(pwd)"
+pm2 restart attra --update-env
 
 pm2 save
 ```
+
+> **ENOTEMPTY no build?** Era o servidor acumulando cache de imagens dentro de
+> `.next/standalone/.next/cache`; o `next build` falhava ao limpar o standalone
+> antigo. Resolvido pelo `prebuild` no `package.json` (limpa esse cache antes de
+> cada build). Se ainda assim acontecer, plano B com downtime curto:
+> `pm2 stop attra; rm -rf .next; npm run build; pm2 restart attra --update-env`.
 
 Depois valide:
 

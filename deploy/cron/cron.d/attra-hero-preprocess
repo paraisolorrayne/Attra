@@ -1,0 +1,4 @@
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+0 */6 * * * root /usr/local/bin/attra-hero-preprocess.sh >> /var/log/attra-hero.log 2>&1
