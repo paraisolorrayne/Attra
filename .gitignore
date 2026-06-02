@@ -46,6 +46,9 @@ next-env.d.ts
 # local data storage (admin sessions, etc)
 /data/admin-sessions.json
 
+# imagens de teste locais (não versionar)
+/public/images/hero-test-urus.jpg
+
 # Note: Sound files in public/uploads/sounds/ are now tracked in git
 # For production, consider using Vercel Blob Storage or similar
 # Previously ignored but now included for deployment
