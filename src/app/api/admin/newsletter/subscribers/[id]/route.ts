@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/admin-auth'
+import { getCurrentAdmin } from '@/lib/admin-auth-supabase'
+import { guardSupervisedAction } from '@/lib/admin-supervision'
 import { createAdminClient } from '@/lib/supabase/server'
 
 // PUT - Update subscriber
@@ -51,10 +53,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authenticated = await isAuthenticated()
-    if (!authenticated) {
+    const admin = await getCurrentAdmin()
+    if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const blocked = await guardSupervisedAction(admin, 'Excluir assinante da newsletter')
+    if (blocked) return blocked
 
     const { id } = await params
     const supabase = createAdminClient()

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAuthenticated } from '@/lib/admin-auth'
+import { getCurrentAdmin } from '@/lib/admin-auth-supabase'
+import { guardSupervisedAction } from '@/lib/admin-supervision'
 import {
   getVehicleSoundById,
   updateVehicleSound,
@@ -68,10 +70,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE - Remove vehicle sound and associated file
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const authenticated = await isAuthenticated()
-    if (!authenticated) {
+    const admin = await getCurrentAdmin()
+    if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const blocked = await guardSupervisedAction(admin, 'Excluir som de motor')
+    if (blocked) return blocked
 
     const { id } = await params
 

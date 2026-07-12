@@ -142,9 +142,13 @@ export async function canAccessRoute(pathname: string): Promise<boolean> {
   // Admin has full access
   if (admin.role === 'admin') return true
 
-  // Gerente can only access engine-sounds
+  // Gerente: funções básicas — sons de motor, gerador de criativos e os
+  // módulos com visão limitada (blog, marketing — só as próprias tarefas)
   if (admin.role === 'gerente') {
     return pathname.startsWith('/admin/engine-sounds') ||
+      pathname.startsWith('/admin/gerador-criativos') ||
+      pathname.startsWith('/admin/blog') ||
+      pathname.startsWith('/admin/marketing') ||
       pathname === '/admin/login' ||
       pathname === '/admin/reset-password'
   }

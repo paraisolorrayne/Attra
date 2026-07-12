@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getCurrentAdmin } from '@/lib/admin-auth-supabase'
+import { guardSupervisedAction } from '@/lib/admin-supervision'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,13 +70,16 @@ export async function PATCH(request: NextRequest) {
   try {
     // Check admin authentication
     const admin = await getCurrentAdmin()
-    
+
     if (!admin) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    const blocked = await guardSupervisedAction(admin, 'Alterar configurações do site')
+    if (blocked) return blocked
     
     // Only admin role can change settings
     if (admin.role !== 'admin') {
