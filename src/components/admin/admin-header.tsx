@@ -24,9 +24,11 @@ interface AdminHeaderProps {
   admin: AdminUser
 }
 
+// Chave interna `gerente` é enum no banco; na Attra o papel real é
+// colaborador de marketing — só o rótulo exibido muda.
 const roleLabels: Record<string, string> = {
   admin: 'Administrador',
-  gerente: 'Gerente',
+  gerente: 'Marketing',
 }
 
 const roleIcons: Record<string, React.ReactNode> = {

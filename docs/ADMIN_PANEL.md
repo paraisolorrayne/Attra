@@ -68,10 +68,19 @@ Crons**.
 
 ### Papéis (roles)
 
-| Papel | Permissões |
-|---|---|
-| **admin** | Acesso total a todos os módulos |
-| **gerente** | Restrito a **Sons de Motor** (`/admin/engine-sounds`), login e reset de senha |
+| Papel (chave interna) | Rótulo exibido | Permissões |
+|---|---|---|
+| **admin** | Administrador | Acesso total a todos os módulos |
+| **gerente** | **Marketing** | Funções básicas: Sons de Motor, Gerador de Criativos, Blog e Marketing (só as próprias tarefas) |
+
+> A chave `gerente` é enum no banco (legado); na Attra o papel corresponde a
+> colaborador de marketing — por isso a interface exibe "Marketing".
+
+**Supervisão de admins:** contas listadas em `ADMIN_SUPERVISED_EMAILS`
+(default: cristiane@) têm papel `admin`, mas ações destrutivas — excluir
+posts/sons/campanhas/assinantes e alterar configurações — são bloqueadas
+(403) e a aprovadora (`ADMIN_APPROVER_EMAIL`, default lorrayne@) recebe
+alerta por e-mail. Implementação em `src/lib/admin-supervision.ts`.
 
 > O `AdminHeader` filtra os itens de menu pelo papel (`allowedRoles`), e a API de cada
 > módulo aplica suas próprias checagens.
