@@ -25,6 +25,31 @@ function getAdmin() {
   }
 }
 
+// Só a linha mais recente por source é lida (loadLatestSnapshot). Sem poda,
+// a tabela cresce sem limite — chegou a 294k linhas e estourou a cota do
+// Supabase em 2026-07. Mantemos uma folga de 5 por source.
+const KEEP_PER_SOURCE = 5
+
+async function pruneOldSnapshots(source: SnapshotSource): Promise<void> {
+  const admin = getAdmin()
+  if (!admin) return
+  const { data: keep, error: selErr } = await admin
+    .from('inventory_snapshots')
+    .select('created_at')
+    .eq('source', source)
+    .order('created_at', { ascending: false })
+    .range(KEEP_PER_SOURCE - 1, KEEP_PER_SOURCE - 1)
+  if (selErr || !keep?.length) return
+  const { error } = await admin
+    .from('inventory_snapshots')
+    .delete()
+    .eq('source', source)
+    .lt('created_at', keep[0].created_at)
+  if (error) {
+    console.error('[inventory-snapshot] prune failed:', source, error.message)
+  }
+}
+
 export async function saveInventorySnapshot(
   source: SnapshotSource,
   payload: unknown,
@@ -39,7 +64,10 @@ export async function saveInventorySnapshot(
   })
   if (error) {
     console.error('[inventory-snapshot] save failed:', source, error.message)
+    return
   }
+  // Poda fire-and-forget: falha não afeta o save
+  pruneOldSnapshots(source).catch(() => {})
 }
 
 async function loadLatestSnapshot<T>(source: SnapshotSource): Promise<T | null> {
@@ -86,7 +114,9 @@ export async function appendVehicleToSnapshot(
   })
   if (error) {
     console.error('[inventory-snapshot] append vehicle failed:', error.message)
+    return
   }
+  pruneOldSnapshots(SOURCE_VEHICLE).catch(() => {})
 }
 
 export function loadLatestAdsHomeSnapshot<T>(): Promise<T | null> {

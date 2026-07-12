@@ -52,3 +52,6 @@ next-env.d.ts
 # Note: Sound files in public/uploads/sounds/ are now tracked in git
 # For production, consider using Vercel Blob Storage or similar
 # Previously ignored but now included for deployment
+
+# exports/backups locais de dados (nunca commitar)
+/backups/
