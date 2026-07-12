@@ -7,6 +7,11 @@
 
 ## TL;DR
 
+> **Atalho (2026-07):** todo o passo a passo abaixo está encapsulado em
+> `deploy/deploy-vps.sh`. Na VPS: `cd /var/www/attra && git pull --ff-only origin master && bash deploy/deploy-vps.sh`
+> (com a connection string do Supabase como argumento, faz também a
+> manutenção de retenção do banco + VACUUM).
+
 No diretório do projeto na VPS (normalmente `/var/www/attra`), rodar:
 
 ```bash
