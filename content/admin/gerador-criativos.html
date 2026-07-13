@@ -542,7 +542,7 @@ function renderClassico(){
 
   ctx.restore(); // fim da sombra do título
 
-  const DIAG_L = 1500, DIAG_R = 1460;
+  const DIAG_L = 1440, DIAG_R = 1400;
   g = ctx.createLinearGradient(0, PHOTO1_H, 0, DIAG_L);
   g.addColorStop(0, '#dbdbdd'); g.addColorStop(1, '#c9c9cc');
   ctx.fillStyle = g;
@@ -590,9 +590,9 @@ function renderClassico(){
     if(text !== b) text += '…';
     return { text, size };
   });
-  let gap = 60;
+  let gap = 30;
   if(items.length > 1)
-    gap = Math.max(24, Math.min(66, (areaBot - areaTop - items.length*lineH) / (items.length - 1)));
+    gap = Math.max(20, Math.min(30, (areaBot - areaTop - items.length*lineH) / (items.length - 1)));
   const totalH = items.length*lineH + gap*Math.max(0, items.length-1);
   let by = areaTop + Math.max(0, (areaBot - areaTop - totalH)/2) + 30;
 
