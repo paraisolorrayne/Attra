@@ -542,19 +542,19 @@ function renderClassico(){
   ctx.restore();
 
   const preco = val('preco');
-  if(preco) spacedText('R$ ' + preco, W/2, 1106, '300 60px Montserrat, sans-serif', 12, '#5a5a5f');
+  if(preco) spacedText('R$ ' + preco, W/2, 1070, '300 60px Montserrat, sans-serif', 12, '#5a5a5f');
 
   const kmParts = [];
   if(val('km')) kmParts.push(val('km') + ' KM');
   if(val('kmextra')) kmParts.push(val('kmextra').toUpperCase());
   if(kmParts.length)
-    spacedText(kmParts.join('  |  '), W/2, 1154, '500 24px Montserrat, sans-serif', 5, '#6f6f74');
+    spacedText(kmParts.join('  |  '), W/2, 1118, '500 24px Montserrat, sans-serif', 5, '#6f6f74');
 
   const bullets = ['b1','b2','b3','b4'].map(val).filter(Boolean);
   const bFont = '700 34px Montserrat, sans-serif';
   const textX = 208, maxW = 770, lineH = 44;
   let blocks = bullets.map(b => wrapLines(b, bFont, maxW));
-  const areaTop = 1232, areaBot = Math.min(DIAG_L, DIAG_R) - 26;
+  const areaTop = 1200, areaBot = Math.min(DIAG_L, DIAG_R) - 26;
   const linesH = blocks.reduce((a, ls) => a + ls.length*lineH, 0);
   let gap = 52;
   if(blocks.length > 1)
