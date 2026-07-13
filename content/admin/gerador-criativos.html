@@ -158,12 +158,12 @@
     </fieldset>
 
     <fieldset id="sec-destaques">
-      <legend>Destaques (até 4)</legend>
-      <input type="text" id="b1" value="Cor Cinza Selenita Magno + interior bicolor preto e Cognac" style="margin-top:8px">
+      <legend>Destaques (até 3, uma linha cada)</legend>
+      <input type="text" id="b1" value="Cor Cinza Selenita Magno" style="margin-top:8px">
       <input type="text" id="b2" value="Motor 2.0 turbo gasolina 285 cv / 61,2 kgfm" style="margin-top:8px">
       <input type="text" id="b3" value="Pacote AMG Line" style="margin-top:8px">
-      <input type="text" id="b4" value="Teto solar panorâmico com abertura" style="margin-top:8px">
-      <div class="hint">Deixe em branco para omitir. Textos longos quebram de linha automaticamente.</div>
+      <div class="hint">Deixe em branco para omitir. Cada destaque ocupa UMA linha —
+        a fonte encolhe até caber e, se ainda passar, corta com "…". Seja direto.</div>
     </fieldset>
 
     <fieldset id="sec-specs" style="display:none">
@@ -542,7 +542,7 @@ function renderClassico(){
 
   ctx.restore(); // fim da sombra do título
 
-  const DIAG_L = 1552, DIAG_R = 1478;
+  const DIAG_L = 1500, DIAG_R = 1460;
   g = ctx.createLinearGradient(0, PHOTO1_H, 0, DIAG_L);
   g.addColorStop(0, '#dbdbdd'); g.addColorStop(1, '#c9c9cc');
   ctx.fillStyle = g;
@@ -572,27 +572,39 @@ function renderClassico(){
   if(kmParts.length)
     spacedText(kmParts.join('  |  '), W/2, 1118, '500 24px Montserrat, sans-serif', 5, '#6f6f74');
 
-  const bullets = ['b1','b2','b3','b4'].map(val).filter(Boolean);
-  const bFont = '700 34px Montserrat, sans-serif';
-  const textX = 208, maxW = 770, lineH = 44;
-  let blocks = bullets.map(b => wrapLines(b, bFont, maxW));
+  // Máximo 3 destaques, UMA linha cada: a fonte encolhe até caber (mín. 25px)
+  // e em último caso o texto é cortado com "…" — nunca quebra de linha.
+  const bullets = ['b1','b2','b3'].map(val).filter(Boolean);
+  const textX = 208, maxW = 800, lineH = 44;
   const areaTop = 1188, areaBot = Math.min(DIAG_L, DIAG_R) - 26;
-  const linesH = blocks.reduce((a, ls) => a + ls.length*lineH, 0);
-  let gap = 52;
-  if(blocks.length > 1)
-    gap = Math.max(18, Math.min(52, (areaBot - areaTop - linesH) / (blocks.length - 1)));
-  const totalH = linesH + gap*Math.max(0, blocks.length-1);
+  const items = bullets.map(b => {
+    let size = 34;
+    ctx.font = `700 ${size}px Montserrat, sans-serif`;
+    while(size > 25 && ctx.measureText(b).width > maxW){
+      size -= 1;
+      ctx.font = `700 ${size}px Montserrat, sans-serif`;
+    }
+    let text = b;
+    while(text.length > 4 && ctx.measureText(text + '…').width > maxW)
+      text = text.slice(0, -1).trimEnd();
+    if(text !== b) text += '…';
+    return { text, size };
+  });
+  let gap = 60;
+  if(items.length > 1)
+    gap = Math.max(24, Math.min(66, (areaBot - areaTop - items.length*lineH) / (items.length - 1)));
+  const totalH = items.length*lineH + gap*Math.max(0, items.length-1);
   let by = areaTop + Math.max(0, (areaBot - areaTop - totalH)/2) + 30;
 
-  for(const lines of blocks){
+  for(const it of items){
     const iy = by - 11;
     ctx.strokeStyle = '#1c1c1e'; ctx.lineWidth = 3.5;
     ctx.beginPath(); ctx.arc(158, iy, 16, 0, Math.PI*2); ctx.stroke();
     ctx.fillStyle = '#1c1c1e';
     ctx.beginPath(); ctx.arc(158, iy, 7.5, 0, Math.PI*2); ctx.fill();
-    ctx.font = bFont; ctx.fillStyle = '#161618';
-    lines.forEach((ln, i) => ctx.fillText(ln, textX, by + i*lineH));
-    by += lines.length*lineH + gap;
+    ctx.font = `700 ${it.size}px Montserrat, sans-serif`; ctx.fillStyle = '#161618';
+    ctx.fillText(it.text, textX, by);
+    by += lineH + gap;
   }
 
   ctx.save();
@@ -921,7 +933,7 @@ $('clearlogo').addEventListener('click', () => {
   state.logo = null; localStorage.removeItem('attra_logo'); $('logofile').value = ''; render();
 });
 
-['marca','modelo','ano','preco','km','kmextra','b1','b2','b3','b4',
+['marca','modelo','ano','preco','km','kmextra','b1','b2','b3',
  'selo','et1','et2'].forEach(id =>
   $(id).addEventListener('input', render));
 
