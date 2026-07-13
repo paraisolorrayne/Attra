@@ -63,6 +63,14 @@
   .sliders{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:6px;}
   .sliders label{margin:4px 0 2px;}
   .hint{font-size:11px; color:var(--muted); margin-top:6px; line-height:1.5;}
+  .estq-item{display:block; width:100%; text-align:left; background:var(--panel2);
+    border:1px solid var(--line); color:var(--txt); border-radius:8px;
+    padding:9px 12px; margin-top:8px; cursor:pointer; font-family:inherit; font-size:13px;}
+  .estq-item:hover{border-color:var(--red);}
+  #estoquefotos{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  .estq-thumb{width:86px; height:64px; object-fit:cover; border-radius:6px;
+    border:1px solid var(--line); cursor:pointer;}
+  .estq-thumb:hover{border-color:var(--red);}
   .btn{
     background:var(--red); color:#fff; border:none; border-radius:10px;
     padding:16px 20px; font-size:15px; font-weight:700; letter-spacing:1px;
@@ -115,6 +123,20 @@
         <button class="typebtn" data-tipo="destaque">2 · Destaque<small>claro, ficha técnica</small></button>
         <button class="typebtn" data-tipo="estoque">3 · Estoque<small>lista de até 4 carros</small></button>
       </div>
+    </fieldset>
+
+    <fieldset id="sec-estoque">
+      <legend>Buscar do estoque (opcional)</legend>
+      <div class="row">
+        <div style="flex:3"><label>Veículo no estoque</label>
+          <input type="text" id="estoquebusca" placeholder="Ex.: Porsche 911, GLC 300, Purosangue..."></div>
+        <div style="flex:1; display:flex; align-items:flex-end">
+          <button class="btn secondary" id="estoquebtn" type="button" style="width:100%; padding:11px 10px; font-size:12px">BUSCAR</button></div>
+      </div>
+      <div id="estoqueresultados"></div>
+      <div id="estoquefotos"></div>
+      <div class="hint">Selecionar um veículo preenche os campos abaixo (tudo continua editável na mão).
+        Clique numa foto para usá-la como <strong>Foto principal</strong>; com Shift, vira a <strong>Foto 2</strong>.</div>
     </fieldset>
 
     <fieldset id="sec-veiculo">
@@ -938,6 +960,72 @@ $('download').addEventListener('click', () => {
 });
 
 /* ---------- init ---------- */
+/* ---------- busca no estoque (preenche os campos; manual continua valendo) ---------- */
+const fmtBR = n => Number(n).toLocaleString('pt-BR');
+
+async function buscarEstoque(){
+  const q = val('estoquebusca');
+  const box = $('estoqueresultados');
+  $('estoquefotos').innerHTML = '';
+  if(!q){ box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="hint">Buscando no estoque…</div>';
+  try{
+    const r = await fetch('/api/vehicles?search=' + encodeURIComponent(q) + '&limit=8');
+    const d = await r.json();
+    const vs = (d.vehicles || []).slice(0, 8);
+    if(!vs.length){ box.innerHTML = '<div class="hint">Nenhum veículo encontrado para "' + q + '".</div>'; return; }
+    box.innerHTML = '';
+    for(const v of vs){
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'estq-item';
+      b.textContent = [v.brand, v.model, v.version, v.year_model].filter(Boolean).join(' ')
+        + ' — R$ ' + fmtBR(v.price) + ' · ' + fmtBR(v.mileage) + ' km';
+      b.addEventListener('click', () => aplicarVeiculo(v));
+      box.appendChild(b);
+    }
+  }catch(_){
+    box.innerHTML = '<div class="hint">Busca indisponível aqui — funciona dentro do admin do site (menu Criativos).</div>';
+  }
+}
+
+function aplicarVeiculo(v){
+  $('marca').value  = (v.brand || '').toUpperCase();
+  $('modelo').value = [v.model, v.version].filter(Boolean).join(' ').toUpperCase();
+  $('ano').value    = v.year_model || '';
+  $('preco').value  = v.price ? fmtBR(v.price) : '';
+  $('km').value     = v.mileage ? fmtBR(v.mileage) : '';
+  if(!val('b1') && v.color) $('b1').value = 'Cor ' + v.color;
+  montarFotosEstoque(v);
+  render();
+}
+
+function montarFotosEstoque(v){
+  const wrap = $('estoquefotos');
+  wrap.innerHTML = '';
+  // /_next/image = proxy da própria origem → canvas continua exportável
+  for(const u of (v.photos || []).slice(0, 12)){
+    const t = document.createElement('img');
+    t.src = '/_next/image?url=' + encodeURIComponent(u) + '&w=256&q=60';
+    t.className = 'estq-thumb';
+    t.title = 'Clique: Foto principal · Shift+clique: Foto 2';
+    t.addEventListener('click', ev => {
+      const img = new Image();
+      img.onload = () => {
+        if(ev.shiftKey){ state.foto2 = img; }
+        else { state.foto1 = img; autoFrameFoto1(img); }
+        render();
+      };
+      img.src = '/_next/image?url=' + encodeURIComponent(u) + '&w=1080&q=85';
+    });
+    wrap.appendChild(t);
+  }
+}
+
+$('estoquebtn').addEventListener('click', buscarEstoque);
+$('estoquebusca').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); buscarEstoque(); }
+});
+
 const savedLogo = (()=>{ try{ return localStorage.getItem('attra_logo'); }catch(_){ return null; } })();
 if(savedLogo){ const img = new Image(); img.onload = () => { state.logo = img; render(); }; img.src = savedLogo; }
 
