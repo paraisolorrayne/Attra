@@ -37,10 +37,17 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ email, password }),
       })
 
-      const data = await response.json()
+      // Resposta não-JSON (ex.: página de erro do Nginx num 502) não pode
+      // virar o erro críptico do JSON.parse — mostra o status HTTP real.
+      let data: { error?: string; retryAfter?: number } = {}
+      try {
+        data = await response.json()
+      } catch {
+        throw new Error(`Servidor indisponível no momento (HTTP ${response.status}). Aguarde alguns segundos e tente novamente.`)
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
+        throw new Error(data.error || `Falha no login (HTTP ${response.status})`)
       }
 
       // Redirect to intended page or default based on user role
