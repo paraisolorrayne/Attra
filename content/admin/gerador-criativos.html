@@ -563,7 +563,7 @@ function renderClassico(){
   ctx.closePath(); ctx.fill();
   ctx.restore();
 
-  const preco = val('preco');
+  const preco = val('preco').replace(/^R\$\s*/i, '');
   if(preco) spacedText('R$ ' + preco, W/2, 1062, '300 48px Montserrat, sans-serif', 10, '#5a5a5f');
 
   const kmParts = [];
@@ -600,7 +600,14 @@ function renderClassico(){
   ctx.moveTo(0, DIAG_L); ctx.lineTo(W, DIAG_R);
   ctx.lineTo(W, H); ctx.lineTo(0, H);
   ctx.closePath(); ctx.clip();
-  if(state.foto2) drawPhoto(state.foto2, 0, DIAG_R - 20, W, H - DIAG_R + 20, state.f2);
+  if(state.foto2){
+    // foto muito "alta" pra faixa panorâmica? mostra inteira com blur nas
+    // laterais em vez de decapitar teto/rodas (Escalade, RAM etc.)
+    const bw = W, bh = H - DIAG_R + 20;
+    const cover = Math.max(bw/state.foto2.width, bh/state.foto2.height);
+    const cropY = (state.foto2.height*cover) / bh;
+    drawPhoto(state.foto2, 0, DIAG_R - 20, bw, bh, state.f2, cropY > 1.35 ? 'fit' : undefined);
+  }
   else placeholder(0, DIAG_R, W, H - DIAG_R, 'FOTO TRASEIRA / LATERAL');
   ctx.restore();
 
@@ -649,7 +656,7 @@ function renderDestaque(){
   if(anokm) spacedText(anokm, W/2, 482, 'italic 500 32px Montserrat, sans-serif', 4, '#55555a');
 
   // preço sóbrio (texto simples, sem pílula)
-  const preco = val('preco');
+  const preco = val('preco').replace(/^R\$\s*/i, '');
   if(preco) spacedText('R$ ' + preco, W/2, 556, '700 48px Montserrat, sans-serif', 3, '#1b1b1e');
 
   // pílulas com os diferenciais do carro (o verdadeiro destaque)
