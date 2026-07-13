@@ -542,7 +542,7 @@ function renderClassico(){
 
   ctx.restore(); // fim da sombra do título
 
-  const DIAG_L = 1622, DIAG_R = 1548;
+  const DIAG_L = 1552, DIAG_R = 1478;
   g = ctx.createLinearGradient(0, PHOTO1_H, 0, DIAG_L);
   g.addColorStop(0, '#dbdbdd'); g.addColorStop(1, '#c9c9cc');
   ctx.fillStyle = g;
@@ -576,7 +576,7 @@ function renderClassico(){
   const bFont = '700 34px Montserrat, sans-serif';
   const textX = 208, maxW = 770, lineH = 44;
   let blocks = bullets.map(b => wrapLines(b, bFont, maxW));
-  const areaTop = 1200, areaBot = Math.min(DIAG_L, DIAG_R) - 26;
+  const areaTop = 1188, areaBot = Math.min(DIAG_L, DIAG_R) - 26;
   const linesH = blocks.reduce((a, ls) => a + ls.length*lineH, 0);
   let gap = 52;
   if(blocks.length > 1)
