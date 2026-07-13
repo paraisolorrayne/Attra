@@ -82,10 +82,13 @@ fi
 echo "==> [3/5] Portas restritas a 127.0.0.1 (docker-compose.override.yml)"
 cat > docker-compose.override.yml <<'EOF'
 # Gateway e pooler só em localhost — acesso externo será via Nginx com TLS.
+# IMPORTANTE: o compose oficial publica o Kong também em 8443 (HTTPS);
+# sem o override das DUAS portas o gateway fica exposto na internet.
 services:
   kong:
     ports: !override
       - "127.0.0.1:8000:8000/tcp"
+      - "127.0.0.1:8443:8443/tcp"
   supavisor:
     ports: !override
       - "127.0.0.1:5432:5432/tcp"
@@ -104,12 +107,17 @@ for i in $(seq 1 36); do
 done
 docker compose ps
 
-echo "==> [5/5] Smoke test do gateway"
+echo "==> [5/5] Smoke test do gateway + auditoria de portas expostas"
 ANON=$(grep '^ANON_KEY=' .env | cut -d= -f2)
 auth_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 -H "apikey: $ANON" http://127.0.0.1:8000/auth/v1/health)
-rest_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 -H "apikey: $ANON" http://127.0.0.1:8000/rest/v1/)
+rest_body=$(curl -s --max-time 10 -H "apikey: $ANON" -H "Authorization: Bearer $ANON" http://127.0.0.1:8000/rest/v1/)
+rest_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 -H "apikey: $ANON" -H "Authorization: Bearer $ANON" http://127.0.0.1:8000/rest/v1/)
 echo "    auth/v1/health -> $auth_code (esperado 200)"
 echo "    rest/v1/       -> $rest_code (esperado 200)"
+[ "$rest_code" != "200" ] && echo "    corpo da resposta: $(echo "$rest_body" | head -c 300)"
+
+echo "    portas escutando fora de localhost (esperado: só 22/80/443):"
+ss -ltn | awk '$4 !~ /^127\.|^\[::1\]/ && NR>1 {print "      " $4}' | sort -u
 
 echo
 echo "STACK_NO_AR — próximos passos: DNS db.attraveiculos.com.br -> IP da VPS,"
