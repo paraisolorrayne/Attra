@@ -23,13 +23,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'REPLICATE_API_TOKEN não configurada no servidor' }, { status: 500 })
   }
 
-  const { image } = await request.json()
-  if (typeof image !== 'string' || !image.startsWith('data:image/')) {
-    return NextResponse.json({ error: 'Envie a imagem como data URL' }, { status: 400 })
-  }
-  // ~14MB de payload máx (dataURL infla ~33%)
-  if (image.length > 14_000_000) {
-    return NextResponse.json({ error: 'Imagem grande demais (máx ~10MB)' }, { status: 413 })
+  const { image, imageUrl } = await request.json()
+
+  // Duas formas de entrada: dataURL (upload manual, já reduzido no browser)
+  // ou URL pública (foto do estoque — sem upload, o Replicate baixa direto)
+  let input: string
+  if (typeof imageUrl === 'string' && /^https:\/\//.test(imageUrl)) {
+    input = imageUrl
+  } else if (typeof image === 'string' && image.startsWith('data:image/')) {
+    if (image.length > 14_000_000) {
+      return NextResponse.json({ error: 'Imagem grande demais (máx ~10MB)' }, { status: 413 })
+    }
+    input = image
+  } else {
+    return NextResponse.json({ error: 'Envie image (data URL) ou imageUrl (https)' }, { status: 400 })
   }
 
   try {
@@ -39,7 +46,7 @@ export async function POST(request: NextRequest) {
         'Authorization': `Bearer ${apiToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ input: { image } }),
+      body: JSON.stringify({ input: { image: input } }),
     })
     if (!start.ok) {
       const t = await start.text().catch(() => '')

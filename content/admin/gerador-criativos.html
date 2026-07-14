@@ -254,7 +254,8 @@ const state = {
   f2: {zoom:1, x:.5, y:.5},
   estFotos: [null, null, null, null],
   foto1Cut: null,   // foto principal com fundo removido (Editorial)
-  foto1Data: null,  // dataURL da foto original (envio pro rembg)
+  foto1Data: null,  // dataURL da foto original (upload manual → rembg)
+  foto1Url: null,   // URL pública da foto (estoque → rembg sem upload)
 };
 
 /* ---------- logos oficiais embutidas ---------- */
@@ -1074,7 +1075,16 @@ function loadImg(file, cb){
   r.onload = e => { const img = new Image(); img.onload = () => cb(img, e.target.result); img.src = e.target.result; };
   r.readAsDataURL(file);
 }
-$('foto1').addEventListener('change', e => { if(e.target.files[0]) loadImg(e.target.files[0], (img, data) => { state.foto1 = img; state.foto1Data = data; state.foto1Cut = null; $('rembg-status').textContent = 'Foto nova carregada — clique em REMOVER FUNDO para recortar.'; autoFrameFoto1(img); render(); }); });
+function reduzirParaEnvio(img){
+  // rembg não precisa de mais que ~1600px; reduzir evita 413 e acelera
+  const max = 1600;
+  const sc = Math.min(1, max / Math.max(img.width, img.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', .88);
+}
+$('foto1').addEventListener('change', e => { if(e.target.files[0]) loadImg(e.target.files[0], (img) => { state.foto1 = img; state.foto1Data = reduzirParaEnvio(img); state.foto1Url = null; state.foto1Cut = null; $('rembg-status').textContent = 'Foto nova carregada — clique em REMOVER FUNDO para recortar.'; autoFrameFoto1(img); render(); }); });
 $('foto2').addEventListener('change', e => { if(e.target.files[0]) loadImg(e.target.files[0], img => { state.foto2 = img; render(); }); });
 $('foto3').addEventListener('change', e => { if(e.target.files[0]) loadImg(e.target.files[0], img => { state.foto3 = img; render(); }); });
 $('foto4').addEventListener('change', e => { if(e.target.files[0]) loadImg(e.target.files[0], img => { state.foto4 = img; render(); }); });
@@ -1205,7 +1215,15 @@ function montarFotosEstoque(v){
       const img = new Image();
       img.onload = () => {
         if(ev.shiftKey){ state.foto2 = img; }
-        else { state.foto1 = img; autoFrameFoto1(img); }
+        else {
+          state.foto1 = img;
+          // foto do estoque: o rembg recebe a URL pública (sem upload)
+          state.foto1Url = u;
+          state.foto1Data = null;
+          state.foto1Cut = null;
+          $('rembg-status').textContent = 'Foto do estoque selecionada — clique em REMOVER FUNDO para recortar.';
+          autoFrameFoto1(img);
+        }
         render();
       };
       img.src = '/_next/image?url=' + encodeURIComponent(u) + '&w=1080&q=85';
@@ -1217,7 +1235,7 @@ function montarFotosEstoque(v){
 /* ---------- recorte de fundo via IA (Replicate, rota do admin) ---------- */
 $('rembgbtn').addEventListener('click', async () => {
   const st = $('rembg-status');
-  if(!state.foto1Data){ st.textContent = 'Envie a Foto principal primeiro.'; return; }
+  if(!state.foto1Data && !state.foto1Url){ st.textContent = 'Envie a Foto principal (ou selecione uma do estoque) primeiro.'; return; }
   if(state.foto1Cut){ st.textContent = 'Esta foto já está recortada — troque a foto para recortar outra.'; return; }
   $('rembgbtn').disabled = true;
   st.textContent = 'Recortando o fundo via IA… (10-30s, não feche a aba)';
@@ -1225,7 +1243,7 @@ $('rembgbtn').addEventListener('click', async () => {
     const r = await fetch('/api/admin/marketing/gerador-criativos/rembg', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: state.foto1Data }),
+      body: JSON.stringify(state.foto1Url ? { imageUrl: state.foto1Url } : { image: state.foto1Data }),
     });
     const d = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(d.error || ('HTTP ' + r.status));
