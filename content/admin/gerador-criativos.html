@@ -821,9 +821,9 @@ function renderEstoque(){
   cars.forEach((car, i) => {
     const cardY = blockTop + i*rowH + 16;
     const cardH = rowH - 32;
-    // a janela adota a proporção exata da foto: nada de faixas cinza nem carro cortado
-    const imgAspect = car.foto ? car.foto.width/car.foto.height : 1.5;
-    const photoW = Math.round(cardH * Math.max(1.0, Math.min(1.9, imgAspect)));
+    // janela de largura FIXA em todos os cards — grade alinhada; a foto
+    // preenche por cover (corta sobra em vez de desalinhar as colunas)
+    const photoW = Math.round(cardH * 1.5);
 
     // card branco de linha inteira
     ctx.save();
@@ -832,7 +832,7 @@ function renderEstoque(){
     rr(cardX, cardY, cardW, cardH, 22); ctx.fill();
     ctx.restore();
 
-    // foto à esquerda (inteira — sem recorte de fundo)
+    // foto à esquerda (cover — janela uniforme)
     ctx.save();
     rr(cardX, cardY, cardW, cardH, 22); ctx.clip();
     ctx.beginPath(); ctx.rect(cardX, cardY, photoW, cardH); ctx.clip();
@@ -1077,7 +1077,7 @@ function loadImg(file, cb){
 }
 function reduzirParaEnvio(img){
   // rembg não precisa de mais que ~1600px; reduzir evita 413 e acelera
-  const max = 1600;
+  const max = 2048;
   const sc = Math.min(1, max / Math.max(img.width, img.height));
   const c = document.createElement('canvas');
   c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);

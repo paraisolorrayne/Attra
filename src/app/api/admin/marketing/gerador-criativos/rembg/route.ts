@@ -8,9 +8,48 @@ export const maxDuration = 120
 // o mesmo modelo do pipeline de hero). Usado pelo template Editorial do
 // Gerador de Criativos: o carro recortado é composto sobre o cenário de
 // estúdio embutido. Custo ~US$0,05/imagem.
-const REPLICATE_URL = 'https://api.replicate.com/v1/models/bria/remove-background/predictions'
+// BiRefNet: recorte mais preciso em bordas finas (rodas, aerofólios,
+// vãos) — o bria fica como fallback se o primário falhar.
+const REMBG_MODELS = [
+  process.env.REMBG_MODEL || 'men1scus/birefnet',
+  'bria/remove-background',
+]
 const POLL_MS = 2000
 const TIMEOUT_MS = 90_000
+
+async function runRembg(model: string, apiToken: string, image: string): Promise<string | null> {
+  const start = await fetch(`https://api.replicate.com/v1/models/${model}/predictions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ input: { image } }),
+  })
+  if (!start.ok) {
+    console.warn(`[GeradorRembg] ${model} start HTTP ${start.status}`)
+    return null
+  }
+  const pred = await start.json()
+  const getUrl = pred.urls?.get
+  if (!getUrl) return null
+
+  const deadline = Date.now() + TIMEOUT_MS
+  while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, POLL_MS))
+    const poll = await fetch(getUrl, { headers: { 'Authorization': `Bearer ${apiToken}` } })
+    const data = await poll.json()
+    if (data.status === 'succeeded') {
+      return typeof data.output === 'string' ? data.output : data.output?.[0] ?? null
+    }
+    if (data.status === 'failed' || data.status === 'canceled') {
+      console.warn(`[GeradorRembg] ${model} ${data.status}: ${data.error || ''}`)
+      return null
+    }
+  }
+  console.warn(`[GeradorRembg] ${model} timeout`)
+  return null
+}
 
 export async function POST(request: NextRequest) {
   const admin = await getCurrentAdmin()
@@ -40,40 +79,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const start = await fetch(REPLICATE_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ input: { image: input } }),
-    })
-    if (!start.ok) {
-      const t = await start.text().catch(() => '')
-      return NextResponse.json({ error: `Replicate HTTP ${start.status}: ${t.slice(0, 200)}` }, { status: 502 })
-    }
-    const pred = await start.json()
-    const getUrl = pred.urls?.get
-    if (!getUrl) {
-      return NextResponse.json({ error: 'Resposta do Replicate sem URL de polling' }, { status: 502 })
-    }
-
-    const deadline = Date.now() + TIMEOUT_MS
     let outputUrl: string | null = null
-    while (Date.now() < deadline) {
-      await new Promise(r => setTimeout(r, POLL_MS))
-      const poll = await fetch(getUrl, { headers: { 'Authorization': `Bearer ${apiToken}` } })
-      const data = await poll.json()
-      if (data.status === 'succeeded') {
-        outputUrl = typeof data.output === 'string' ? data.output : data.output?.[0]
-        break
-      }
-      if (data.status === 'failed' || data.status === 'canceled') {
-        return NextResponse.json({ error: `Replicate falhou: ${data.error || data.status}` }, { status: 502 })
-      }
+    for (const model of REMBG_MODELS) {
+      outputUrl = await runRembg(model, apiToken, input)
+      if (outputUrl) break
     }
     if (!outputUrl) {
-      return NextResponse.json({ error: 'Timeout aguardando o Replicate (90s)' }, { status: 504 })
+      return NextResponse.json({ error: 'Recorte falhou nos dois modelos — tente outra foto' }, { status: 502 })
     }
 
     // Busca o PNG recortado e devolve como data URL — mesma origem, o
