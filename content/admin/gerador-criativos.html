@@ -81,13 +81,13 @@
   .btn.secondary{background:var(--panel2); border:1px solid var(--line); font-weight:600; text-transform:none; letter-spacing:0;}
   /* seletor de tipo */
   .types{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;}
-  .typebtn{
+  .typebtn, .edtemabtn{
     background:var(--panel2); border:2px solid var(--line); border-radius:10px;
     color:var(--muted); padding:12px 8px; cursor:pointer; text-align:center;
     font-family:inherit; font-size:13px; font-weight:700;
   }
-  .typebtn small{display:block; font-weight:400; font-size:10px; margin-top:3px;}
-  .typebtn.active{border-color:var(--red); color:var(--txt);}
+  .typebtn small, .edtemabtn small{display:block; font-weight:400; font-size:10px; margin-top:3px;}
+  .typebtn.active, .edtemabtn.active{border-color:var(--red); color:var(--txt);}
   .carblock{
     border:1px solid var(--line); border-radius:10px; padding:12px; margin-top:12px;
     background:rgba(255,255,255,.02);
@@ -123,6 +123,14 @@
         <button class="typebtn" data-tipo="destaque">2 · Destaque<small>claro, ficha técnica</small></button>
         <button class="typebtn" data-tipo="estoque">3 · Estoque<small>lista de até 4 carros</small></button>
         <button class="typebtn" data-tipo="editorial">4 · Editorial<small>luxo, minimalista</small></button>
+      </div>
+    </fieldset>
+
+    <fieldset id="sec-edtema" style="display:none">
+      <legend>Fundo do Editorial</legend>
+      <div class="types">
+        <button class="edtemabtn active" data-edtema="escuro">Escuro<small>foto funde no preto</small></button>
+        <button class="edtemabtn" data-edtema="claro">Claro<small>foto funde no cinza-claro</small></button>
       </div>
     </fieldset>
 
@@ -240,6 +248,7 @@ const state = {
   f1: {zoom:1, x:.5, y:.5},
   f2: {zoom:1, x:.5, y:.5},
   estFotos: [null, null, null, null],
+  edTema: 'escuro',
 };
 
 /* ---------- logos oficiais embutidas ---------- */
@@ -876,13 +885,29 @@ function renderEstoque(){
    de fundo)
 ================================================================ */
 const ED = {
-  escuro: '#0f1116', escuro2: '#151821',
-  branco: '#ffffff', claro: '#c9ced6', medio: '#9aa1ab', suave: '#7d8590',
-  vermelho: '#9a1c1c',
   fonte: "'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif",
   margem: 76,
   fotoH: 1150,      // foto full-bleed no topo (~60%)
-  fusaoIni: 720,    // onde o escurecimento começa
+  fusaoIni: 720,    // onde a fusão com o fundo começa
+};
+
+// Duas variações do mesmo layout: a foto se funde no escuro (noturno,
+// dramático) ou no claro (catálogo, fotos de estúdio/dia)
+const ED_TEMAS = {
+  escuro: {
+    fundo1: '#0f1116', fundo2: '#151821',
+    fusaoRGB: '15,17,22',
+    titulo: '#ffffff', texto: '#c9ced6', medio: '#9aa1ab', suave: '#7d8590',
+    chipFundo: 'rgba(255,255,255,.10)', chipTexto: '#ffffff',
+    vermelho: '#9a1c1c', logoClara: true,
+  },
+  claro: {
+    fundo1: '#f2f2f4', fundo2: '#e9e9ec',
+    fusaoRGB: '242,242,244',
+    titulo: '#181818', texto: '#3d4148', medio: '#7d838d', suave: '#8b9096',
+    chipFundo: 'rgba(0,0,0,.07)', chipTexto: '#181818',
+    vermelho: '#9a1c1c', logoClara: true,
+  },
 };
 
 function edTextoEsq(text, x, y, font, spacing, color){
@@ -907,11 +932,12 @@ function edChip(x, y, w, h, r){
 
 function renderEditorial(){
   const M = ED.margem, FH = ED.fotoH;
+  const T = ED_TEMAS[state.edTema] || ED_TEMAS.escuro;
 
-  // fundo escuro de base (a foto se funde nele)
+  // fundo de base (a foto se funde nele)
   const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, ED.escuro);
-  bg.addColorStop(1, ED.escuro2);
+  bg.addColorStop(0, T.fundo1);
+  bg.addColorStop(1, T.fundo2);
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
   // foto full-bleed no topo — cover; horizontais/quadradas ajustam com os
@@ -927,24 +953,24 @@ function renderEditorial(){
     ctx.textAlign = 'left';
   }
 
-  // fusão: a base da foto escurece suavemente até virar o painel de info
+  // fusão: a base da foto se dissolve suavemente no fundo do painel
   const g = ctx.createLinearGradient(0, ED.fusaoIni, 0, FH);
-  g.addColorStop(0, 'rgba(15,17,22,0)');
-  g.addColorStop(.55, 'rgba(15,17,22,.55)');
-  g.addColorStop(1, 'rgba(15,17,22,1)');
+  g.addColorStop(0, `rgba(${T.fusaoRGB},0)`);
+  g.addColorStop(.55, `rgba(${T.fusaoRGB},.55)`);
+  g.addColorStop(1, `rgba(${T.fusaoRGB},1)`);
   ctx.fillStyle = g;
   ctx.fillRect(0, ED.fusaoIni, W, FH - ED.fusaoIni);
 
-  // logo branca pequena e discreta no topo
+  // logo pequena e discreta no topo (sobre a foto)
   drawLogoWhite(W/2, 92, 150);
 
   // ---------- painel de informação ----------
   let y = 1268;
 
   // rótulo de curadoria com filete vermelho mínimo
-  ctx.fillStyle = ED.vermelho;
+  ctx.fillStyle = T.vermelho;
   ctx.fillRect(M, y - 20, 44, 3);
-  edTextoEsq('SELEÇÃO ATTRA', M + 62, y - 12, '500 21px ' + ED.fonte, 6, ED.medio);
+  edTextoEsq('SELEÇÃO ATTRA', M + 62, y - 12, '500 21px ' + ED.fonte, 6, T.medio);
 
   // marca — protagonista tipográfico (branco, bold)
   y += 74;
@@ -955,7 +981,7 @@ function renderEditorial(){
     while(bs > 40 && ctx.measureText(marca).width > W - 2*M){
       bs -= 2; ctx.font = `600 ${bs}px ` + ED.fonte;
     }
-    ctx.fillStyle = ED.branco;
+    ctx.fillStyle = T.titulo;
     ctx.fillText(marca, M, y);
   }
 
@@ -968,7 +994,7 @@ function renderEditorial(){
     while(ms > 24 && ctx.measureText(modelo).width > W - 2*M){
       ms -= 1; ctx.font = `400 ${ms}px ` + ED.fonte;
     }
-    ctx.fillStyle = ED.claro;
+    ctx.fillStyle = T.texto;
     ctx.fillText(modelo, M, y);
   }
 
@@ -981,7 +1007,7 @@ function renderEditorial(){
   ].filter(Boolean).join('   |   ');
   if(meta){
     ctx.font = '400 27px ' + ED.fonte;
-    ctx.fillStyle = ED.medio;
+    ctx.fillStyle = T.medio;
     ctx.fillText(meta, M, y);
   }
 
@@ -998,9 +1024,9 @@ function renderEditorial(){
     const tw = ctx.measureText(ptxt).width;
     const ch = ps + 44;
     edChip(M, y, tw + 72, ch, 16);
-    ctx.fillStyle = 'rgba(255,255,255,.10)';
+    ctx.fillStyle = T.chipFundo;
     ctx.fill();
-    ctx.fillStyle = ED.branco;
+    ctx.fillStyle = T.chipTexto;
     ctx.fillText(ptxt, M + 36, y + ch/2 + ps*.36);
     y += ch;
   }
@@ -1011,7 +1037,7 @@ function renderEditorial(){
     const t = val(id);
     if(!t) continue;
     ctx.font = '400 24px ' + ED.fonte;
-    ctx.fillStyle = ED.suave;
+    ctx.fillStyle = T.suave;
     ctx.fillText(t, M, y);
     y += 42;
   }
@@ -1099,6 +1125,7 @@ $('clearlogo').addEventListener('click', () => {
 /* ---------- troca de tipo ---------- */
 function updateVisibility(){
   const t = state.tipo;
+  $('sec-edtema').style.display    = t === 'editorial' ? '' : 'none';
   $('sec-busca').style.display     = t === 'estoque' ? 'none' : '';
   $('sec-veiculo').style.display   = t === 'estoque' ? 'none' : '';
   $('sec-destaques').style.display = (t === 'classico' || t === 'editorial') ? '' : 'none';
@@ -1197,6 +1224,15 @@ function montarFotosEstoque(v){
     wrap.appendChild(t);
   }
 }
+
+document.querySelectorAll('.edtemabtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.edtemabtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.edTema = btn.dataset.edtema;
+    render();
+  });
+});
 
 $('estoquebtn').addEventListener('click', buscarEstoque);
 $('estoquebusca').addEventListener('keydown', e => {
