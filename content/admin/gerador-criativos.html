@@ -486,9 +486,10 @@ function renderClassico(){
   ctx.save();
   ctx.beginPath(); ctx.rect(0, 0, W, PHOTO1_H); ctx.clip();
   if(facadeImg.complete && facadeImg.naturalWidth){
-    // -60px esconde o toldo e deixa o letreiro mais compacto no topo
-    // (limite prático: o letreiro começa ~70px do topo da foto)
-    ctx.drawImage(facadeImg, 0, -60, W, facadeImg.height * (W/facadeImg.width));
+    // -60px esconde o toldo; escala 1.03 ancorada à esquerda corrige o
+    // letreiro ATTRA da foto (centroide medido em x=524 → cai em 540)
+    const fw = W * 1.03;
+    ctx.drawImage(facadeImg, 0, -60, fw, facadeImg.height * (fw/facadeImg.width));
   } else {
     ctx.fillStyle = '#101013'; ctx.fillRect(0, 0, W, PHOTO1_H);
   }
@@ -547,14 +548,14 @@ function renderClassico(){
 
   if(marca) spacedText(marca, W/2, 316, '600 30px Montserrat, sans-serif', 11, '#ffffff');
 
-  let msize = 92, mspace = 34;
-  while(msize > 40 && spacedWidth(modelo, `200 ${msize}px Montserrat, sans-serif`, mspace) > 980){
-    msize -= 3; mspace = Math.max(10, mspace - 1);
+  let msize = 64, mspace = 26;
+  while(msize > 36 && spacedWidth(modelo, `600 ${msize}px Montserrat, sans-serif`, mspace) > 960){
+    msize -= 2; mspace = Math.max(8, mspace - 1);
   }
-  if(modelo) spacedText(modelo, W/2, 400, `200 ${msize}px Montserrat, sans-serif`, mspace, '#ffffff');
+  if(modelo) spacedText(modelo, W/2, 394, `600 ${msize}px Montserrat, sans-serif`, mspace, '#ffffff');
 
   if(ano){
-    const yy = 458;
+    const yy = 452;
     const tw = spacedText(ano, W/2, yy, '300 34px Montserrat, sans-serif', 15, '#ffffff');
     ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.5;
     ctx.beginPath();
