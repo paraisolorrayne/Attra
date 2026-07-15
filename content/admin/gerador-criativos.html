@@ -572,11 +572,31 @@ function renderClassico(){
   // Transição RETA e esfumada pra foto de baixo (padrão da arte manual
   // em Photoshop): a área cinza se dissolve na foto, sem corte duro.
   const CUT = 1416 - corte;
-  const FUSAO = 120; // altura do esfumado cinza→foto
+  const FUSAO = 150; // altura do esfumado cinza→foto
   g = ctx.createLinearGradient(0, PHOTO1_H, 0, CUT + FUSAO);
   g.addColorStop(0, '#dbdbdd'); g.addColorStop(1, '#c9c9cc');
   ctx.fillStyle = g;
   ctx.fillRect(0, PHOTO1_H, W, CUT + FUSAO - PHOTO1_H);
+
+  // A área de texto não pode parecer uma laje chapada: um brilho radial
+  // suave atrás do preço simula luz de estúdio, e um decaimento quase
+  // imperceptível nas laterais quebra a uniformidade do cinza.
+  const meioY = PHOTO1_H + (CUT - PHOTO1_H) * .42;
+  const glow = ctx.createRadialGradient(W/2, meioY, 40, W/2, meioY, 700);
+  glow.addColorStop(0, 'rgba(255,255,255,.30)');
+  glow.addColorStop(.55, 'rgba(255,255,255,.12)');
+  glow.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.save();
+  ctx.beginPath(); ctx.rect(0, PHOTO1_H, W, CUT + FUSAO - PHOTO1_H); ctx.clip();
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, PHOTO1_H, W, CUT + FUSAO - PHOTO1_H);
+  const vinL = ctx.createLinearGradient(0, 0, 190, 0);
+  vinL.addColorStop(0, 'rgba(0,0,0,.055)'); vinL.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = vinL; ctx.fillRect(0, PHOTO1_H, 190, CUT + FUSAO - PHOTO1_H);
+  const vinR = ctx.createLinearGradient(W, 0, W - 190, 0);
+  vinR.addColorStop(0, 'rgba(0,0,0,.055)'); vinR.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = vinR; ctx.fillRect(W - 190, PHOTO1_H, 190, CUT + FUSAO - PHOTO1_H);
+  ctx.restore();
 
   const preco = val('preco').replace(/^R\$\s*/i, '');
   if(preco) spacedText('R$ ' + preco, W/2, 1062, '300 48px Montserrat, sans-serif', 10, '#5a5a5f');
