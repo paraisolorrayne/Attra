@@ -549,8 +549,8 @@ function renderClassico(){
   }
 
   g = ctx.createLinearGradient(0, PHOTO1_H-60, 0, PHOTO1_H);
-  g.addColorStop(0, 'rgba(248,247,244,0)');
-  g.addColorStop(1, 'rgba(248,247,244,1)');
+  g.addColorStop(0, 'rgba(250,254,255,0)');
+  g.addColorStop(1, 'rgba(250,254,255,1)');
   ctx.fillStyle = g; ctx.fillRect(0, PHOTO1_H-60, W, 60);
 
   // logo desenhado só quando a foto cobre o letreiro da fachada
@@ -598,33 +598,35 @@ function renderClassico(){
     ctx.closePath();
   };
 
-  // Bloco pérola suavizado: quase branco-quente, transição de tom mínima
+  // Bloco #FAFEFF com transição de tom mínima
   g = ctx.createLinearGradient(0, PHOTO1_H, 0, DIAG_L);
-  g.addColorStop(0, '#f8f7f4'); g.addColorStop(1, '#f0eee9');
+  g.addColorStop(0, '#fafeff'); g.addColorStop(1, '#f2f6f7');
   ctx.fillStyle = g;
   areaPath(); ctx.fill();
 
+  // Todos os efeitos cobrem o bloco INTEIRO (até DIAG_L) e são clipados
+  // pela mesma areaPath — nada de faixas/slivers na diagonal
   ctx.save(); areaPath(); ctx.clip();
   const meioY = PHOTO1_H + (CUT - PHOTO1_H) * .40;
   const luz = ctx.createRadialGradient(W/2, meioY, 60, W/2, meioY, 860);
-  luz.addColorStop(0, 'rgba(255,255,255,.22)');
-  luz.addColorStop(.6, 'rgba(255,255,255,.07)');
-  luz.addColorStop(1, 'rgba(120,112,100,.045)');
+  luz.addColorStop(0, 'rgba(255,255,255,.14)');
+  luz.addColorStop(.6, 'rgba(255,255,255,.05)');
+  luz.addColorStop(1, 'rgba(110,118,120,.03)');
   ctx.fillStyle = luz;
   ctx.fillRect(0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
-  ctx.globalAlpha = .03;
+  ctx.globalAlpha = .025;
   ctx.drawImage(grainCanvas(), 0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
   ctx.globalAlpha = 1;
-  const sombraTopo = ctx.createLinearGradient(0, PHOTO1_H, 0, PHOTO1_H + 150);
-  sombraTopo.addColorStop(0, 'rgba(60,52,40,.09)');
-  sombraTopo.addColorStop(.5, 'rgba(60,52,40,.035)');
-  sombraTopo.addColorStop(1, 'rgba(60,52,40,0)');
-  ctx.fillStyle = sombraTopo; ctx.fillRect(0, PHOTO1_H, W, 150);
-  const sombraBase = ctx.createLinearGradient(0, DIAG_R - 150, 0, DIAG_R);
-  sombraBase.addColorStop(0, 'rgba(60,52,40,0)');
-  sombraBase.addColorStop(.5, 'rgba(60,52,40,.035)');
-  sombraBase.addColorStop(1, 'rgba(60,52,40,.09)');
-  ctx.fillStyle = sombraBase; ctx.fillRect(0, DIAG_R - 150, W, 150);
+  const sombraTopo = ctx.createLinearGradient(0, PHOTO1_H, 0, PHOTO1_H + 180);
+  sombraTopo.addColorStop(0, 'rgba(50,56,60,.06)');
+  sombraTopo.addColorStop(.5, 'rgba(50,56,60,.02)');
+  sombraTopo.addColorStop(1, 'rgba(50,56,60,0)');
+  ctx.fillStyle = sombraTopo; ctx.fillRect(0, PHOTO1_H, W, 180);
+  const sombraBase = ctx.createLinearGradient(0, CUT - 180, 0, CUT);
+  sombraBase.addColorStop(0, 'rgba(50,56,60,0)');
+  sombraBase.addColorStop(.5, 'rgba(50,56,60,.02)');
+  sombraBase.addColorStop(1, 'rgba(50,56,60,.06)');
+  ctx.fillStyle = sombraBase; ctx.fillRect(0, CUT - 180, W, DIAG_L - (CUT - 180));
   ctx.restore();
 
   const tx = { preco: '#5a5a5f', km: '#6f6f74', bullet: '#161618', icone: '#1c1c1e' };
@@ -691,7 +693,7 @@ function renderClassico(){
       const rangeY = Math.max(dh - bh, bh*.6);
       opt = {...state.f2, y: .5 + (dh - bh) / (2 * rangeY)};
     }
-    drawPhoto(state.foto2, 0, DIAG_R, bw, bh, opt);
+    drawPhoto(state.foto2, 0, DIAG_R - 2, bw, bh + 2, opt);
   }
   else placeholder(0, DIAG_R, W, H - DIAG_R, 'FOTO TRASEIRA / LATERAL');
 
