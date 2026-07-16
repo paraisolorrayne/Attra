@@ -200,14 +200,6 @@
         <div><label>Posição ↔</label><input type="range" id="f2x" min="0" max="100" value="50"></div>
         <div><label>Posição ↕</label><input type="range" id="f2y" min="0" max="100" value="50"></div>
       </div>
-      <div id="estilo-wrap">
-        <label style="margin-top:12px">Área de texto (Clássico)</label>
-        <div class="types">
-          <button class="estilobtn typebtn active" data-estilo="perola">Pérola<small>bloco sólido atual</small></button>
-          <button class="estilobtn typebtn" data-estilo="faixa">Faixa<small>foto atrás + branco 85%</small></button>
-          <button class="estilobtn typebtn" data-estilo="vidro">Vidro<small>glassmorphism leve</small></button>
-        </div>
-      </div>
       <div id="corte-wrap">
         <label style="margin-top:12px">Altura do corte transversal (Clássico)</label>
         <input type="range" id="corte" min="-160" max="200" value="0">
@@ -267,7 +259,6 @@ const state = {
   foto1Data: null,  // dataURL da foto original (upload manual → rembg)
   foto1Url: null,   // URL pública da foto (estoque → rembg sem upload)
   edRot: 0,         // rotação do carro recortado no Editorial (graus)
-  txEstilo: 'perola', // área de texto do Clássico: perola | faixa | vidro
 };
 
 /* ---------- logos oficiais embutidas ---------- */
@@ -557,12 +548,10 @@ function renderClassico(){
     ctx.fillStyle = g; ctx.fillRect(0, 170, W, 610);
   }
 
-  if((state.txEstilo || 'perola') === 'perola'){
-    g = ctx.createLinearGradient(0, PHOTO1_H-60, 0, PHOTO1_H);
-    g.addColorStop(0, 'rgba(244,242,238,0)');
-    g.addColorStop(1, 'rgba(244,242,238,1)');
-    ctx.fillStyle = g; ctx.fillRect(0, PHOTO1_H-60, W, 60);
-  }
+  g = ctx.createLinearGradient(0, PHOTO1_H-60, 0, PHOTO1_H);
+  g.addColorStop(0, 'rgba(248,247,244,0)');
+  g.addColorStop(1, 'rgba(248,247,244,1)');
+  ctx.fillStyle = g; ctx.fillRect(0, PHOTO1_H-60, W, 60);
 
   // logo desenhado só quando a foto cobre o letreiro da fachada
   if(topGap < 150) drawLogoWhite(W/2, 168, 340);
@@ -602,8 +591,6 @@ function renderClassico(){
   const CUT = 1416 - corte;
   // diagonal de volta (assinatura do layout): 40px de inclinação
   const DIAG_L = CUT + 20, DIAG_R = CUT - 20;
-  const estilo = state.txEstilo || 'perola';
-
   const areaPath = () => {
     ctx.beginPath();
     ctx.moveTo(0, PHOTO1_H); ctx.lineTo(W, PHOTO1_H);
@@ -611,80 +598,36 @@ function renderClassico(){
     ctx.closePath();
   };
 
-  if(estilo !== 'perola' && state.foto1){
-    // faixa/vidro: a foto continua atrás da área de texto
-    ctx.save(); areaPath(); ctx.clip();
-    drawPhoto(state.foto1, 0, 0, W, DIAG_L, state.f1);
-    ctx.restore();
-  }
+  // Bloco pérola suavizado: quase branco-quente, transição de tom mínima
+  g = ctx.createLinearGradient(0, PHOTO1_H, 0, DIAG_L);
+  g.addColorStop(0, '#f8f7f4'); g.addColorStop(1, '#f0eee9');
+  ctx.fillStyle = g;
+  areaPath(); ctx.fill();
 
-  if(estilo === 'perola'){
-    g = ctx.createLinearGradient(0, PHOTO1_H, 0, DIAG_L);
-    g.addColorStop(0, '#f4f2ee'); g.addColorStop(1, '#e8e4dd');
-    ctx.fillStyle = g;
-    areaPath(); ctx.fill();
+  ctx.save(); areaPath(); ctx.clip();
+  const meioY = PHOTO1_H + (CUT - PHOTO1_H) * .40;
+  const luz = ctx.createRadialGradient(W/2, meioY, 60, W/2, meioY, 860);
+  luz.addColorStop(0, 'rgba(255,255,255,.22)');
+  luz.addColorStop(.6, 'rgba(255,255,255,.07)');
+  luz.addColorStop(1, 'rgba(120,112,100,.045)');
+  ctx.fillStyle = luz;
+  ctx.fillRect(0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
+  ctx.globalAlpha = .03;
+  ctx.drawImage(grainCanvas(), 0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
+  ctx.globalAlpha = 1;
+  const sombraTopo = ctx.createLinearGradient(0, PHOTO1_H, 0, PHOTO1_H + 150);
+  sombraTopo.addColorStop(0, 'rgba(60,52,40,.09)');
+  sombraTopo.addColorStop(.5, 'rgba(60,52,40,.035)');
+  sombraTopo.addColorStop(1, 'rgba(60,52,40,0)');
+  ctx.fillStyle = sombraTopo; ctx.fillRect(0, PHOTO1_H, W, 150);
+  const sombraBase = ctx.createLinearGradient(0, DIAG_R - 150, 0, DIAG_R);
+  sombraBase.addColorStop(0, 'rgba(60,52,40,0)');
+  sombraBase.addColorStop(.5, 'rgba(60,52,40,.035)');
+  sombraBase.addColorStop(1, 'rgba(60,52,40,.09)');
+  ctx.fillStyle = sombraBase; ctx.fillRect(0, DIAG_R - 150, W, 150);
+  ctx.restore();
 
-    ctx.save(); areaPath(); ctx.clip();
-    const meioY = PHOTO1_H + (CUT - PHOTO1_H) * .40;
-    const luz = ctx.createRadialGradient(W/2, meioY, 60, W/2, meioY, 860);
-    luz.addColorStop(0, 'rgba(255,255,255,.34)');
-    luz.addColorStop(.6, 'rgba(255,255,255,.10)');
-    luz.addColorStop(1, 'rgba(120,112,100,.07)');
-    ctx.fillStyle = luz;
-    ctx.fillRect(0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
-    ctx.globalAlpha = .04;
-    ctx.drawImage(grainCanvas(), 0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
-    ctx.globalAlpha = 1;
-    const sombraTopo = ctx.createLinearGradient(0, PHOTO1_H, 0, PHOTO1_H + 150);
-    sombraTopo.addColorStop(0, 'rgba(60,52,40,.13)');
-    sombraTopo.addColorStop(.5, 'rgba(60,52,40,.05)');
-    sombraTopo.addColorStop(1, 'rgba(60,52,40,0)');
-    ctx.fillStyle = sombraTopo; ctx.fillRect(0, PHOTO1_H, W, 150);
-    const sombraBase = ctx.createLinearGradient(0, DIAG_R - 150, 0, DIAG_R);
-    sombraBase.addColorStop(0, 'rgba(60,52,40,0)');
-    sombraBase.addColorStop(.5, 'rgba(60,52,40,.05)');
-    sombraBase.addColorStop(1, 'rgba(60,52,40,.13)');
-    ctx.fillStyle = sombraBase; ctx.fillRect(0, DIAG_R - 150, W, 150);
-    ctx.restore();
-  } else if(estilo === 'faixa'){
-    // faixa: blur leve da foto atrás + branco a 85%
-    ctx.save(); areaPath(); ctx.clip();
-    const snap = document.createElement('canvas');
-    snap.width = W; snap.height = DIAG_L - PHOTO1_H + 80;
-    snap.getContext('2d').drawImage(cv, 0, PHOTO1_H - 40, W, snap.height, 0, 0, W, snap.height);
-    ctx.filter = 'blur(16px)';
-    ctx.drawImage(snap, 0, PHOTO1_H - 40);
-    ctx.filter = 'none';
-    ctx.fillStyle = 'rgba(250,249,247,.85)';
-    ctx.fillRect(0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
-    ctx.restore();
-  } else {
-    // vidro: cartão quase transparente, borda fina, sombra discreta
-    const gx = 56, gw = W - 112, gy = PHOTO1_H + 26, gh = DIAG_R - PHOTO1_H - 64;
-    const snap = document.createElement('canvas');
-    snap.width = gw; snap.height = gh;
-    snap.getContext('2d').drawImage(cv, gx, gy, gw, gh, 0, 0, gw, gh);
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 34; ctx.shadowOffsetY = 10;
-    ctx.fillStyle = 'rgba(255,255,255,.01)';
-    rr(gx, gy, gw, gh, 26); ctx.fill();
-    ctx.restore();
-    ctx.save();
-    rr(gx, gy, gw, gh, 26); ctx.clip();
-    ctx.filter = 'blur(20px)';
-    ctx.drawImage(snap, gx, gy);
-    ctx.filter = 'none';
-    ctx.fillStyle = 'rgba(20,20,24,.38)';
-    ctx.fillRect(gx, gy, gw, gh);
-    ctx.restore();
-    ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1.5;
-    rr(gx, gy, gw, gh, 26); ctx.stroke();
-  }
-
-  // cores dos textos conforme o fundo do estilo
-  const tx = estilo === 'vidro'
-    ? { preco: '#f4f4f6', km: '#cfcfd6', bullet: '#ffffff', icone: '#e8e8ec' }
-    : { preco: '#5a5a5f', km: '#6f6f74', bullet: '#161618', icone: '#1c1c1e' };
+  const tx = { preco: '#5a5a5f', km: '#6f6f74', bullet: '#161618', icone: '#1c1c1e' };
 
   const preco = val('preco').replace(/^R\$\s*/i, '');
   if(preco) spacedText('R$ ' + preco, W/2, 1062, '300 48px Montserrat, sans-serif', 10, tx.preco);
@@ -1222,7 +1165,6 @@ function updateVisibility(){
   const t = state.tipo;
   $('sec-edtema').style.display    = t === 'editorial' ? '' : 'none';
   $('corte-wrap').style.display    = t === 'classico' ? '' : 'none';
-  $('estilo-wrap').style.display   = t === 'classico' ? '' : 'none';
   $('sec-busca').style.display     = t === 'estoque' ? 'none' : '';
   $('sec-veiculo').style.display   = t === 'estoque' ? 'none' : '';
   $('sec-destaques').style.display = t === 'classico' ? '' : 'none';
@@ -1331,15 +1273,6 @@ function montarFotosEstoque(v){
 }
 
 /* ---------- recorte de fundo via IA (Replicate, rota do admin) ---------- */
-document.querySelectorAll('.estilobtn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.estilobtn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    state.txEstilo = btn.dataset.estilo;
-    render();
-  });
-});
-
 $('edrot').addEventListener('input', e => {
   state.edRot = parseInt(e.target.value, 10) || 0;
   render();
