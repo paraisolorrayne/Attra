@@ -531,13 +531,10 @@ function renderClassico(){
     ctx.fillStyle = g; ctx.fillRect(0, 170, W, 610);
   }
 
-  // véu longo: começa 260px DENTRO da foto e só fica opaco 40px depois
-  // da divisa — nenhuma linha de mudança de contexto visível
-  g = ctx.createLinearGradient(0, PHOTO1_H-260, 0, PHOTO1_H+40);
+  g = ctx.createLinearGradient(0, PHOTO1_H-60, 0, PHOTO1_H);
   g.addColorStop(0, 'rgba(219,219,221,0)');
-  g.addColorStop(.45, 'rgba(219,219,221,.42)');
   g.addColorStop(1, 'rgba(219,219,221,1)');
-  ctx.fillStyle = g; ctx.fillRect(0, PHOTO1_H-260, W, 300);
+  ctx.fillStyle = g; ctx.fillRect(0, PHOTO1_H-60, W, 60);
 
   // logo desenhado só quando a foto cobre o letreiro da fachada
   if(topGap < 150) drawLogoWhite(W/2, 168, 340);
@@ -554,14 +551,14 @@ function renderClassico(){
 
   if(marca) spacedText(marca, W/2, 316, '600 30px Montserrat, sans-serif', 11, '#ffffff');
 
-  let msize = 64, mspace = 26;
-  while(msize > 36 && spacedWidth(modelo, `600 ${msize}px Montserrat, sans-serif`, mspace) > 960){
-    msize -= 2; mspace = Math.max(8, mspace - 1);
+  let msize = 92, mspace = 26;
+  while(msize > 40 && spacedWidth(modelo, `200 ${msize}px Montserrat, sans-serif`, mspace) > 980){
+    msize -= 3; mspace = Math.max(8, mspace - 1);
   }
-  if(modelo) spacedText(modelo, W/2, 394, `600 ${msize}px Montserrat, sans-serif`, mspace, '#ffffff');
+  if(modelo) spacedText(modelo, W/2, 400, `200 ${msize}px Montserrat, sans-serif`, mspace, '#ffffff');
 
   if(ano){
-    const yy = 452;
+    const yy = 458;
     const tw = spacedText(ano, W/2, yy, '300 34px Montserrat, sans-serif', 15, '#ffffff');
     ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -584,24 +581,19 @@ function renderClassico(){
   ctx.fillStyle = g;
   ctx.fillRect(0, PHOTO1_H, W, CUT + FUSAO - PHOTO1_H);
 
-  // A área de texto não pode parecer uma laje chapada: um brilho radial
-  // suave atrás do preço simula luz de estúdio, e um decaimento quase
-  // imperceptível nas laterais quebra a uniformidade do cinza.
-  const meioY = PHOTO1_H + (CUT - PHOTO1_H) * .42;
-  const glow = ctx.createRadialGradient(W/2, meioY, 40, W/2, meioY, 700);
-  glow.addColorStop(0, 'rgba(255,255,255,.30)');
-  glow.addColorStop(.55, 'rgba(255,255,255,.12)');
-  glow.addColorStop(1, 'rgba(255,255,255,0)');
+  // Sombreamento interno na área de texto (pedido da Attra): as bordas
+  // superior e inferior do bloco ganham sombra suave — profundidade sem
+  // véu sobre as fotos.
   ctx.save();
-  ctx.beginPath(); ctx.rect(0, PHOTO1_H, W, CUT + FUSAO - PHOTO1_H); ctx.clip();
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, PHOTO1_H, W, CUT + FUSAO - PHOTO1_H);
-  const vinL = ctx.createLinearGradient(0, 0, 190, 0);
-  vinL.addColorStop(0, 'rgba(0,0,0,.055)'); vinL.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = vinL; ctx.fillRect(0, PHOTO1_H, 190, CUT + FUSAO - PHOTO1_H);
-  const vinR = ctx.createLinearGradient(W, 0, W - 190, 0);
-  vinR.addColorStop(0, 'rgba(0,0,0,.055)'); vinR.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = vinR; ctx.fillRect(W - 190, PHOTO1_H, 190, CUT + FUSAO - PHOTO1_H);
+  ctx.beginPath(); ctx.rect(0, PHOTO1_H, W, CUT - PHOTO1_H); ctx.clip();
+  const sombraTopo = ctx.createLinearGradient(0, PHOTO1_H, 0, PHOTO1_H + 110);
+  sombraTopo.addColorStop(0, 'rgba(0,0,0,.16)');
+  sombraTopo.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sombraTopo; ctx.fillRect(0, PHOTO1_H, W, 110);
+  const sombraBase = ctx.createLinearGradient(0, CUT - 110, 0, CUT);
+  sombraBase.addColorStop(0, 'rgba(0,0,0,0)');
+  sombraBase.addColorStop(1, 'rgba(0,0,0,.16)');
+  ctx.fillStyle = sombraBase; ctx.fillRect(0, CUT - 110, W, 110);
   ctx.restore();
 
   const preco = val('preco').replace(/^R\$\s*/i, '');
