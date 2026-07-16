@@ -506,9 +506,10 @@ function renderClassico(){
   ctx.save();
   ctx.beginPath(); ctx.rect(0, 0, W, PHOTO1_H); ctx.clip();
   if(facadeImg.complete && facadeImg.naturalWidth){
-    // -60px esconde o toldo; escala 1.03 ancorada à esquerda corrige o
-    // letreiro ATTRA da foto (centroide medido em x=524 → cai em 540)
-    const fw = W * 1.03;
+    // -60px esconde o toldo; escala 1.06 ancorada à esquerda desloca o
+    // conteúdo pra direita (letreiro ~+16px vs 1.03) mantendo o full-bleed:
+    // borda esquerda fixa em 0, sobra recortada só à direita
+    const fw = W * 1.06;
     ctx.drawImage(facadeImg, 0, -60, fw, facadeImg.height * (fw/facadeImg.width));
   } else {
     ctx.fillStyle = '#101013'; ctx.fillRect(0, 0, W, PHOTO1_H);
