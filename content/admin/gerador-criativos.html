@@ -207,6 +207,10 @@
           <button class="pisobtn typebtn" data-piso="concreto">Concreto<small>piso claro real</small></button>
           <button class="pisobtn typebtn active" data-piso="asfalto">Asfalto<small>piso escuro real</small></button>
         </div>
+        <label style="margin-top:12px">Posição do piso (altura)</label>
+        <input type="range" id="pisoy" min="-60" max="160" value="0">
+        <div class="hint">Desça o piso até a divisa ficar abaixo do veículo — a fusão nunca
+          deve cobrir o carro. O preço e os destaques acompanham.</div>
       </div>
       <div id="corte-wrap">
         <label style="margin-top:12px">Altura do corte transversal (Clássico)</label>
@@ -612,7 +616,7 @@ function renderClassico(){
   const DIAG_L = CUT + 20, DIAG_R = CUT - 20;
   const areaPath = () => {
     ctx.beginPath();
-    ctx.moveTo(0, PHOTO1_H); ctx.lineTo(W, PHOTO1_H);
+    ctx.moveTo(0, PISO_TOP); ctx.lineTo(W, PISO_TOP);
     ctx.lineTo(W, DIAG_R); ctx.lineTo(0, DIAG_L);
     ctx.closePath();
   };
@@ -621,34 +625,37 @@ function renderClassico(){
   // (texturas reais fundidas dentro da foto por máscara de alpha).
   const piso = state.pisoTipo || 'asfalto';
   const FUSAO_H = 160; // overlap dentro da foto = comprimento da máscara
+  // altura da divisa ajustável: posicionar SEMPRE abaixo do veículo
+  const pisoShift = parseInt($('pisoy').value, 10) || 0;
+  const PISO_TOP = PHOTO1_H + pisoShift;
 
   if(piso === 'perola'){
-    g = ctx.createLinearGradient(0, PHOTO1_H, 0, DIAG_L);
+    g = ctx.createLinearGradient(0, PISO_TOP, 0, DIAG_L);
     g.addColorStop(0, '#fafeff'); g.addColorStop(1, '#f2f6f7');
     ctx.fillStyle = g;
     areaPath(); ctx.fill();
     ctx.save(); areaPath(); ctx.clip();
-    const meioY = PHOTO1_H + (CUT - PHOTO1_H) * .40;
+    const meioY = PISO_TOP + (CUT - PISO_TOP) * .40;
     const luz = ctx.createRadialGradient(W/2, meioY, 60, W/2, meioY, 860);
     luz.addColorStop(0, 'rgba(255,255,255,.14)');
     luz.addColorStop(.6, 'rgba(255,255,255,.05)');
     luz.addColorStop(1, 'rgba(110,118,120,.03)');
     ctx.fillStyle = luz;
-    ctx.fillRect(0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
+    ctx.fillRect(0, PISO_TOP, W, DIAG_L - PISO_TOP);
     ctx.globalAlpha = .025;
-    ctx.drawImage(grainCanvas(), 0, PHOTO1_H, W, DIAG_L - PHOTO1_H);
+    ctx.drawImage(grainCanvas(), 0, PISO_TOP, W, DIAG_L - PISO_TOP);
     ctx.globalAlpha = 1;
     ctx.restore();
     // fusão foto→bloco na cor do pérola
-    g = ctx.createLinearGradient(0, PHOTO1_H-60, 0, PHOTO1_H);
+    g = ctx.createLinearGradient(0, PISO_TOP-60, 0, PISO_TOP);
     g.addColorStop(0, 'rgba(250,254,255,0)');
     g.addColorStop(1, 'rgba(250,254,255,1)');
-    ctx.fillStyle = g; ctx.fillRect(0, PHOTO1_H-60, W, 60);
+    ctx.fillStyle = g; ctx.fillRect(0, PISO_TOP-60, W, 60);
   } else {
     const img = pisoImgs[piso];
     // FIX da faixa escura: o overlap dentro da foto tem o MESMO tamanho da
     // máscara — a textura chega na divisa já 100% opaca
-    const bandTop = PHOTO1_H - FUSAO_H;
+    const bandTop = PISO_TOP - FUSAO_H;
     const bandH = DIAG_L - bandTop;
     ctx.save();
     ctx.beginPath();
@@ -676,10 +683,10 @@ function renderClassico(){
     }
     // sombras internas discretas (intensidade conforme o tom do piso)
     const sa = piso === 'asfalto' ? .14 : .07;
-    const sombraTopo = ctx.createLinearGradient(0, PHOTO1_H, 0, PHOTO1_H + 160);
+    const sombraTopo = ctx.createLinearGradient(0, PISO_TOP, 0, PISO_TOP + 160);
     sombraTopo.addColorStop(0, `rgba(0,0,0,${sa})`);
     sombraTopo.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = sombraTopo; ctx.fillRect(0, PHOTO1_H, W, 160);
+    ctx.fillStyle = sombraTopo; ctx.fillRect(0, PISO_TOP, W, 160);
     const sombraBase = ctx.createLinearGradient(0, CUT - 160, 0, CUT);
     sombraBase.addColorStop(0, 'rgba(0,0,0,0)');
     sombraBase.addColorStop(1, `rgba(0,0,0,${sa})`);
@@ -693,19 +700,19 @@ function renderClassico(){
     : { preco: '#5a5a5f', km: '#6f6f74', bullet: '#161618', icone: '#1c1c1e' };
 
   const preco = val('preco').replace(/^R\$\s*/i, '');
-  if(preco) spacedText('R$ ' + preco, W/2, 1062, '300 48px Montserrat, sans-serif', 10, tx.preco);
+  if(preco) spacedText('R$ ' + preco, W/2, PISO_TOP + 62, '300 48px Montserrat, sans-serif', 10, tx.preco);
 
   const kmParts = [];
   if(val('km')) kmParts.push(val('km') + ' KM');
   if(val('kmextra')) kmParts.push(val('kmextra').toUpperCase());
   if(kmParts.length)
-    spacedText(kmParts.join('  |  '), W/2, 1118, '500 24px Montserrat, sans-serif', 5, tx.km);
+    spacedText(kmParts.join('  |  '), W/2, PISO_TOP + 118, '500 24px Montserrat, sans-serif', 5, tx.km);
 
   // Máximo 3 destaques, UMA linha cada: a fonte encolhe até caber (mín. 25px)
   // e em último caso o texto é cortado com "…" — nunca quebra de linha.
   const bullets = ['b1','b2','b3'].map(val).filter(Boolean);
   const textX = 208, maxW = 800, lineH = 44;
-  const areaTop = 1188, areaBot = Math.min(DIAG_L, DIAG_R) - 26;
+  const areaTop = PISO_TOP + 188, areaBot = Math.min(DIAG_L, DIAG_R) - 26;
   const items = bullets.map(b => {
     let size = 34;
     ctx.font = `700 ${size}px Montserrat, sans-serif`;
@@ -1223,7 +1230,7 @@ $('clearlogo').addEventListener('click', () => {
 });
 
 ['marca','modelo','ano','preco','km','kmextra','b1','b2','b3',
- 'selo','et1','et2','corte'].forEach(id =>
+ 'selo','et1','et2','corte','pisoy'].forEach(id =>
   $(id).addEventListener('input', render));
 
 [['f1zoom','f1','zoom'],['f1x','f1','x'],['f1y','f1','y'],
@@ -1252,9 +1259,9 @@ function updateVisibility(){
   $('foto2-label').textContent     = t === 'destaque'
     ? 'Foto de baixo 1 (interior / detalhe)' : 'Foto secundária (traseira / lateral — rodapé)';
 }
-document.querySelectorAll('.typebtn').forEach(btn => {
+document.querySelectorAll('.typebtn[data-tipo]').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.typebtn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.typebtn[data-tipo]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.tipo = btn.dataset.tipo;
     updateVisibility();
