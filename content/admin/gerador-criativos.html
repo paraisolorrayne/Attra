@@ -619,16 +619,15 @@ function renderClassico(){
     const ps = Math.max(W / pisoImg.width, bandH / pisoImg.height);
     ox.drawImage(pisoImg, (W - pisoImg.width*ps)/2, (bandH - pisoImg.height*ps)/2,
                  pisoImg.width*ps, pisoImg.height*ps);
-    // clareia levemente pro texto assentar
-    ox.fillStyle = 'rgba(250,252,253,.30)';
-    ox.fillRect(0, 0, W, bandH);
-    // máscara: alpha 0 no topo da banda → 1 na altura da divisa
+    // máscara de fusão: alpha 0 no topo da banda → 1 a partir de 110px.
+    // O fill cobre a banda INTEIRA (o gradiente satura em 1) — antes
+    // cobria só 110px e o resto da textura era apagado (área preta).
     const mg = ox.createLinearGradient(0, 0, 0, 110);
     mg.addColorStop(0, 'rgba(0,0,0,0)');
     mg.addColorStop(1, 'rgba(0,0,0,1)');
     ox.globalCompositeOperation = 'destination-in';
     ox.fillStyle = mg;
-    ox.fillRect(0, 0, W, 110);
+    ox.fillRect(0, 0, W, bandH);
     ox.globalCompositeOperation = 'source-over';
     ctx.drawImage(osc, 0, bandTop);
   } else {
