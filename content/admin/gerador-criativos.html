@@ -624,7 +624,9 @@ function renderClassico(){
   // Fundo da área de texto: Pérola (sólido), Concreto ou Asfalto
   // (texturas reais fundidas dentro da foto por máscara de alpha).
   const piso = state.pisoTipo || 'perola';
-  const FUSAO_H = 160; // overlap dentro da foto = comprimento da máscara
+  // fusão curta: entra só 56px na foto — o suficiente pro chão da foto
+  // dissolver no piso, sem nunca alcançar rodas/carroceria
+  const FUSAO_H = 56;
   // altura da divisa ajustável: posicionar SEMPRE abaixo do veículo
   const pisoShift = parseInt($('pisoy').value, 10) || 0;
   const PISO_TOP = PHOTO1_H + pisoShift;
@@ -647,10 +649,10 @@ function renderClassico(){
     ctx.globalAlpha = 1;
     ctx.restore();
     // fusão foto→bloco na cor do pérola
-    g = ctx.createLinearGradient(0, PISO_TOP-60, 0, PISO_TOP);
+    g = ctx.createLinearGradient(0, PISO_TOP-44, 0, PISO_TOP);
     g.addColorStop(0, 'rgba(250,254,255,0)');
     g.addColorStop(1, 'rgba(250,254,255,1)');
-    ctx.fillStyle = g; ctx.fillRect(0, PISO_TOP-60, W, 60);
+    ctx.fillStyle = g; ctx.fillRect(0, PISO_TOP-44, W, 44);
   } else {
     const img = pisoImgs[piso];
     // FIX da faixa escura: o overlap dentro da foto tem o MESMO tamanho da
