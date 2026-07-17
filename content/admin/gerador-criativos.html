@@ -203,9 +203,9 @@
       <div id="piso-wrap">
         <label style="margin-top:12px">Fundo da área de texto (Clássico)</label>
         <div class="types">
-          <button class="pisobtn typebtn" data-piso="perola">Pérola<small>sólido claro</small></button>
+          <button class="pisobtn typebtn active" data-piso="perola">Pérola<small>sólido claro</small></button>
           <button class="pisobtn typebtn" data-piso="concreto">Concreto<small>piso claro real</small></button>
-          <button class="pisobtn typebtn active" data-piso="asfalto">Asfalto<small>piso escuro real</small></button>
+          <button class="pisobtn typebtn" data-piso="asfalto">Asfalto<small>piso escuro real</small></button>
         </div>
         <label style="margin-top:12px">Posição do piso (altura)</label>
         <input type="range" id="pisoy" min="-60" max="160" value="0">
@@ -271,7 +271,7 @@ const state = {
   foto1Data: null,  // dataURL da foto original (upload manual → rembg)
   foto1Url: null,   // URL pública da foto (estoque → rembg sem upload)
   edRot: 0,         // rotação do carro recortado no Editorial (graus)
-  pisoTipo: 'asfalto', // fundo da área de texto do Clássico
+  pisoTipo: 'perola', // fundo da área de texto do Clássico
 };
 
 /* ---------- logos oficiais embutidas ---------- */
@@ -623,7 +623,7 @@ function renderClassico(){
 
   // Fundo da área de texto: Pérola (sólido), Concreto ou Asfalto
   // (texturas reais fundidas dentro da foto por máscara de alpha).
-  const piso = state.pisoTipo || 'asfalto';
+  const piso = state.pisoTipo || 'perola';
   const FUSAO_H = 160; // overlap dentro da foto = comprimento da máscara
   // altura da divisa ajustável: posicionar SEMPRE abaixo do veículo
   const pisoShift = parseInt($('pisoy').value, 10) || 0;
@@ -767,7 +767,7 @@ function renderClassico(){
 
   // sombra de acomodação: o piso projeta penumbra suave no topo da foto
   // (só nos pisos de textura; no pérola a divisa limpa é a estética)
-  if((state.pisoTipo || 'asfalto') !== 'perola'){
+  if((state.pisoTipo || 'perola') !== 'perola'){
     const acomA = (state.pisoTipo === 'asfalto') ? .42 : .22;
     g = ctx.createLinearGradient(0, DIAG_R - 2, 0, DIAG_L + 78);
     g.addColorStop(0, `rgba(0,0,0,${acomA})`);
@@ -1329,7 +1329,7 @@ function montarFotosEstoque(v){
   const wrap = $('estoquefotos');
   wrap.innerHTML = '';
   // /_next/image = proxy da própria origem → canvas continua exportável
-  for(const u of (v.photos || []).slice(0, 12)){
+  for(const u of (v.photos || [])){
     const t = document.createElement('img');
     t.src = '/_next/image?url=' + encodeURIComponent(u) + '&w=256&q=60';
     t.className = 'estq-thumb';
