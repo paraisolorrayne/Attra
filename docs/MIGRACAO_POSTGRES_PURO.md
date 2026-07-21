@@ -68,12 +68,16 @@ Para cada módulo: adicionar tabelas em `src/lib/db/types.ts`, trocar `supabase-
    - Tabelas tipadas: visitor_fingerprints/sessions/page_views/identity_events/visitor_profiles/conversion_events/ip_geolocation_cache.
    - **12 testes de integração contra PG real** (opt-in via `TEST_DATABASE_URL`; fixture `src/lib/db/__tests__/fixtures/tracking-schema.sql`). Proxy `db` corrigido pra getters do Kysely (`fn`/`dynamic`).
    - Dívida herdada: a Edge Function `ip-geo-updater` do geolocation ainda é do Supabase (código fora do repo, tem fallback ipapi.co) — recuperar numa fase posterior.
-2. **Conteúdo/config SSR** ← EM ANDAMENTO
-   - ✅ `site-settings.ts` + `api/settings` (site_settings), `vehicle-sections.ts` (vehicle_section_content: cache read + upsert). Tabelas tipadas + 2 testes de integração.
-   - ⏳ Falta: `vehicle_sounds` (som de motor), `vehicle-hero-asset.ts` (entangled com storage — DB agora, storage na Fase 6).
-3. Marketing / blog / news / newsletter
-4. `match_vehicles` (pgvector → SQL cru)
-5. Admin (dashboards) — depende da Fase 5
+2. ✅ **Conteúdo/config SSR** — site_settings, vehicle_section_content, vehicle_sounds (CRUD), vehicle-hero-asset (DB; storage na Fase 6).
+3. ✅ **Blog / News** — dual_blog_posts, blog_posts (legado), blog_ai_generations, news_* (+ jobs de ingestão), páginas SSR.
+4. ✅ **Marketing** — strategies/tasks/campaigns/comments/history/metrics; embeds PostgREST → `jsonObjectFrom`/`jsonArrayFrom`.
+5. ✅ **Newsletter** — campaigns + subscribers (CRUD, import, export, subscribe público).
+6. ✅ **CRM / Settings / Misc** — crm_cards + webhook Fykos, settings, cron-status, embeddings/sync + llm/gaps, inventory-snapshot, cleanup-tracking.
+7. ✅ **`match_vehicles`** (pgvector) → SQL cru `<=>`.
+
+> **FASE 4 CONCLUÍDA.** Todo o acesso a DADOS está em Kysely. Os únicos `.from()`
+> restantes são em `admin_users` (arquivos de auth) → vão na Fase 5. Tipadas ~30
+> tabelas em `src/lib/db/types.ts`.
 
 ### Fase 5 — Auth (código) — o mais arriscado, por último
 - Auth.js Credentials contra `admin_users` (bcrypt via `pgcrypto`/`bcryptjs`).
