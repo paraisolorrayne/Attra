@@ -495,10 +495,11 @@ export interface InventorySnapshotsTable {
 export interface AdminUsersTable {
   id: string
   email: string
-  role: Generated<string>
+  role: Generated<string> // admin | owner | operador | marketing | gerente
   name: string | null
   is_active: Generated<boolean>
   last_login_at: Timestamp | null
+  password_hash: string | null // bcrypt (Auth.js Credentials) — Fase 5
   created_at: Timestamp
   updated_at: Timestamp
 }
