@@ -17,9 +17,11 @@ import type { Generated, ColumnType } from 'kysely'
 /** TIMESTAMPTZ: lê Date; no insert/update aceita Date ou ISO string (default no banco). */
 type Timestamp = ColumnType<Date, Date | string | undefined, Date | string>
 
-/** JSONB: lê objeto; grava objeto/string/`sql` (default no banco). */
-type Json = ColumnType<Record<string, unknown>, Record<string, unknown> | string | undefined, Record<string, unknown> | string>
-type JsonNullable = ColumnType<Record<string, unknown> | null, Record<string, unknown> | string | null, Record<string, unknown> | string | null>
+/** JSONB: lê objeto; grava qualquer valor (o driver pg serializa objetos).
+ *  Insert/update tipados como `unknown` porque jsonb é schemaless e aceita
+ *  interfaces específicas (BlogAuthor, etc.) sem index signature. */
+type Json = ColumnType<Record<string, unknown>, unknown, unknown>
+type JsonNullable = ColumnType<Record<string, unknown> | null, unknown, unknown>
 
 // ─────────────────────────── TRACKING ───────────────────────────
 
@@ -340,6 +342,9 @@ export interface NewsSourcesTable {
 
 export interface NewsArticlesTable {
   id: Generated<string>
+  // slug existe no banco vivo (o código insere/consulta), mesmo ausente nas
+  // migrations do repo — divergência a reconciliar no dump da Fase 1.
+  slug: Generated<string>
   news_cycle_id: string
   category_id: number
   source_id: number
