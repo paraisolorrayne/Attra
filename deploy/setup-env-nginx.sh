@@ -46,7 +46,8 @@ fi
 
 # --------------------------------- 2) Nginx ----------------------------------
 echo "==> [2/2] Nginx: location /media/ -> ${MEDIA_ROOT}"
-CONF="$(grep -rlE "server_name[^;]*${DOMAIN}|proxy_pass[^;]*:3000" /etc/nginx/sites-enabled/ /etc/nginx/conf.d/ 2>/dev/null | head -1 || true)"
+# procura em TODO o /etc/nginx (não só sites-enabled/conf.d); override: NGINX_CONF=...
+CONF="${NGINX_CONF:-$(grep -rlE "server_name[^;]*${DOMAIN}|proxy_pass[^;]*:3000" /etc/nginx/ 2>/dev/null | grep -v '\.bak' | head -1 || true)}"
 BLOCK="    location /media/ { alias ${MEDIA_ROOT}/; access_log off; expires 30d; add_header Cache-Control \"public, immutable\"; }"
 
 if [ -z "$CONF" ]; then
