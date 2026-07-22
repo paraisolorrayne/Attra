@@ -22,14 +22,12 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/admin/login', req.url))
   }
 
-  // /admin puro → landing
-  if (pathname === '/admin') {
-    return NextResponse.redirect(new URL('/admin/engine-sounds', req.url))
-  }
+  // /admin puro → renderiza a landing (hub de cards). Todo papel autenticado vê.
+  if (pathname === '/admin') return
 
-  // Gate por papel
+  // Gate por papel — sem acesso volta pro hub (nem todo papel acessa engine-sounds)
   if (!canAccessRoute(role, pathname)) {
-    return NextResponse.redirect(new URL('/admin/engine-sounds', req.url))
+    return NextResponse.redirect(new URL('/admin', req.url))
   }
 })
 

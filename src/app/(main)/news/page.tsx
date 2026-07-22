@@ -89,7 +89,8 @@ async function getNews(): Promise<NewsData> {
       formula1: (formula1Raw as unknown as NewsArticle[]) || [],
       premiumMarket: (premiumMarketRaw as unknown as NewsArticle[]) || [],
     }
-  } catch {
+  } catch (err) {
+    console.error('[news] getNews falhou:', err)
     return { cycle: null, featured: [], formula1: [], premiumMarket: [] }
   }
 }

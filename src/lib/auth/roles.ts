@@ -32,7 +32,8 @@ export const ROLE_LABELS: Record<AdminRole, string> = {
 // Sempre incluídos pra todos: /admin/login e /admin/reset-password.
 const ROUTE_ACCESS: Record<Exclude<AdminRole, 'admin'>, string[]> = {
   // Owner: tudo menos gestão de usuários (isso é do admin total).
-  owner: ['*', '!/admin/users'],
+  // A rota da UI é /admin/usuarios (a API é /api/admin/users) — negamos as duas.
+  owner: ['*', '!/admin/usuarios', '!/admin/users'],
   // Operador: operação — sons, gerador, blog, news, CRM (leitura), visitantes.
   operador: [
     '/admin/engine-sounds',
