@@ -79,7 +79,9 @@ UPDATE admin_users a
 SQL
 
 echo "==> [6/6] Reescreve URLs de storage *.supabase.co -> disco/Nginx..."
-psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+# ON_ERROR_STOP=0: blog_posts (legado) pode não existir no banco de origem — o
+# rewrite é idempotente/best-effort, então uma tabela ausente só loga e segue.
+psql "$DATABASE_URL" -v ON_ERROR_STOP=0 \
   -v old_prefix="$OLD_PREFIX" -v new_prefix="$NEW_PREFIX" \
   -f "$SCRIPT_DIR/rewrite-storage-urls.sql"
 

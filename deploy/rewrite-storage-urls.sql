@@ -16,7 +16,9 @@ UPDATE dual_blog_posts SET
 WHERE featured_image LIKE :'old_prefix' || '%'
    OR content        LIKE '%' || :'old_prefix' || '%';
 
-\echo '  - blog_posts (legado)'
+-- blog_posts é legado e pode NÃO existir no banco de origem — o chamador roda
+-- este arquivo com ON_ERROR_STOP=0, então um erro aqui não interrompe o resto.
+\echo '  - blog_posts (legado — pode não existir)'
 UPDATE blog_posts SET
   featured_image = replace(featured_image, :'old_prefix', :'new_prefix'),
   content        = replace(content,        :'old_prefix', :'new_prefix')
