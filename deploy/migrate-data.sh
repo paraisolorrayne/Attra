@@ -53,6 +53,9 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=0 -f public.sql 2> restore-errors.log || t
 echo "    Erros relevantes do restore (ignore 'already exists' / permissão de extensão):"
 grep -iE "^psql:.*(ERROR|ERRO)" restore-errors.log | grep -viE "already exists|já existe|extension" | head -30 || echo "    (nenhum)"
 
+echo "==> [3b/6] Aplica a migração de auth (password_hash + papéis) — não existe no dump do Supabase..."
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$SCRIPT_DIR/../supabase/migrations/20260721_auth_roles_and_password.sql"
+
 echo "==> [4/6] Desliga RLS em todas as tabelas public (acesso agora é via API Next)..."
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
 DO $$ DECLARE r record; BEGIN

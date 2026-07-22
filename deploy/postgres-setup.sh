@@ -50,7 +50,7 @@ SQL
 echo "==> Extensões (espelhando o layout do Supabase: schema 'extensions') + roles stub..."
 sudo -u postgres psql -d "$DB_NAME" <<SQL
 CREATE SCHEMA IF NOT EXISTS extensions;
-CREATE EXTENSION IF NOT EXISTS vector      SCHEMA extensions;  -- embeddings / busca semântica (<=>)
+CREATE EXTENSION IF NOT EXISTS vector      SCHEMA public;      -- embeddings (<=>); o dump do Supabase referencia public.vector
 CREATE EXTENSION IF NOT EXISTS pgcrypto    SCHEMA extensions;  -- gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA extensions;  -- uuid_generate_v4() (defaults do Supabase)
 CREATE EXTENSION IF NOT EXISTS pg_trgm     SCHEMA extensions;  -- similaridade de texto
